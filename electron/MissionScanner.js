@@ -9,6 +9,15 @@ class Mission {
     this.missionId = missionId
   }
 
+  asIpcData() {
+    return {
+      fname: this.fname,
+      levelId: this.levelId,
+      missionType: this.missionType,
+      missionId: this.missionId,
+    }
+  }
+
   fullId() {
     return `${this.levelId}/${this.missionType}/${this.missionId}`
   }
@@ -42,7 +51,7 @@ class MissionScanner {
 
         if (match) {
           let mission = new Mission(filePath, match[1], match[2], match[3])
-          fileList.push(mission.fullId())
+          fileList.push(mission.asIpcData())
         }
       }
     });

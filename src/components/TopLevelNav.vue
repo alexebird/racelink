@@ -1,49 +1,37 @@
-<template>
-  <div class="top-level-nav">
-    <Menu :model="items" class="top-level-nav">
-      <template #item="{ item, props }">
-        <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-          <a :href="href" v-bind="props.action" @click="navigate">
-            <span :class="item.icon" />
-              <span class="ml-2">{{ item.label }}</span>
-          </a>
-        </router-link>
-      </template>
-    </Menu>
-  </div>
-</template>
+<script setup lang='ts'>
+import { ref } from "vue";
 
-<script lang='ts'>
-import { defineComponent } from 'vue';
-import Menu from 'primevue/menu';
-
-export default defineComponent({
-  components: {
-    Menu,
+const items = ref([
+  {
+    label: 'Rally',
+    icon: 'pi pi-car',
+    route: '/rally'
   },
-  data() {
-    return {
-      items: [
-        {
-            label: 'Rally',
-            icon: 'pi pi-palette',
-            route: '/rally'
-        },
-        {
-            label: 'Rally2',
-            icon: 'pi pi-palette',
-            route: '/rally2'
-        }
-      ],
-    };
-  },
-});
+  {
+    label: 'Help',
+    icon: 'pi pi-palette',
+    route: '/rally2'
+  }
+])
 </script>
 
+<template>
+  <TabMenu :model="items" pt:root:class="h-screen !bg-stone-800" pt:menu:class="flex flex-col">
+    <template #item="{ item, props }">
+      <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+        <a :href="href" v-bind="props.action" @click="navigate">
+          <span v-bind="props.icon" />
+          <span v-bind="props.label">{{ item.label }}</span>
+        </a>
+      </router-link>
+    </template>
+  </TabMenu>
+</template>
+
 <style scoped>
-.top-level-nav {
-  display: flex;
-  flex-direction: column;
-  width: 200px;
-}
+/* .top-level-nav { */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* width: 200px; */
+/* } */
 </style>

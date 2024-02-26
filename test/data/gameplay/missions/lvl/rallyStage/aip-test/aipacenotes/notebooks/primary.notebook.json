@@ -1,0 +1,12 @@
+{
+    "pacenotes":[
+        {
+            "name": "pacenote 1",
+            "note": "hello world"
+        },
+        {
+            "name": "pacenote 2",
+            "note": "foo bar"
+        }
+    ]
+}

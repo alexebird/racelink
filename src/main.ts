@@ -32,8 +32,17 @@ app.use(PrimeVue, {
 // import InputText from 'primevue/inputtext'
 // app.component('InputText', InputText)
 
-import Menu from 'primevue/menu'
-app.component('Menu', Menu)
+import TabMenu from 'primevue/tabmenu'
+app.component('TabMenu', TabMenu)
+
+import TabView from 'primevue/tabview'
+app.component('TabView', TabView)
+
+import TabPanel from 'primevue/tabpanel'
+app.component('TabPanel', TabPanel)
+
+// import Menu from 'primevue/menu'
+// app.component('Menu', Menu)
 
 import Tree from 'primevue/tree'
 app.component('Tree', Tree)

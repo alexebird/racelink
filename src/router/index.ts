@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import Rally from '@/components/topLevel/Rally.vue';
+import Rally from '@/components/tabs/Rally.vue';
 
 const routes = [
   { path: '/', redirect: '/rally' },
