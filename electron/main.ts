@@ -1,5 +1,6 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
+import { MissionScanner } from './MissionScanner'
 
 // The built directory structure
 //
@@ -37,15 +38,17 @@ function createWindow() {
     },
   })
 
+  setupIPC()
+
   // Test active push message to Renderer-process.
-  win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
-  })
+  // win.webContents.on('did-finish-load', () => {
+  //   win?.webContents.send('main-process-message', (new Date).toLocaleString())
+  // })
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-    // win.loadFile('dist/index.html')
+  //   // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
 }
@@ -68,4 +71,21 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+const scanner = new MissionScanner()
+
+async function handleScannerConfigure(_event, config) {
+  scanner.configure(config)
+}
+
+async function handleScannerScan(event, _args) {
+  return scanner.scan()
+}
+
+function setupIPC() {
+  ipcMain.on('scanner:configure', handleScannerConfigure)
+  ipcMain.handle('scanner:scan', handleScannerScan)
+}
+
+app.whenReady().then(() => {
+  createWindow()
+})
