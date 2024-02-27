@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
   scan: () => ipcRenderer.invoke('scanner:scan'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('mission:generate-pacenotes', mission),
+  saveAudio: (data, fname) => ipcRenderer.send('save-audio', data, fname),
 })
 
 

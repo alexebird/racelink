@@ -1,9 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
+import fs from 'node:fs'
 import { MissionScanner } from './aipacenotes/MissionScanner'
 import NotebookScanner from './aipacenotes/NotebookScanner'
 import Notebook from './aipacenotes/Notebook'
 import readFileFromZip from './aipacenotes/Zip'
+import startServer from './server'
 
 // The built directory structure
 //
@@ -21,8 +23,6 @@ process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
-
-// const { session } = require('electron')
 
 function createWindow() {
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -54,6 +54,10 @@ function createWindow() {
   //   // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
+
+  // Open the DevTools.
+  // mainWindow.webContents.openDevTools();
+  startServer()
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -102,15 +106,25 @@ function setupIPC() {
   ipcMain.on('scanner:configure', handleScannerConfigure)
   ipcMain.handle('scanner:scan', handleScannerScan)
   ipcMain.on('mission:generate-pacenotes', handleMissionGeneratePacenotes)
+
+  ipcMain.on('save-audio', (event, audioBuffer, filename) => {
+    const filePath = path.join(app.getPath('desktop'), filename); // Save to desktop for example
+    fs.writeFile(filePath, Buffer.from(audioBuffer), (err) => {
+      if (err) {
+        console.log('Error saving the file: ', err);
+        event.reply('save-audio-response', 'failure');
+      } else {
+        console.log('File saved successfully');
+        event.reply('save-audio-response', 'success');
+      }
+    });
+  });
 }
 
 app.whenReady().then(() => {
   createWindow()
 
-  // Example usage
-  const zipFilePath = 'test/data/aipacenotes.zip';
-  const targetFileName = 'gitsha.txt';
-
-  // Read and print the content of the specific file
-  readFileFromZip(zipFilePath, targetFileName);
+  // const zipFilePath = 'test/data/aipacenotes.zip';
+  // const targetFileName = 'gitsha.txt';
+  // readFileFromZip(zipFilePath, targetFileName);
 })

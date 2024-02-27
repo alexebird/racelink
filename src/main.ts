@@ -11,8 +11,6 @@ import PrimeVue from 'primevue/config'
 // import Lara from '@/presets/lara';
 import Wind from '@/presets/wind';
 
-// const ipcRenderer = window.ipcRenderer
-
 const pinia = createPinia()
 
 const app = createApp(App)
@@ -70,3 +68,47 @@ app.mount('#app')
     // Process the matching directories as needed
   // }, 1000); // Check every 10000 milliseconds (10 seconds)
 // })
+
+
+const conf = {
+  audio: {
+    autoGainControl: false,
+    noiseSuppression: false,
+    echoCancellation: false
+  }
+}
+// const conf = { audio: true }
+navigator.mediaDevices.getUserMedia(conf)
+.then(stream => {
+  const mediaRecorder = new MediaRecorder(stream);
+  let audioChunks = [];
+
+  mediaRecorder.ondataavailable = event => {
+    audioChunks.push(event.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      window.electronAPI.saveAudio(reader.result, 'output.webm');
+    };
+    reader.readAsArrayBuffer(audioBlob);
+  };
+
+  // Start recording
+  mediaRecorder.start();
+
+  // Example: Stop recording after 5 seconds
+  setTimeout(() => {
+    mediaRecorder.stop();
+  }, 5000);
+})
+.catch(error => {
+  console.error('Error accessing the microphone:', error);
+});
+
+// Listen for save response
+// ipcRenderer.on('save-audio-response', (event, status) => {
+  // console.log('Save audio response:', status);
+// });

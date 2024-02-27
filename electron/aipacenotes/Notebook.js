@@ -9,7 +9,8 @@ function cleanNameForPath(aString) {
 }
 
 function normalizePath(inPath) {
-  return path.normalize(inPath).replace(/\\/g, "/");
+  // return path.normalize(inPath).replace(/\\/g, "/");
+  return inPath
 }
 
 class Pacenote {
@@ -116,7 +117,7 @@ class Notebook {
   }
 
   basenameNoExt() {
-    const match = this.notebookPath.match(/\/([^/]+)\.notebook\.json$/)
+    const match = this.notebookPath.match(/[\/\\]([^/\\]+)\.notebook\.json$/)
     const filename = match[1]
     return filename
   }
