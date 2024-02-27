@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="js">
 import { ref, onMounted, onUnmounted } from "vue"
 import { useMissionsStore } from "@/stores/missions"
 import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";

@@ -80,19 +80,21 @@ async function handleScannerConfigure(_event, config) {
   scanner.configure(config)
 }
 
-async function handleScannerScan(event, _args) {
+async function handleScannerScan(_event, _args) {
   return scanner.scan()
 }
 
-async function handleMissionGeneratePacenotes(event, args) {
+async function handleMissionGeneratePacenotes(_event, args) {
   const mission = args.mission
   if (mission) {
     // console.log(mission)
     const nb = new NotebookScanner(mission.fname)
     const files = nb.scan()
-    const notebooks = files.map((f) => new Notebook(f))
-    console.log(notebooks)
-    notebooks[0].updatePacenotes()
+    if (files) {
+      const notebooks = files.map((f) => new Notebook(f))
+      console.log(notebooks)
+      notebooks[0].updatePacenotes()
+    }
   }
 }
 

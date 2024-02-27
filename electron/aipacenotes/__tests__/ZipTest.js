@@ -1,4 +1,3 @@
-import
 test("test zip file reading", async function () {
   // Usage example
   // Replace 'your_beam_directory_path_here' with the actual path to the beam directory

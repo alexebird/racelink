@@ -39,11 +39,12 @@ class MissionScanner {
   }
 
   _listFilesRecursively(dir, fileList = []) {
-    const pattern = /gameplay\/missions\/([^/]+)\/([^/]+)\/([^/]+)$/;
+    const pattern = /gameplay[\/\\]missions[\/\\]([^/\\]+)[\/\\]([^/\\]+)[\/\\]([^/\\]+)$/;
     const files = fs.readdirSync(dir);
 
     files.forEach(file => {
       const filePath = path.join(dir, file);
+      console.log(filePath)
 
       if (fs.statSync(filePath).isDirectory()) {
         this._listFilesRecursively(filePath, fileList);
