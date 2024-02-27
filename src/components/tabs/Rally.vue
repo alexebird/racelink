@@ -14,6 +14,8 @@ const onNodeSelect = (node) => {
   if (node.selectable) {
     // toast.add({ severity: 'success', summary: 'Node Selected', detail: node.data.fname, life: 1000 });
     missionsStore.setSelectedMission(node.data)
+    console.log(missionsStore.serializedSelectedMission)
+    window.electronAPI.missionGeneratePacenotes(missionsStore.serializedSelectedMission)
   } else {
 
   }

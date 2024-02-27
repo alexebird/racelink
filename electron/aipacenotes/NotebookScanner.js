@@ -8,7 +8,7 @@ export default class NotebookScanner {
 
   scan() {
     if (!this.basePath) return null
-    return this._listFiles(this.basePath)
+    return this._listFiles(path.join(this.basePath, 'aipacenotes', 'notebooks'))
   }
 
   _listFiles(dir) {

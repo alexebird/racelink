@@ -1,6 +1,9 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
-import { MissionScanner } from './MissionScanner'
+import { MissionScanner } from './aipacenotes/MissionScanner'
+import NotebookScanner from './aipacenotes/NotebookScanner'
+import Notebook from './aipacenotes/Notebook'
+import readFileFromZip from './aipacenotes/Zip'
 
 // The built directory structure
 //
@@ -81,11 +84,31 @@ async function handleScannerScan(event, _args) {
   return scanner.scan()
 }
 
+async function handleMissionGeneratePacenotes(event, args) {
+  const mission = args.mission
+  if (mission) {
+    // console.log(mission)
+    const nb = new NotebookScanner(mission.fname)
+    const files = nb.scan()
+    const notebooks = files.map((f) => new Notebook(f))
+    console.log(notebooks)
+    notebooks[0].updatePacenotes()
+  }
+}
+
 function setupIPC() {
   ipcMain.on('scanner:configure', handleScannerConfigure)
   ipcMain.handle('scanner:scan', handleScannerScan)
+  ipcMain.on('mission:generate-pacenotes', handleMissionGeneratePacenotes)
 }
 
 app.whenReady().then(() => {
   createWindow()
+
+  // Example usage
+  const zipFilePath = 'test/data/aipacenotes.zip';
+  const targetFileName = 'gitsha.txt';
+
+  // Read and print the content of the specific file
+  readFileFromZip(zipFilePath, targetFileName);
 })

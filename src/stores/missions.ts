@@ -54,6 +54,15 @@ export const useMissionsStore = defineStore('missions', {
     missionsTree: [],
     selectedMission: null,
   }),
+  getters: {
+    serializedSelectedMission: (state) => {
+      return {
+        mission: {
+          fname: state.selectedMission.fname
+        }
+      }
+    }
+  },
   actions: {
     setMissionsTree(data) {
       data = toTreeData(data)
