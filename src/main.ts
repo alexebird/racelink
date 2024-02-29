@@ -7,7 +7,7 @@ import { createPinia } from 'pinia'
 
 // import 'primevue/resources/themes/aura-light-green/theme.css'
 import PrimeVue from 'primevue/config'
-
+import { usePassThrough } from 'primevue/passthrough'
 // import Lara from '@/presets/lara';
 import Wind from '@/presets/wind';
 
@@ -17,15 +17,23 @@ const app = createApp(App)
 
 app.use(pinia)
 app.use(router)
+
+const CustomPreset = usePassThrough(
+  Wind,
+  {},
+  {
+    mergeSections: true,
+    mergeProps: true
+  }
+);
+
 app.use(PrimeVue, {
-  // ripple: true
   unstyled: true,
-  // pt: Lara,
-  pt: Wind,
+  pt: CustomPreset,
 })
 
-// import Button from 'primevue/button'
-// app.component('Button', Button)
+import Button from 'primevue/button'
+app.component('Button', Button)
 
 // import InputText from 'primevue/inputtext'
 // app.component('InputText', InputText)
@@ -68,47 +76,3 @@ app.mount('#app')
     // Process the matching directories as needed
   // }, 1000); // Check every 10000 milliseconds (10 seconds)
 // })
-
-
-const conf = {
-  audio: {
-    autoGainControl: false,
-    noiseSuppression: false,
-    echoCancellation: false
-  }
-}
-// const conf = { audio: true }
-navigator.mediaDevices.getUserMedia(conf)
-.then(stream => {
-  const mediaRecorder = new MediaRecorder(stream);
-  let audioChunks = [];
-
-  mediaRecorder.ondataavailable = event => {
-    audioChunks.push(event.data);
-  };
-
-  mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      window.electronAPI.saveAudio(reader.result, 'output.webm');
-    };
-    reader.readAsArrayBuffer(audioBlob);
-  };
-
-  // Start recording
-  mediaRecorder.start();
-
-  // Example: Stop recording after 5 seconds
-  setTimeout(() => {
-    mediaRecorder.stop();
-  }, 5000);
-})
-.catch(error => {
-  console.error('Error accessing the microphone:', error);
-});
-
-// Listen for save response
-// ipcRenderer.on('save-audio-response', (event, status) => {
-  // console.log('Save audio response:', status);
-// });

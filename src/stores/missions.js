@@ -8,7 +8,7 @@ function toTreeData(missionScanResults) {
     let levelNode;
     if (levelIndex === -1) {
       levelNode = {
-        key: `${data.length}`,
+        key: mission.levelId,
         label: mission.levelId,
         // data: 'level id',
         icon: 'pi pi-fw pi-image',
@@ -24,7 +24,7 @@ function toTreeData(missionScanResults) {
     let typeNode
     if (typeIndex === -1) {
       typeNode = {
-        key: `${levelNode.key}-${levelNode.children.length}`,
+        key: `${levelNode.key}/${mission.missionType}`,
         label: mission.missionType,
         // data: 'mission type',
         selectable: false,
@@ -37,12 +37,13 @@ function toTreeData(missionScanResults) {
     }
 
     const missionNode = {
-      key: `${typeNode.key}-${typeNode.children.length}`,
+      key: `${typeNode.key}/${mission.missionId}`,
       label: mission.missionId,
       data: mission,
       selectable: true,
       icon: 'pi pi-fw pi-flag-fill'
     }
+    console.log(missionNode.key)
     typeNode.children.push(missionNode);
   })
 

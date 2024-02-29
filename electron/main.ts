@@ -35,6 +35,8 @@ function createWindow() {
   // })
 
   win = new BrowserWindow({
+    width: 1800,
+    height: 1200,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -56,7 +58,7 @@ function createWindow() {
   }
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  win.webContents.openDevTools();
   startServer()
 }
 
