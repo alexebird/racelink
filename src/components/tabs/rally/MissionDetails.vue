@@ -11,6 +11,42 @@ onMounted(() => {
 
 const activeTab = ref(1)
 
+const onRecordingStart = () => {
+  rallyStore.recorder.startRecording()
+  rallyStore.setIsRecording(true)
+}
+
+const onRecordingStop = () => {
+  rallyStore.recorder.stopRecordingAfter()
+  rallyStore.setIsRecording(false)
+}
+
+const onRecordingCut = () => {
+  if (!rallyStore.isRecording) {
+    onRecordingStart()
+  } else {
+    rallyStore.recorder.cutRecording()
+  }
+}
+
+window.electronAPI.onTranscribeDone((resp) => {
+  // console.log('onTranscribeDone')
+  // console.log(resp)
+  rallyStore.setLastTranscriptResp(resp)
+})
+
+window.electronAPI.onServerRecordingStart((resp) => {
+  onRecordingStart()
+})
+
+window.electronAPI.onServerRecordingStop((resp) => {
+  onRecordingStop()
+})
+
+window.electronAPI.onServerRecordingCut((resp) => {
+  onRecordingCut()
+})
+
 </script>
 
 <template>
@@ -32,9 +68,24 @@ const activeTab = ref(1)
           </p>
         </TabPanel>
         <TabPanel header="Transcripts">
-          <Button :disabled="!rallyStore.recordingSetup">Start</Button>
-          <Button :disabled="!rallyStore.recordingSetup">Stop</Button>
-          <Button :disabled="!rallyStore.recordingSetup">Cut</Button>
+          <Button :disabled="!rallyStore.recordingSetup || rallyStore.isRecording" class='mr-2' @click="onRecordingStart">
+            Start
+          </Button>
+          <Button :disabled="!rallyStore.recordingSetup || !rallyStore.isRecording" class='mr-2' @click="onRecordingStop">
+            Stop
+          </Button>
+          <Button :disabled="!rallyStore.recordingSetup" @click="onRecordingCut">
+            Cut
+          </Button>
+          <div >
+            recording status: recorder={{rallyStore.recorder && rallyStore.recorder.recordingStatus()}} store={{rallyStore.isRecording}}
+          </div>
+          <div v-if="!rallyStore.lastTranscriptResp.error">
+            Last Transcript: "{{rallyStore.lastTranscriptResp.text}}"
+          </div>
+          <div v-if="rallyStore.lastTranscriptResp.error" class='text-red-400'>
+            Last Transcript: ERROR!!!
+          </div>
         </TabPanel>
       </TabView>
     </div>

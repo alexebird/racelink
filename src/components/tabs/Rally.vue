@@ -56,10 +56,6 @@ onMounted(() => {
     rallyStore.recordingSetupDone()
   })
 })
-    // recorder.startRecording()
-    // setTimeout(() => {
-    //   recorder.stopRecording()
-    // }, 3000)
 
 onUnmounted(() => {
   rallyStore.recorder.teardown()

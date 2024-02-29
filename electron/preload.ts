@@ -4,7 +4,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
   scan: () => ipcRenderer.invoke('scanner:scan'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('mission:generate-pacenotes', mission),
-  saveAudio: (data, fname) => ipcRenderer.send('save-audio', data, fname),
+  // saveAudio: (data, fname) => ipcRenderer.send('save-audio', data, fname),
+
+  openAudioFile: () => ipcRenderer.invoke('open-audio-file'),
+  writeAudioChunk: (audioChunk) => ipcRenderer.send('write-audio-chunk', audioChunk),
+  closeAudioFile: () => ipcRenderer.invoke('close-audio-file'),
+  cutRecording: () => ipcRenderer.send('cut-recording'),
+
+  transcribeAudioFile: () => ipcRenderer.send('transcribe-audio-file'),
+  onTranscribeDone: (callback) => ipcRenderer.on('transcribe-done', (_event, value) => callback(value)),
+  onServerRecordingStart: (callback) => ipcRenderer.on('server-recording-start', (_event, value) => callback(value)),
+  onServerRecordingStop: (callback) => ipcRenderer.on('server-recording-stop', (_event, value) => callback(value)),
+  onServerRecordingCut: (callback) => ipcRenderer.on('server-recording-cut', (_event, value) => callback(value)),
 })
 
 
