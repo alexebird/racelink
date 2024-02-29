@@ -14,12 +14,17 @@ const activeTab = ref(1)
 </script>
 
 <template>
-  <div class='flex flex-col w-full h-screen bg-surface-700'>
+  <div class='flex flex-col w-full h-screen bg-surface-800'>
     <div v-if="missionsStore.selectedMission">
-      <div>
-        Mission: {{missionsStore.selectedMission.fname}}
+      <div class="text-surface-0 text-lg m-2">
+        {{missionsStore.selectedMission.missionId}}
       </div>
-      <TabView v-model:activeIndex="activeTab" class="w-full" pt:content:class="!rounded-none">
+
+      <TabView v-model:activeIndex="activeTab"
+        class="w-full"
+        pt:navcontainer:class="ml-1"
+        pt:content:class="!rounded-none"
+      >
         <TabPanel header="Notebooks">
           <p class="m-0">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo

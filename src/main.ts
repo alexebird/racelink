@@ -56,6 +56,9 @@ app.component('Tree', Tree)
 import ToastService from 'primevue/toastservice';
 app.use(ToastService);
 
+// import Card from 'primevue/card'
+// app.component('Card', Card)
+
 // import { useToast } from 'primevue/useToast'
 // app.component('useToast', useToast)
 

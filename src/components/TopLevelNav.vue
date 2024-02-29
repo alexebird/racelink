@@ -17,7 +17,6 @@ const items = ref([
 
 <template>
   <TabMenu :model="items"
-    class='top-level-tabmenu'
     :ptOptions="{ mergeProps: true }"
     pt:root:class="h-screen !bg-stone-800 min-w-24 max-w-24"
     pt:menu:class="flex-col"
@@ -35,20 +34,12 @@ const items = ref([
 </template>
 
 <style scoped>
-/* .top-level-tabmenu  { */
-/*   background-color: red !important; */
-/* } */
-
 [data-pc-section="menuitem"][data-p-disabled="false"][data-p-highlight="true"] [data-pc-section="action"] {
-  /* background-color: rgb(var(--stone-400)); */
   background-color: theme(colors.stone.700);
-  /* color: theme(colors.stone.800); */
   color: rgb(var(--surface-0));
-  /* background-color: red; */
 }
 
 [data-pc-section="action"]:hover {
   background-color: theme(colors.stone.800);
-  /* font-weight: bold; */
 }
 </style>
