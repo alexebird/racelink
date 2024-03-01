@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express();
-const PORT = 3000;
+const PORT = 27872;
 
 const callbacks = {
   onRecordingCut: () => {},
@@ -16,22 +16,17 @@ app.get('/health', (req, res) => {
   res.json({ ok: true });
 });
 
-// expressApp.post('/print-json', (req, res) => {
-//   console.log(req.body);  // Print the JSON request body to the console
-//   res.json({ message: 'Received and printed the JSON body' });
+// app.post('/recordings/actions/start', (req, resp) => {
+//   callbacks.onRecordingStart().then(() => {
+//     resp.json({ ok: true });
+//   })
 // });
-
-app.post('/recordings/actions/start', (req, resp) => {
-  callbacks.onRecordingStart().then(() => {
-    resp.json({ ok: true });
-  })
-});
-
-app.post('/recordings/actions/stop', (req, resp) => {
-  callbacks.onRecordingStop().then(() => {
-    resp.json({ ok: true });
-  })
-});
+//
+// app.post('/recordings/actions/stop', (req, resp) => {
+//   callbacks.onRecordingStop().then(() => {
+//     resp.json({ ok: true });
+//   })
+// });
 
 app.post('/recordings/actions/cut', (req, resp) => {
   const vehicleData = req.body
@@ -54,29 +49,29 @@ app.get('/transcripts/:count', (req, resp) => {
 });
 
 function startServer(cbs) {
-  callbacks.onRecordingStart = () => {
-    return new Promise((resolve, reject) => {
-      try {
-        cbs.onRecordingStart()
-        resolve()
-      }
-      catch (error) {
-        reject(error)
-      }
-    })
-  }
-
-  callbacks.onRecordingStop = () => {
-    return new Promise((resolve, reject) => {
-      try {
-        cbs.onRecordingStop()
-        resolve()
-      }
-      catch (error) {
-        reject(error)
-      }
-    })
-  }
+  // callbacks.onRecordingStart = () => {
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       cbs.onRecordingStart()
+  //       resolve()
+  //     }
+  //     catch (error) {
+  //       reject(error)
+  //     }
+  //   })
+  // }
+  //
+  // callbacks.onRecordingStop = () => {
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       cbs.onRecordingStop()
+  //       resolve()
+  //     }
+  //     catch (error) {
+  //       reject(error)
+  //     }
+  //   })
+  // }
 
   callbacks.onRecordingCut = (vehicleData) => {
     return new Promise((resolve, reject) => {

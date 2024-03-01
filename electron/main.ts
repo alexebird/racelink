@@ -62,17 +62,17 @@ function createWindow() {
   // Open the DevTools.
   win.webContents.openDevTools();
   startServer({
-    onRecordingStart: () => {
-      console.log('start recording from express')
-      win.webContents.send('server-recording-start')
-    },
-    onRecordingStop: () => {
-      console.log('stop recording from express')
-      win.webContents.send('server-recording-stop')
-    },
-    onRecordingCut: (vehicleData) => {
-      console.log('cut recording from express', vehicleData)
-      win.webContents.send('server-recording-cut')
+    // onRecordingStart: () => {
+    //   console.log('start recording from express')
+    //   win.webContents.send('server-recording-start')
+    // },
+    // onRecordingStop: () => {
+    //   console.log('stop recording from express')
+    //   win.webContents.send('server-recording-stop')
+    // },
+    onRecordingCut: (cutReq) => {
+      console.log('cut recording from express', cutReq)
+      win.webContents.send('server-recording-cut', cutReq)
     },
     onGetTranscripts: (count) => {
       console.log('get transcripts', count)
@@ -171,18 +171,27 @@ function closeAudioFile() {
   }
 }
 
-function transcribeAudio(fname) {
-    flaskClient.postTranscribe(fname).then((resp) => {
-      try {
-        // fs.unlinkSync(fname)
-        // console.log('File deleted successfully');
-      } catch (err) {
-        console.error('Error deleting the file:', err);
-      }
+function transcribeAudio(fname, cutId) {
+  flaskClient.postTranscribe(fname).then((resp) => {
+    try {
+      fs.unlinkSync(fname)
+      console.log('File deleted successfully');
+    } catch (err) {
+      console.error('Error deleting the file:', err);
+    }
 
-      console.log(resp)
-      win.webContents.send('transcribe-done', resp)
-    })
+    console.log(resp)
+    win.webContents.send('transcribe-done', resp)
+  })
+}
+
+function discardAudio(fname) {
+  try {
+    fs.unlinkSync(fname)
+    console.log('File deleted successfully');
+  } catch (err) {
+    console.error('Error deleting the file:', err);
+  }
 }
 
 function setupIPC() {
@@ -232,24 +241,26 @@ function setupIPC() {
     return
   });
 
-  ipcMain.on('cut-recording', (event) => {
-    // closeAudioFile()
+  // ipcMain.on('cut-recording', (event) => {
+  //   if (audioFileStream) {
+  //     audioFileStream.end(() => {
+  //       console.log('cut: File stream closed successfully.');
+  //       transcribeAudio(audioFileFname)
+  //       openAudioFile()
+  //     });
+  //     audioFileStream = null; // Reset the variable for future use
+  //   } else {
+  //     console.log('No open file stream to close.');
+  //   }
+  //
+  // })
 
-    if (audioFileStream) {
-      audioFileStream.end(() => {
-        console.log('cut: File stream closed successfully.');
-        transcribeAudio(audioFileFname)
-        openAudioFile()
-      });
-      audioFileStream = null; // Reset the variable for future use
-    } else {
-      console.log('No open file stream to close.');
-    }
+  ipcMain.on('transcribe-audio-file', (cutId) => {
+    transcribeAudio(audioFileFname, cutId)
+  });
 
-  })
-
-  ipcMain.on('transcribe-audio-file', () => {
-    transcribeAudio(audioFileFname)
+  ipcMain.on('discard-audio-file', () => {
+    discardAudio(audioFileFname)
   });
 }
 

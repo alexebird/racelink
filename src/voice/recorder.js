@@ -1,3 +1,5 @@
+import { useRallyStore } from "@/stores/rally"
+
 // const mediaDeviceConf = { audio: true }
 const mediaDeviceConf = {
     audio: {
@@ -15,13 +17,22 @@ export default class Recorder {
         this.mediaRecorder = null
         // this.audioChunks = null
         this.stream = null
+        this.lastCut = 0
+        this.autocut = false
+        this.cutId = -1
+
+        setInterval(() => {
+            this.watchdog()
+        }, 1000)
     }
 
     setup(callback) {
         navigator.mediaDevices.getUserMedia(mediaDeviceConf)
             .then(stream => {
                 this.stream = stream
-                callback()
+                if (callback) {
+                    callback()
+                }
             })
             .catch(error => {
                 console.error('error setting up recording', error)
@@ -29,6 +40,8 @@ export default class Recorder {
     }
 
     createMediaRecorder() {
+        this.lastCut = Date.now()/1000
+        this.autocut = false
         this.mediaRecorder = new MediaRecorder(this.stream);
         this.mediaRecorder.ondataavailable = event => {
             const audioChunks = []
@@ -41,26 +54,29 @@ export default class Recorder {
 
                 if (this.mediaRecorder.state === 'inactive') {
                     this.onBufferingDone()
-                } //else if (this.cutHappened) {
-                //     this.cutHappened = false
-                //     window.electronAPI.cutRecording()
-                // }
+                }
             }
 
             reader.readAsArrayBuffer(audioBlob);
         };
 
-        this.mediaRecorder.onstop = () => {
+        // this.mediaRecorder.onstop = () => {
             // this.writeAudioChunks()
-        }
+        // }
     }
 
     onBufferingDone() {
         window.electronAPI.closeAudioFile().then(() => {
             console.log('closeAudioFile done')
-            window.electronAPI.transcribeAudioFile()
+            if (this.autocut) {
+                window.electronAPI.discardAudioFile()
+            } else {
+                window.electronAPI.transcribeAudioFile(this.cutId)
+            }
+
             if (this.cutHappened) {
                 this.cutHappened = false
+                this.lastCut = Date.now()/1000
                 this.startRecording()
             }
         })
@@ -68,38 +84,48 @@ export default class Recorder {
 
     teardown() {
         this.mediaRecorder = null
-        // this.audioChunks = null
     }
 
-    // writeAudioChunks() {
-    //     const fname = 'output.webm'
-    //     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-    //     const reader = new FileReader();
-    //     reader.onloadend = () => {
-    //         window.electronAPI.saveAudio(reader.result, fname);
-    //     };
-    //     reader.readAsArrayBuffer(audioBlob);
-    //     this.audioChunks = []
-    // }
+    watchdog() {
+        // if (this.mediaRecorder) {
+        //     console.log(this.mediaRecorder.state)
+        // }
+
+        const now = Date.now()/1000
+        if (now - this.lastCut > 5) {
+            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                this.autocut = true
+                console.log('auto-stopping recording')
+                this.stopRecording()
+            }
+        }
+    }
 
     recordingStatus() {
         if (this.mediaRecorder) {
             return this.mediaRecorder.state
         } else {
-            return 'null'
+            return 'none'
         }
     }
 
+    isRecording() {
+        return this.recordingStatus() === 'recording'
+    }
+
     startRecording() {
-        // this.audioChunks = []
         window.electronAPI.openAudioFile().then(() => {
+            useRallyStore().$patch({ recordingStatus: 'recording' })
             this.createMediaRecorder()
             this.mediaRecorder.start(1000)
         })
     }
 
     stopRecording() {
-        this.mediaRecorder.stop()
+        if (this.mediaRecorder) {
+            useRallyStore().$patch({ recordingStatus: 'not_recording' })
+            this.mediaRecorder.stop()
+        }
     }
 
     stopRecordingAfter() {
@@ -108,11 +134,10 @@ export default class Recorder {
         }, stopRecordingDelayMs)
     }
 
-    cutRecording() {
+    cutRecording(cutReq) {
+        console.log(cutReq)
+        this.cutId = cutReq.cut_id
         this.cutHappened = true
         this.stopRecordingAfter()
-        // setTimeout(() => {
-        //     this.stopRecording()
-        // }, stopRecordingDelayMs)
     }
 }

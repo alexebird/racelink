@@ -1,5 +1,5 @@
 <script setup lang='js'>
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useMissionsStore } from '@/stores/missions'
 import { useRallyStore } from "@/stores/rally"
 const missionsStore = useMissionsStore()
@@ -13,38 +13,44 @@ const activeTab = ref(1)
 
 const onRecordingStart = () => {
   rallyStore.recorder.startRecording()
-  rallyStore.setIsRecording(true)
 }
 
-const onRecordingStop = () => {
-  rallyStore.recorder.stopRecordingAfter()
-  rallyStore.setIsRecording(false)
+// const onRecordingStop = () => {
+//   rallyStore.recorder.stopRecordingAfter()
+//   rallyStore.setIsRecording(false)
+// }
+
+const doCut = (cutReq) => {
+  if (!rallyStore.recorder.isRecording()) {
+    onRecordingStart()
+  } else {
+    rallyStore.recorder.cutRecording(cutReq)
+  }
 }
 
 const onRecordingCut = () => {
-  if (!rallyStore.isRecording) {
-    onRecordingStart()
-  } else {
-    rallyStore.recorder.cutRecording()
-  }
+  doCut({cut_id: -1})
 }
 
 window.electronAPI.onTranscribeDone((resp) => {
   // console.log('onTranscribeDone')
   // console.log(resp)
-  rallyStore.setLastTranscriptResp(resp)
+  // rallyStore.setLastTranscriptResp(resp)
+  rallyStore.$patch({
+    lastTranscriptResp: resp
+  })
 })
 
-window.electronAPI.onServerRecordingStart((resp) => {
-  onRecordingStart()
-})
+// window.electronAPI.onServerRecordingStart((resp) => {
+//   onRecordingStart()
+// })
+//
+// window.electronAPI.onServerRecordingStop((resp) => {
+//   onRecordingStop()
+// })
 
-window.electronAPI.onServerRecordingStop((resp) => {
-  onRecordingStop()
-})
-
-window.electronAPI.onServerRecordingCut((resp) => {
-  onRecordingCut()
+window.electronAPI.onServerRecordingCut((cutReq) => {
+  doCut(cutReq)
 })
 
 </script>
@@ -68,17 +74,17 @@ window.electronAPI.onServerRecordingCut((resp) => {
           </p>
         </TabPanel>
         <TabPanel header="Transcripts">
-          <Button :disabled="!rallyStore.recordingSetup || rallyStore.isRecording" class='mr-2' @click="onRecordingStart">
-            Start
-          </Button>
-          <Button :disabled="!rallyStore.recordingSetup || !rallyStore.isRecording" class='mr-2' @click="onRecordingStop">
-            Stop
-          </Button>
-          <Button :disabled="!rallyStore.recordingSetup" @click="onRecordingCut">
+          <!-- <Button :disabled="!rallyStore.recordingSetup || rallyStore.isRecording" class='mr-2' @click="onRecordingStart"> -->
+          <!--   Start -->
+          <!-- </Button> -->
+          <!-- <Button :disabled="!rallyStore.recordingSetup || !rallyStore.isRecording" class='mr-2' @click="onRecordingStop"> -->
+          <!--   Stop -->
+          <!-- </Button> -->
+          <Button :disabled="!rallyStore.recorder" @click="onRecordingCut">
             Cut
           </Button>
           <div >
-            recording status: recorder={{rallyStore.recorder && rallyStore.recorder.recordingStatus()}} store={{rallyStore.isRecording}}
+            recording: {{rallyStore.recordingStatus}}
           </div>
           <div v-if="!rallyStore.lastTranscriptResp.error">
             Last Transcript: "{{rallyStore.lastTranscriptResp.text}}"

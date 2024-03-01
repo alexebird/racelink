@@ -3,7 +3,6 @@ import { ref, onMounted, onUnmounted } from "vue"
 import { useMissionsStore } from "@/stores/missions"
 import { useRallyStore } from "@/stores/rally"
 import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
-import Recorder from '@/voice/recorder'
 
 // import { useToast } from "primevue/usetoast"
 // import Toast from 'primevue/toast'
@@ -50,11 +49,16 @@ onMounted(() => {
     onNodeSelect(node)
   })
 
-  const recorder = new Recorder()
-  recorder.setup(() => {
-    rallyStore.setRecorder(recorder)
-    rallyStore.recordingSetupDone()
-  })
+  rallyStore.recorder.setup()
+
+  // const recorder = new Recorder()
+  // recorder.setup(() => {
+  //   // rallyStore.setRecorder(recorder)
+  //   // rallyStore.recordingSetupDone()
+  //   rallyStore.$patch({
+  //     recorder: recorder,
+  //   })
+  // })
 })
 
 onUnmounted(() => {

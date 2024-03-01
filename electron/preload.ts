@@ -9,12 +9,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openAudioFile: () => ipcRenderer.invoke('open-audio-file'),
   writeAudioChunk: (audioChunk) => ipcRenderer.send('write-audio-chunk', audioChunk),
   closeAudioFile: () => ipcRenderer.invoke('close-audio-file'),
-  cutRecording: () => ipcRenderer.send('cut-recording'),
+  // cutRecording: () => ipcRenderer.send('cut-recording'),
 
-  transcribeAudioFile: () => ipcRenderer.send('transcribe-audio-file'),
+  transcribeAudioFile: (cutId) => ipcRenderer.send('transcribe-audio-file', cutId),
+  discardAudioFile: () => ipcRenderer.send('discard-audio-file'),
   onTranscribeDone: (callback) => ipcRenderer.on('transcribe-done', (_event, value) => callback(value)),
-  onServerRecordingStart: (callback) => ipcRenderer.on('server-recording-start', (_event, value) => callback(value)),
-  onServerRecordingStop: (callback) => ipcRenderer.on('server-recording-stop', (_event, value) => callback(value)),
+  // onServerRecordingStart: (callback) => ipcRenderer.on('server-recording-start', (_event, value) => callback(value)),
+  // onServerRecordingStop: (callback) => ipcRenderer.on('server-recording-stop', (_event, value) => callback(value)),
   onServerRecordingCut: (callback) => ipcRenderer.on('server-recording-cut', (_event, value) => callback(value)),
 })
 
