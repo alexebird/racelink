@@ -26,3 +26,4 @@ release
 *.sw?
 
 out
+settings.json

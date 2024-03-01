@@ -1,12 +1,14 @@
 <script setup lang="js">
 import { ref, onMounted, onUnmounted } from "vue"
 import { useRallyStore } from "@/stores/rally"
+import { useSettingsStore } from "@/stores/settings"
 import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
 
 // import { useToast } from "primevue/usetoast"
 // import Toast from 'primevue/toast'
-
 // const toast = useToast();
+
+const settingsStore = useSettingsStore()
 const rallyStore = useRallyStore()
 
 function toTreeData(missionScanResults) {
@@ -52,7 +54,7 @@ function toTreeData(missionScanResults) {
       selectable: true,
       icon: 'pi pi-fw pi-flag-fill'
     }
-    console.log(missionNode.key)
+    // console.log(missionNode.key)
     typeNode.children.push(missionNode);
   })
 
@@ -79,20 +81,45 @@ const onNodeUnselect = (node) => {
   }
 }
 
-// async function doScan() {
-//   return await window.electronAPI.scan()
-// }
+
+function getMissionWithKey(missionId) {
+  for (let i = 0; i < rallyStore.missionsTree.length; i++) {
+    const levelNode = rallyStore.missionsTree[i];
+
+    for (let j = 0; j < levelNode.children.length; j++) {
+      const missionTypeNode = levelNode.children[j];
+
+      for (let k = 0; k < missionTypeNode.children.length; k++) {
+        const missionNode = missionTypeNode.children[k];
+
+        if (missionNode.key === missionId) {
+          return missionNode;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+const selectedKey = ref({})
+const expandedKeys = ref({})
 
 onMounted(() => {
-  window.electronAPI.configureScanner({
-    basePath: 'test/data',
-  })
-
   window.electronAPI.scan().then((results) => {
     results = toTreeData(results)
     rallyStore.$patch({missionsTree: results})
-    const node = rallyStore.missionsTree[0].children[0].children[0]
-    onNodeSelect(node)
+
+    const selectedMissionId = "driver_training/rallyStage/aip-test3"
+    const node = getMissionWithKey(selectedMissionId)
+
+    if (node) {
+      let [levelId, missionType, missionId] = selectedMissionId.split('/')
+      missionType = `${levelId}/${missionType}`
+      selectedKey.value = {[selectedMissionId]: true}
+      expandedKeys.value = {[levelId]: true, [missionType]: true}
+      onNodeSelect(node)
+    }
   })
 
   rallyStore.recorder.setup()
@@ -102,9 +129,6 @@ onUnmounted(() => {
   rallyStore.recorder.teardown()
 })
 
-// const selectedNode = ref({key:'lvl/rallyStage/aip-test', label: 'aip-test'})
-const selectedKey = ref({'lvl/rallyStage/aip-test': true})
-const expandedKeys = ref({"lvl": true, "lvl/rallyStage": true})
 </script>
 
 <template>

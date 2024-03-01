@@ -1,14 +1,12 @@
 <script setup lang='js'>
-import { ref, computed, onMounted, onUnmounted } from "vue"
-import { useMissionsStore } from '@/stores/missions'
+import { ref, onMounted, onUnmounted } from "vue"
 import { useRallyStore } from "@/stores/rally"
 const rallyStore = useRallyStore()
 
 onMounted(() => {
-  console.log('mounted MissionDetails')
 })
 
-const activeTab = ref(1)
+const activeTab = ref(0)
 
 const onRecordingStart = () => {
   rallyStore.recorder.startRecording()
@@ -55,9 +53,9 @@ window.electronAPI.onServerRecordingCut((cutReq) => {
 </script>
 
 <template>
-  <div class='flex flex-col w-full h-screen bg-surface-800'>
+  <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
     <div v-if="rallyStore.selectedMission">
-      <div class="text-surface-0 text-lg m-2">
+      <div class="text-lg m-2">
         {{rallyStore.selectedMission.missionId}}
       </div>
 

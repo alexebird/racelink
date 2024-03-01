@@ -1,18 +1,28 @@
 const AdmZip = require('adm-zip');
 const fs = require('fs');
+const path = require('path');
 
-class BeamUserDir {
+export default class BeamUserDir {
   constructor(beamDir) {
     this.beamDir = beamDir;
     this.searchPaths = [
       `${beamDir}/mods/repo/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/default.voices.json`,
+      `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/default.voices.json`,
       `${beamDir}/settings/aipacenotes/user.voices.json`,
     ];
   }
 
   readFileFromZip(zipFilePath, internalPath) {
+    zipFilePath = path.normalize(zipFilePath)
+    console.log(`reading zip file: ${zipFilePath}`)
+
+    if (!fs.existsSync(zipFilePath)) {
+      console.error('File does not exist:', zipFilePath);
+      return null;
+    }
+
     try {
       const zip = new AdmZip(zipFilePath);
       const zipEntry = zip.getEntry(internalPath);
@@ -26,12 +36,20 @@ class BeamUserDir {
   }
 
   readFileNormally(filePath) {
+    filePath = path.normalize(filePath)
+    console.log(`reading normal file: ${filePath}`)
+
+    if (!fs.existsSync(filePath)) {
+      console.error('File does not exist:', filePath);
+      return null;
+    }
+
     try {
       return fs.readFileSync(filePath, { encoding: 'utf8' });
     } catch (error) {
       console.error('Error reading file:', error);
+      return null;
     }
-    return null;
   }
 
   mergeJsonContents(contents) {
@@ -44,7 +62,7 @@ class BeamUserDir {
     }, {});
   }
 
-  async loadAndMergeJson() {
+  async loadAndMergeVoices() {
     const contents = await Promise.all(this.searchPaths.map(path => {
       if (path.includes('.zip/')) {
         const [zipPath, internalPath] = path.split('.zip/').map((part, index) => index === 0 ? `${part}.zip` : part);
@@ -58,5 +76,3 @@ class BeamUserDir {
     return mergedJson;
   }
 }
-
-export default BeamUserDir

@@ -19,6 +19,18 @@ class Pacenote {
     this.noteData = noteData
   }
 
+  joinedNote() {
+    return this.noteData.note
+  }
+
+  name() {
+    return this.noteData.name
+  }
+
+  voice() {
+    return this.noteData.codriver.voice
+  }
+
   noteHash() {
     const note = this.noteData.note
     // Assuming note is already a string; if not, you might need to encode it from UTF-16 to UTF-8.
@@ -34,17 +46,54 @@ class Pacenote {
     return hashValue
   }
 
+ // noteData: {
+ //    metadata: {},
+ //    name: 'Pacenote 5',
+ //    notes: {
+ //      english: [Object],
+ //      french: [Object],
+ //      german: [Object],
+ //      russian: [Object],
+ //      spanish: [Object]
+ //    },
+ //    oldId: 30,
+ //    pacenoteWaypoints: [
+ //      [Object], [Object],
+ //      [Object], [Object],
+ //      [Object], [Object],
+ //      [Object], [Object]
+ //    ],
+ //    note: 'fotobar ?',
+ //    language: 'french',
+ //    codriver: {
+ //      language: 'french',
+ //      name: 'Cosette',
+ //      oldId: 13,
+ //      voice: 'french_female'
+ //    }
+ //  }
+  cleanCodriverName() {
+    return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.language}_${this.noteData.codriver.voice}`)
+
+    // return normalizePath(path.join(this.dirname(), 'generated_pacenotes', cleanNameForPath(this.basenameNoExt())))
+
+    // return aipacenotes.clean_name_for_path(
+    //   self.codriver_name() + '_'+self.language() + '_' + self.voice()
+    // )
+  }
+
   noteBasename() {
     return `pacenote_${this.noteHash()}.ogg`
   }
 
   audioFname() {
-    return path.join(this.notebook.pacenotesDir(), this.noteBasename())
+    return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.noteBasename())
   }
 }
 
 class Notebook {
-  constructor(notebookPath) {
+  constructor(notebookPath, voices) {
+    this.voices = voices
     this.notebookPath = notebookPath
     this.content = this._readNotebookFile()
     this._cachePacenotes()
@@ -133,7 +182,20 @@ class Notebook {
 
   updatePacenotes() {
     console.log(this.pacenotesDir())
-    this.cachedPacenotes.forEach(pn => console.log(pn))
+    return this.cachedPacenotes.map(pn => {
+      // console.log(pn.noteData.note)
+
+      const fname = pn.audioFname()
+      // console.log(fname)
+
+      if (!fs.existsSync(fname)) {
+        return pn
+      }
+
+      // console.log('-------------------------------------')
+
+      return null
+    }).filter(content => content !== null)
   }
 }
 

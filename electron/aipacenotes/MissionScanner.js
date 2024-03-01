@@ -44,7 +44,7 @@ class MissionScanner {
 
     files.forEach(file => {
       const filePath = path.join(dir, file);
-      console.log(filePath)
+      // console.log(filePath)
 
       if (fs.statSync(filePath).isDirectory()) {
         this._listFilesRecursively(filePath, fileList);

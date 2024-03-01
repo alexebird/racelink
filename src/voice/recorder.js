@@ -71,7 +71,7 @@ export default class Recorder {
             if (this.autocut) {
                 window.electronAPI.discardAudioFile()
             } else {
-                window.electronAPI.transcribeAudioFile(this.cutId)
+                window.electronAPI.transcribeAudioFile(this.cutId, useRallyStore().serializedSelectedMission)
             }
 
             if (this.cutHappened) {
@@ -141,7 +141,6 @@ export default class Recorder {
     // }
 
     cutRecording(cutReq) {
-        console.log(cutReq)
         this.cutId = cutReq.cut_id
         this.cutHappened = true
         setTimeout(() => {

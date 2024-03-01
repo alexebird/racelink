@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
 import crypto from 'node:crypto'
@@ -6,8 +6,10 @@ import { MissionScanner } from './aipacenotes/MissionScanner'
 import NotebookScanner from './aipacenotes/NotebookScanner'
 import Notebook from './aipacenotes/Notebook'
 import FlaskApiClient from './aipacenotes/FlaskApiClient'
+import BeamUserDir from './aipacenotes/BeamUserDir'
 import readFileFromZip from './aipacenotes/Zip'
 import startServer from './server'
+import Settings from './Settings'
 
 // The built directory structure
 //
@@ -21,12 +23,20 @@ import startServer from './server'
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
-
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+let appSettings = null
 
 function createWindow() {
+  const defaultSettings = {
+    beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31')
+    // windowSize: { width: 800, height: 600 },
+    // notificationsEnabled: true
+  }
+
+  appSettings = new Settings('settings.json', defaultSettings)
+
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
   //   callback({
   //     responseHeaders: {
@@ -109,6 +119,9 @@ async function handleScannerConfigure(_event, config) {
 }
 
 async function handleScannerScan(_event, _args) {
+  scanner.configure({
+    basePath: appSettings.get('beamUserDir'),
+  })
   return scanner.scan()
 }
 
@@ -125,14 +138,44 @@ function recordingFname() {
 async function handleMissionGeneratePacenotes(_event, args) {
   const mission = args.mission
   if (mission) {
-    // console.log(mission)
-    const nb = new NotebookScanner(mission.fname)
-    const files = nb.scan()
-    if (files) {
-      const notebooks = files.map((f) => new Notebook(f))
-      // console.log(notebooks)
-      // notebooks[0].updatePacenotes()
-    }
+    const beamUserDir = new BeamUserDir(appSettings.get('beamUserDir'));
+    beamUserDir.loadAndMergeVoices().then(voices => {
+      // console.log(voices);
+
+      const nb = new NotebookScanner(mission.fname)
+      const files = nb.scan()
+      if (files) {
+        const notebooks = files.map((f) => new Notebook(f, voices))
+        const updates = notebooks.map(notebook => {
+          return notebook.updatePacenotes()
+        }).flat()
+
+        updates.forEach(pn => {
+          console.log('------------------------------------------------------')
+          const audioFname = pn.audioFname()
+          console.log(pn.joinedNote())
+          console.log(audioFname)
+
+          const voiceConfig = voices[pn.voice()]
+
+          flaskClient.postCreatePacenoteAudio(pn.name(), pn.joinedNote(), voiceConfig)
+            .then((resp) => {
+              fs.mkdirSync(path.dirname(audioFname), { recursive: true });
+
+              try {
+                resp = Buffer.from(resp)
+                fs.writeFileSync(audioFname, resp);
+                console.log('File written successfully');
+              } catch (error) {
+                console.error('Error writing file:', error);
+              }
+            })
+            .catch(error => {
+              console.error('error creating parent dirs for pacenote file', error)
+            })
+        })
+      }
+    });
   }
 }
 
@@ -171,18 +214,49 @@ function closeAudioFile() {
   }
 }
 
-function transcribeAudio(fname, cutId) {
+// function transcribeAudio(fname, cutId, selectedMission) {
+//   flaskClient.postTranscribe(fname).then((resp) => {
+//     // try {
+//     //   fs.unlinkSync(fname)
+//     //   console.log('File deleted successfully');
+//     // } catch (err) {
+//     //   console.error('Error deleting the file:', err);
+//     // }
+//
+//     console.log(selectedMission)
+//     console.log(cutId)
+//     console.log(resp)
+//
+//     win.webContents.send('transcribe-done', resp)
+//   })
+// }
+
+
+function transcribeAudio(fname, cutId, selectedMission) {
   flaskClient.postTranscribe(fname).then((resp) => {
+    const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'transcripts', 'primary', 'transcripts.json');
+    const jsonLine = JSON.stringify({ cutId, resp }) + '\n';
+
+    try {
+      fs.appendFileSync(filePath, jsonLine, 'utf8');
+      console.log('JSON line appended successfully');
+    } catch (err) {
+      console.error('Error appending to the file:', err);
+    }
+
+    // console.log(selectedMission);
+    // console.log(cutId);
+    // console.log(resp);
+
+    win.webContents.send('transcribe-done', resp);
+
     // try {
-    //   fs.unlinkSync(fname)
+    //   fs.unlinkSync(fname);
     //   console.log('File deleted successfully');
     // } catch (err) {
     //   console.error('Error deleting the file:', err);
     // }
-
-    console.log(resp)
-    win.webContents.send('transcribe-done', resp)
-  })
+  });
 }
 
 function discardAudio(fname) {
@@ -195,7 +269,17 @@ function discardAudio(fname) {
 }
 
 function setupIPC() {
-  ipcMain.on('scanner:configure', handleScannerConfigure)
+  ipcMain.handle('settings:getAll', (event) => {
+    return appSettings.settings
+  });
+
+  ipcMain.handle('settings:set', (event, key, value) => {
+    console.log(`setting ${key} to ${value}`)
+    appSettings.set(key, value)
+    return appSettings.settings
+  });
+
+  // ipcMain.on('scanner:configure', handleScannerConfigure)
   ipcMain.handle('scanner:scan', handleScannerScan)
   ipcMain.on('mission:generate-pacenotes', handleMissionGeneratePacenotes)
 
@@ -219,6 +303,7 @@ function setupIPC() {
     openAudioFile()
     return true
   });
+
 
   ipcMain.on('write-audio-chunk', (event, audioChunk) => {
     if (!audioFileStream) {
@@ -255,12 +340,25 @@ function setupIPC() {
   //
   // })
 
-  ipcMain.on('transcribe-audio-file', (cutId) => {
-    transcribeAudio(audioFileFname, cutId)
+  ipcMain.on('transcribe-audio-file', (_event, cutId, selectedMission) => {
+    transcribeAudio(audioFileFname, cutId, selectedMission)
   });
 
-  ipcMain.on('discard-audio-file', () => {
+  ipcMain.on('discard-audio-file', (_event) => {
     discardAudio(audioFileFname)
+  });
+
+  ipcMain.on('open-file-picker', async (event) => {
+    const lastPath = appSettings.get('beamUserDir');
+
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory'],
+      defaultPath: lastPath,
+    });
+
+    if (!result.canceled && result.filePaths.length > 0) {
+      event.sender.send('directory-selected', result.filePaths[0]);
+    }
   });
 }
 

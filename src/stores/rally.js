@@ -4,6 +4,7 @@ import Recorder from '@/voice/recorder'
 
 export const useRallyStore = defineStore('rally', {
   state: () => ({
+    selectedMissionDetailsTab: 1,
     recorder: new Recorder(),
     recordingStatus: 'not_recording',
     lastTranscriptResp: {error: false, text: "<none>"},
@@ -12,11 +13,7 @@ export const useRallyStore = defineStore('rally', {
   }),
   getters: {
     serializedSelectedMission: (state) => {
-      return {
-        mission: {
-          fname: state.selectedMission.fname
-        }
-      }
+      return { mission: { fname: state.selectedMission.fname } }
     }
   },
   actions: {

@@ -1,7 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
+  getSettings: () => ipcRenderer.invoke('settings:getAll'),
+  setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
+  openFilePicker: () => ipcRenderer.send('open-file-picker'),
+  onDirectorySelected: (callback) => ipcRenderer.on('directory-selected', callback),
+
+  // configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
   scan: () => ipcRenderer.invoke('scanner:scan'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('mission:generate-pacenotes', mission),
   // saveAudio: (data, fname) => ipcRenderer.send('save-audio', data, fname),
@@ -11,7 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeAudioFile: () => ipcRenderer.invoke('close-audio-file'),
   // cutRecording: () => ipcRenderer.send('cut-recording'),
 
-  transcribeAudioFile: (cutId) => ipcRenderer.send('transcribe-audio-file', cutId),
+  transcribeAudioFile: (cutId, selectedMission) => ipcRenderer.send('transcribe-audio-file', cutId, selectedMission),
   discardAudioFile: () => ipcRenderer.send('discard-audio-file'),
   onTranscribeDone: (callback) => ipcRenderer.on('transcribe-done', (_event, value) => callback(value)),
   // onServerRecordingStart: (callback) => ipcRenderer.on('server-recording-start', (_event, value) => callback(value)),

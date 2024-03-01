@@ -1,5 +1,7 @@
 <script setup lang='ts'>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useSettingsStore } from "@/stores/settings"
+const settingsStore = useSettingsStore()
 
 const items = ref([
   {
@@ -12,16 +14,25 @@ const items = ref([
     icon: 'pi pi-sliders-h',
     route: '/settings'
   },
-  {
-    label: 'Help',
-    icon: 'pi pi-question-circle',
-    route: '/help'
-  }
+  // {
+  //   label: 'Help',
+  //   icon: 'pi pi-question-circle',
+  //   route: '/help'
+  // }
 ])
+
+const activeIndex = ref(0)
+
+onMounted(() => {
+  window.electronAPI.getSettings().then((settings) => {
+    settingsStore.$patch({settings: settings})
+  })
+})
 </script>
 
 <template>
   <TabMenu :model="items"
+    :activeIndex="activeIndex"
     :ptOptions="{ mergeProps: true }"
     pt:root:class="h-screen !bg-stone-800 min-w-28 max-w-28"
     pt:menu:class="flex-col"
