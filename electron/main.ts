@@ -26,17 +26,22 @@ process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
-let appSettings = null
+
+const defaultSettings = {
+  beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31')
+  // windowSize: { width: 800, height: 600 },
+  // notificationsEnabled: true
+}
+
+const appSettings = new Settings('settings.json', defaultSettings)
+const beamUserDir = new BeamUserDir(appSettings)
+const scanner = new MissionScanner()
+const flaskClient = new FlaskApiClient()
+const inFlightMissions = new Set()
+let audioFileStream = null;
+let audioFileFname = null;
 
 function createWindow() {
-  const defaultSettings = {
-    beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31')
-    // windowSize: { width: 800, height: 600 },
-    // notificationsEnabled: true
-  }
-
-  appSettings = new Settings('settings.json', defaultSettings)
-
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
   //   callback({
   //     responseHeaders: {
@@ -112,8 +117,6 @@ app.on('activate', () => {
   }
 })
 
-const scanner = new MissionScanner()
-
 async function handleScannerConfigure(_event, config) {
   scanner.configure(config)
 }
@@ -135,52 +138,80 @@ function recordingFname() {
   return outputFile
 }
 
-async function handleMissionGeneratePacenotes(_event, args) {
-  const mission = args.mission
-  if (mission) {
-    const beamUserDir = new BeamUserDir(appSettings.get('beamUserDir'));
-    beamUserDir.loadAndMergeVoices().then(voices => {
-      // console.log(voices);
+async function handleMissionGeneratePacenotes(_event, selectedMission) {
+  if (!selectedMission) {
+    return
+  }
 
-      const nb = new NotebookScanner(mission.fname)
-      const files = nb.scan()
-      if (files) {
-        const notebooks = files.map((f) => new Notebook(f, voices))
-        const updates = notebooks.map(notebook => {
-          return notebook.updatePacenotes()
-        }).flat()
+  if (inFlightMissions.has(selectedMission.mission.fname)) {
+    console.log(`mission already being updated: ${selectedMission.mission.fname}`)
+    return
+  }
 
-        updates.forEach(pn => {
-          console.log('------------------------------------------------------')
-          const audioFname = pn.audioFname()
-          console.log(pn.joinedNote())
-          console.log(audioFname)
+  inFlightMissions.add(selectedMission.mission.fname)
 
-          const voiceConfig = voices[pn.voice()]
+  const nb = new NotebookScanner(selectedMission.mission.fname)
+  const files = nb.scan()
 
-          flaskClient.postCreatePacenoteAudio(pn.name(), pn.joinedNote(), voiceConfig)
-            .then((resp) => {
-              fs.mkdirSync(path.dirname(audioFname), { recursive: true });
+  if (files) {
+    const notebooks = files.map((file) => {
+      return new Notebook(file, beamUserDir.voices(), beamUserDir.staticPacenotes())
+    })
 
-              try {
-                resp = Buffer.from(resp)
-                fs.writeFileSync(audioFname, resp);
-                console.log('File written successfully');
-              } catch (error) {
-                console.error('Error writing file:', error);
-              }
-            })
-            .catch(error => {
-              console.error('error creating parent dirs for pacenote file', error)
-            })
+    const updates = notebooks.map(notebook => {
+      return notebook.updatePacenotes()
+    }).flat()
+
+    const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
+    win.webContents.send('notebooks-updated', ipcNotebooks);
+
+    const promises = updates.map(pn => {
+      console.log('------------------------------------------------------')
+      const audioFname = pn.audioFname()
+      console.log(pn.joinedNote())
+      console.log(audioFname)
+
+      const voiceConfig = beamUserDir.voices()[pn.voice()]
+
+      return flaskClient.postCreatePacenoteAudio(pn.name(), pn.joinedNote(), voiceConfig)
+        .then((resp) => {
+          fs.mkdirSync(path.dirname(audioFname), { recursive: true });
+
+          try {
+            resp = Buffer.from(resp)
+            fs.writeFileSync(audioFname, resp);
+            console.log(`File written successfully: ${audioFname}`);
+
+            const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
+            win.webContents.send('notebooks-updated', ipcNotebooks);
+          } catch (error) {
+            console.error('Error writing file:', error);
+          }
         })
-      }
+        .catch(error => {
+          console.error('error creating parent dirs for pacenote file', error)
+        })
+    })
+
+    Promise.allSettled(promises).then(results => {
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          // console.log(`Operation ${index + 1} succeeded.`);
+        } else {
+          console.error(`Operation ${index + 1} failed:`, result.reason);
+        }
+      });
+
+      // Cleanup code here
+      // console.log('All operations completed. Running cleanup code...');
+      notebooks.forEach(nb => {
+        nb.cleanUpAudioFiles()
+      })
+
+      inFlightMissions.delete(selectedMission.mission.fname)
     });
   }
 }
-
-let audioFileStream = null;
-let audioFileFname = null;
 
 function openAudioFile() {
     audioFileFname = recordingFname()
@@ -213,24 +244,6 @@ function closeAudioFile() {
     console.log('No open file stream to close.');
   }
 }
-
-// function transcribeAudio(fname, cutId, selectedMission) {
-//   flaskClient.postTranscribe(fname).then((resp) => {
-//     // try {
-//     //   fs.unlinkSync(fname)
-//     //   console.log('File deleted successfully');
-//     // } catch (err) {
-//     //   console.error('Error deleting the file:', err);
-//     // }
-//
-//     console.log(selectedMission)
-//     console.log(cutId)
-//     console.log(resp)
-//
-//     win.webContents.send('transcribe-done', resp)
-//   })
-// }
-
 
 function transcribeAudio(fname, cutId, selectedMission) {
   flaskClient.postTranscribe(fname).then((resp) => {
@@ -279,31 +292,13 @@ function setupIPC() {
     return appSettings.settings
   });
 
-  // ipcMain.on('scanner:configure', handleScannerConfigure)
   ipcMain.handle('scanner:scan', handleScannerScan)
   ipcMain.on('mission:generate-pacenotes', handleMissionGeneratePacenotes)
-
-  // ipcMain.on('save-audio', (event, audioBuffer, filename) => {
-  //   fs.mkdirSync('out', { recursive: true })
-  //   const filePath = path.join('out', filename)
-  //   // const filePath = path.join(app.getPath('desktop'), filename)
-  //
-  //   fs.writeFile(filePath, Buffer.from(audioBuffer), (err) => {
-  //     if (err) {
-  //       console.log('Error saving the file: ', err);
-  //       event.reply('save-audio-response', 'failure');
-  //     } else {
-  //       console.log(`wrote file: ${filePath}`);
-  //       event.reply('save-audio-response', 'success');
-  //     }
-  //   });
-  // });
 
   ipcMain.handle('open-audio-file', (event) => {
     openAudioFile()
     return true
   });
-
 
   ipcMain.on('write-audio-chunk', (event, audioChunk) => {
     if (!audioFileStream) {
@@ -326,20 +321,6 @@ function setupIPC() {
     return
   });
 
-  // ipcMain.on('cut-recording', (event) => {
-  //   if (audioFileStream) {
-  //     audioFileStream.end(() => {
-  //       console.log('cut: File stream closed successfully.');
-  //       transcribeAudio(audioFileFname)
-  //       openAudioFile()
-  //     });
-  //     audioFileStream = null; // Reset the variable for future use
-  //   } else {
-  //     console.log('No open file stream to close.');
-  //   }
-  //
-  // })
-
   ipcMain.on('transcribe-audio-file', (_event, cutId, selectedMission) => {
     transcribeAudio(audioFileFname, cutId, selectedMission)
   });
@@ -360,9 +341,12 @@ function setupIPC() {
       event.sender.send('directory-selected', result.filePaths[0]);
     }
   });
-}
 
-let flaskClient = new FlaskApiClient()
+  ipcMain.handle('load-mod-configs', async (event) => {
+    await beamUserDir.load()
+    return
+  });
+}
 
 function testNetwork() {
   flaskClient.getHealthcheck().then((resp) => {

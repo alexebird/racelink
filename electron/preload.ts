@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
   openFilePicker: () => ipcRenderer.send('open-file-picker'),
   onDirectorySelected: (callback) => ipcRenderer.on('directory-selected', callback),
+  onNotebooksUpdated: (callback) => ipcRenderer.on('notebooks-updated', callback),
+  loadModConfigFiles: () => ipcRenderer.invoke('load-mod-configs'),
 
   // configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
   scan: () => ipcRenderer.invoke('scanner:scan'),

@@ -48,7 +48,6 @@ export default class FlaskApiClient {
 
     try {
       const response = await axios.post(url, data, { headers: headers, responseType: 'arraybuffer' });
-      console.log(response)
       return response.data;
     } catch (error) {
       console.error('Error creating pacenote audio:', error);

@@ -1,4 +1,4 @@
-<script setup lang='ts'>
+<script setup lang='js'>
 import { ref, onMounted } from "vue";
 import { useSettingsStore } from "@/stores/settings"
 const settingsStore = useSettingsStore()

@@ -29,7 +29,7 @@ class MissionScanner {
   }
 
   configure(conf) {
-    console.log(`configuring scanner with ${JSON.stringify(conf)}`)
+    // console.log(`configuring scanner with ${JSON.stringify(conf)}`)
     this.basePath = conf.basePath
   }
 

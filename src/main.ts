@@ -53,14 +53,23 @@ app.component('TabPanel', TabPanel)
 import Tree from 'primevue/tree'
 app.component('Tree', Tree)
 
-import ToastService from 'primevue/toastservice';
-app.use(ToastService);
+import DataTable from 'primevue/datatable';
+app.component('DataTable', DataTable);
+import Column from 'primevue/column';
+app.component('Column', Column);
+import ColumnGroup from 'primevue/columngroup';   // optional
+app.component('ColumnGroup', ColumnGroup);
+import Row from 'primevue/row';                   // optional
+app.component('Row', Row);
 
 // import Card from 'primevue/card'
 // app.component('Card', Card)
 
 // import { useToast } from 'primevue/useToast'
 // app.component('useToast', useToast)
+
+import ToastService from 'primevue/toastservice';
+app.use(ToastService);
 
 app.mount('#app')
 // .$nextTick(() => {

@@ -10,10 +10,15 @@ export const useRallyStore = defineStore('rally', {
     lastTranscriptResp: {error: false, text: "<none>"},
     missionsTree: [],
     selectedMission: null,
+    notebooks: [],
   }),
   getters: {
     serializedSelectedMission: (state) => {
-      return { mission: { fname: state.selectedMission.fname } }
+      if (state.selectedMission) {
+        return { mission: { fname: state.selectedMission.fname } }
+      } else  {
+        return null
+      }
     }
   },
   actions: {

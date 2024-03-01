@@ -17,6 +17,11 @@ class Pacenote {
   constructor(notebook, noteData) {
     this.notebook = notebook
     this.noteData = noteData
+    this.fileExists = false
+  }
+
+  setFileExists() {
+    this.fileExists = fs.existsSync(this.audioFname())
   }
 
   joinedNote() {
@@ -92,8 +97,9 @@ class Pacenote {
 }
 
 class Notebook {
-  constructor(notebookPath, voices) {
+  constructor(notebookPath, voices, staticPacenotes) {
     this.voices = voices
+    this.staticPacenotes = staticPacenotes.static_pacenotes
     this.notebookPath = notebookPath
     this.content = this._readNotebookFile()
     this._cachePacenotes()
@@ -101,6 +107,15 @@ class Notebook {
 
   codrivers() {
     return this.content.codrivers
+  }
+
+  toIpcData() {
+    return {
+      updates: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
+      pacenotes: this.cachedPacenotes.length,
+      basename: this.basename(),
+      name: this.content.name,
+    }
   }
 
   _concatNoteData(noteData) {
@@ -131,16 +146,12 @@ class Notebook {
     return rv;
   }
 
-  _staticPacenotes() {
-    return []
-  }
-
   _cachePacenotes() {
     this.cachedPacenotes = []
 
     this.codrivers().forEach(codriverData => {
       // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
-      this.content.pacenotes.concat(this._staticPacenotes()).forEach(pacenoteData => {
+      this.content.pacenotes.concat(this.staticPacenotes).forEach(pacenoteData => {
         Object.entries(pacenoteData['notes']).forEach(([lang, noteData]) => {
           if (codriverData['language'] === lang) {
             let pnDataCopy = JSON.parse(JSON.stringify(pacenoteData)); // Deep copy equivalent
@@ -148,6 +159,7 @@ class Notebook {
             pnDataCopy['language'] = lang;
             pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
             let pacenote = new Pacenote(this, pnDataCopy);
+            pacenote.setFileExists()
             this.cachedPacenotes.push(pacenote);
           }
         });
@@ -163,6 +175,12 @@ class Notebook {
       console.error('Error reading notebook file:', err)
       return null
     }
+  }
+
+  basename() {
+    const match = this.notebookPath.match(/[\/\\]([^/\\]+\.notebook\.json)$/)
+    const filename = match[1]
+    return filename
   }
 
   basenameNoExt() {
@@ -181,21 +199,57 @@ class Notebook {
   }
 
   updatePacenotes() {
-    console.log(this.pacenotesDir())
+    this._cachePacenotes()
+
+    // console.log(this.pacenotesDir())
     return this.cachedPacenotes.map(pn => {
-      // console.log(pn.noteData.note)
-
-      const fname = pn.audioFname()
-      // console.log(fname)
-
-      if (!fs.existsSync(fname)) {
+      if (!pn.fileExists) {
         return pn
+      } else {
+        return null
       }
-
-      // console.log('-------------------------------------')
-
-      return null
     }).filter(content => content !== null)
+  }
+
+  cleanUpAudioFiles() {
+    this._cachePacenotes()
+
+    const pacenotesDirPath = this.pacenotesDir(); // Assuming this returns the directory path
+    let allOggFiles = new Set();
+    let pacenoteFiles = new Set();
+
+    // Recursive function to list all .ogg files
+    const listOggFiles = (dir) => {
+      const files = fs.readdirSync(dir, { withFileTypes: true });
+      files.forEach(file => {
+        const fullPath = path.join(dir, file.name);
+        if (file.isDirectory()) {
+          listOggFiles(fullPath); // Recurse into subdirectories
+        } else if (path.extname(file.name) === '.ogg') {
+          allOggFiles.add(fullPath); // Store the full path for deletion
+        }
+      });
+    };
+
+    // 1. List all .ogg files in the directory and subdirectories
+    listOggFiles(pacenotesDirPath);
+
+    // 2. Collect all pacenote filenames
+    this.cachedPacenotes.forEach(pn => {
+      const audioFname = pn.audioFname(); // Assuming this returns the full path of the file
+      if (audioFname) {
+        pacenoteFiles.add(audioFname);
+      }
+    });
+
+    // 3. Perform a set difference to find .ogg files not associated with a pacenote
+    let filesToDelete = new Set([...allOggFiles].filter(x => !pacenoteFiles.has(x)));
+
+    // 4. Delete these files
+    filesToDelete.forEach(file => {
+      fs.unlinkSync(file);
+      console.log(`Deleted file: ${file}`);
+    });
   }
 }
 
