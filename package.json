@@ -1,5 +1,7 @@
 {
   "name": "racelink",
+  "description": "Racing software for BeamNG.drive",
+  "author": "birdman",
   "private": true,
   "version": "0.1.0",
   "scripts": {

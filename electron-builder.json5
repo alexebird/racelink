@@ -3,9 +3,9 @@
  */
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "RaceLink",
   "asar": true,
-  "productName": "YourAppName",
+  "productName": "RaceLink",
   "directories": {
     "output": "release/${version}"
   },
@@ -20,6 +20,7 @@
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
+    "icon": "./dist/icon.ico",
     "target": [
       {
         "target": "nsis",
@@ -28,7 +29,7 @@
         ]
       }
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    "artifactName": "${productName}-${version}-Setup.${ext}"
   },
   "nsis": {
     "oneClick": false,
