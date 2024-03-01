@@ -8,9 +8,14 @@ const items = ref([
     route: '/rally'
   },
   {
+    label: 'Settings',
+    icon: 'pi pi-sliders-h',
+    route: '/settings'
+  },
+  {
     label: 'Help',
-    icon: 'pi pi-palette',
-    route: '/rally2'
+    icon: 'pi pi-question-circle',
+    route: '/help'
   }
 ])
 </script>
@@ -18,7 +23,7 @@ const items = ref([
 <template>
   <TabMenu :model="items"
     :ptOptions="{ mergeProps: true }"
-    pt:root:class="h-screen !bg-stone-800 min-w-24 max-w-24"
+    pt:root:class="h-screen !bg-stone-800 min-w-28 max-w-28"
     pt:menu:class="flex-col"
     pt:action:class="bg-stone-800 !rounded-none !border-none"
   >

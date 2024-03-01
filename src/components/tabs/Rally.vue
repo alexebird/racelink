@@ -1,6 +1,5 @@
 <script setup lang="js">
 import { ref, onMounted, onUnmounted } from "vue"
-import { useMissionsStore } from "@/stores/missions"
 import { useRallyStore } from "@/stores/rally"
 import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
 
@@ -8,16 +7,64 @@ import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
 // import Toast from 'primevue/toast'
 
 // const toast = useToast();
-const missionsStore = useMissionsStore()
 const rallyStore = useRallyStore()
+
+function toTreeData(missionScanResults) {
+  const data = [];
+
+  missionScanResults.forEach((mission, index) => {
+    const levelIndex = data.findIndex(item => item.label === mission.levelId);
+    let levelNode;
+    if (levelIndex === -1) {
+      levelNode = {
+        key: mission.levelId,
+        label: mission.levelId,
+        // data: 'level id',
+        icon: 'pi pi-fw pi-image',
+        selectable: false,
+        children: []
+      }
+      data.push(levelNode)
+    } else {
+      levelNode = data[levelIndex]
+    }
+
+    const typeIndex = levelNode.children.findIndex(item => item.label === mission.missionType);
+    let typeNode
+    if (typeIndex === -1) {
+      typeNode = {
+        key: `${levelNode.key}/${mission.missionType}`,
+        label: mission.missionType,
+        // data: 'mission type',
+        selectable: false,
+        icon: 'pi pi-fw pi-car',
+        children: []
+      }
+      levelNode.children.push(typeNode);
+    } else {
+      typeNode = levelNode.children[typeIndex];
+    }
+
+    const missionNode = {
+      key: `${typeNode.key}/${mission.missionId}`,
+      label: mission.missionId,
+      data: mission,
+      selectable: true,
+      icon: 'pi pi-fw pi-flag-fill'
+    }
+    console.log(missionNode.key)
+    typeNode.children.push(missionNode);
+  })
+
+  return data
+}
 
 const onNodeSelect = (node) => {
   // console.log(selectedKey)
   if (node.selectable) {
     // toast.add({ severity: 'success', summary: 'Node Selected', detail: node.data.fname, life: 1000 });
-    missionsStore.setSelectedMission(node.data)
-    // console.log(missionsStore.serializedSelectedMission)
-    window.electronAPI.missionGeneratePacenotes(missionsStore.serializedSelectedMission)
+    rallyStore.$patch({selectedMission: node.data})
+    window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
   } else {
 
   }
@@ -26,7 +73,7 @@ const onNodeSelect = (node) => {
 const onNodeUnselect = (node) => {
   if (node.selectable) {
     // toast.add({ severity: 'warn', summary: 'Node Unselected', detail: node.data.fname, life: 1000 });
-    missionsStore.setSelectedMission(null)
+    rallyStore.$patch({selectedMission: null})
   } else {
 
   }
@@ -42,23 +89,13 @@ onMounted(() => {
   })
 
   window.electronAPI.scan().then((results) => {
-    // doScan().then((results) => {
-    missionsStore.setMissionsTree(results)
-    // console.log(missionsStore.missionsTree)
-    const node = missionsStore.missionsTree[0].children[0].children[0]
+    results = toTreeData(results)
+    rallyStore.$patch({missionsTree: results})
+    const node = rallyStore.missionsTree[0].children[0].children[0]
     onNodeSelect(node)
   })
 
   rallyStore.recorder.setup()
-
-  // const recorder = new Recorder()
-  // recorder.setup(() => {
-  //   // rallyStore.setRecorder(recorder)
-  //   // rallyStore.recordingSetupDone()
-  //   rallyStore.$patch({
-  //     recorder: recorder,
-  //   })
-  // })
 })
 
 onUnmounted(() => {
@@ -73,7 +110,7 @@ const expandedKeys = ref({"lvl": true, "lvl/rallyStage": true})
 <template>
   <!-- <Toast /> -->
   <Tree class="min-w-72 max-w-72 rounded-none"
-    :value="missionsStore.missionsTree"
+    :value="rallyStore.missionsTree"
     v-model:selectionKeys="selectedKey"
     v-model:expandedKeys="expandedKeys"
     selectionMode="single"

@@ -121,6 +121,12 @@ export default class Recorder {
         })
     }
 
+    internalStopRecording() {
+        if (this.mediaRecorder) {
+            this.mediaRecorder.stop()
+        }
+    }
+
     stopRecording() {
         if (this.mediaRecorder) {
             useRallyStore().$patch({ recordingStatus: 'not_recording' })
@@ -128,16 +134,18 @@ export default class Recorder {
         }
     }
 
-    stopRecordingAfter() {
-        setTimeout(() => {
-            this.stopRecording()
-        }, stopRecordingDelayMs)
-    }
+    // stopRecordingAfter() {
+    //     setTimeout(() => {
+    //         this.stopRecording()
+    //     }, stopRecordingDelayMs)
+    // }
 
     cutRecording(cutReq) {
         console.log(cutReq)
         this.cutId = cutReq.cut_id
         this.cutHappened = true
-        this.stopRecordingAfter()
+        setTimeout(() => {
+            this.internalStopRecording()
+        }, stopRecordingDelayMs)
     }
 }

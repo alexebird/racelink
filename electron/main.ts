@@ -173,12 +173,12 @@ function closeAudioFile() {
 
 function transcribeAudio(fname, cutId) {
   flaskClient.postTranscribe(fname).then((resp) => {
-    try {
-      fs.unlinkSync(fname)
-      console.log('File deleted successfully');
-    } catch (err) {
-      console.error('Error deleting the file:', err);
-    }
+    // try {
+    //   fs.unlinkSync(fname)
+    //   console.log('File deleted successfully');
+    // } catch (err) {
+    //   console.error('Error deleting the file:', err);
+    // }
 
     console.log(resp)
     win.webContents.send('transcribe-done', resp)
@@ -186,12 +186,12 @@ function transcribeAudio(fname, cutId) {
 }
 
 function discardAudio(fname) {
-  try {
-    fs.unlinkSync(fname)
-    console.log('File deleted successfully');
-  } catch (err) {
-    console.error('Error deleting the file:', err);
-  }
+  // try {
+  //   fs.unlinkSync(fname)
+  //   console.log('File deleted successfully');
+  // } catch (err) {
+  //   console.error('Error deleting the file:', err);
+  // }
 }
 
 function setupIPC() {

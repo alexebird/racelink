@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, onUnmounted } from "vue"
 import { useMissionsStore } from '@/stores/missions'
 import { useRallyStore } from "@/stores/rally"
-const missionsStore = useMissionsStore()
 const rallyStore = useRallyStore()
 
 onMounted(() => {
@@ -57,9 +56,9 @@ window.electronAPI.onServerRecordingCut((cutReq) => {
 
 <template>
   <div class='flex flex-col w-full h-screen bg-surface-800'>
-    <div v-if="missionsStore.selectedMission">
+    <div v-if="rallyStore.selectedMission">
       <div class="text-surface-0 text-lg m-2">
-        {{missionsStore.selectedMission.missionId}}
+        {{rallyStore.selectedMission.missionId}}
       </div>
 
       <TabView v-model:activeIndex="activeTab"
