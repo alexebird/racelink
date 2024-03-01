@@ -23,7 +23,7 @@ import Settings from './Settings'
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
-let win: BrowserWindow | null
+let win = null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
@@ -38,8 +38,8 @@ const beamUserDir = new BeamUserDir(appSettings)
 const scanner = new MissionScanner()
 const flaskClient = new FlaskApiClient()
 const inFlightMissions = new Set()
-let audioFileStream = null;
-let audioFileFname = null;
+let audioFileStream = null
+let audioFileFname = null
 
 function createWindow() {
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -87,7 +87,8 @@ function createWindow() {
     // },
     onRecordingCut: (cutReq) => {
       console.log('cut recording from express', cutReq)
-      win.webContents.send('server-recording-cut', cutReq)
+      if (win)
+        win.webContents.send('server-recording-cut', cutReq)
     },
     onGetTranscripts: (count) => {
       console.log('get transcripts', count)
@@ -163,7 +164,8 @@ async function handleMissionGeneratePacenotes(_event, selectedMission) {
     }).flat()
 
     const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
-    win.webContents.send('notebooks-updated', ipcNotebooks);
+    if (win)
+      win.webContents.send('notebooks-updated', ipcNotebooks);
 
     const promises = updates.map(pn => {
       console.log('------------------------------------------------------')
@@ -183,7 +185,8 @@ async function handleMissionGeneratePacenotes(_event, selectedMission) {
             console.log(`File written successfully: ${audioFname}`);
 
             const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
-            win.webContents.send('notebooks-updated', ipcNotebooks);
+            if (win)
+              win.webContents.send('notebooks-updated', ipcNotebooks);
           } catch (error) {
             console.error('Error writing file:', error);
           }
@@ -282,11 +285,11 @@ function discardAudio(fname) {
 }
 
 function setupIPC() {
-  ipcMain.handle('settings:getAll', (event) => {
+  ipcMain.handle('settings:getAll', (_event) => {
     return appSettings.settings
   });
 
-  ipcMain.handle('settings:set', (event, key, value) => {
+  ipcMain.handle('settings:set', (_event, key, value) => {
     console.log(`setting ${key} to ${value}`)
     appSettings.set(key, value)
     return appSettings.settings
@@ -295,7 +298,7 @@ function setupIPC() {
   ipcMain.handle('scanner:scan', handleScannerScan)
   ipcMain.on('mission:generate-pacenotes', handleMissionGeneratePacenotes)
 
-  ipcMain.handle('open-audio-file', (event) => {
+  ipcMain.handle('open-audio-file', (_event) => {
     openAudioFile()
     return true
   });
@@ -342,7 +345,7 @@ function setupIPC() {
     }
   });
 
-  ipcMain.handle('load-mod-configs', async (event) => {
+  ipcMain.handle('load-mod-configs', async (_event) => {
     await beamUserDir.load()
     return
   });
