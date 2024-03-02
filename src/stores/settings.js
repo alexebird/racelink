@@ -5,8 +5,9 @@ export const useSettingsStore = defineStore('settings', {
   state: () => ({
     settings: {}
   }),
-  // getters: {
-  // },
+  getters: {
+    autostopThreshold: (state) => state.settings.autostopThreshold,
+  },
   actions: {
     setSetting(key, value) {
       window.electronAPI.setSetting(key, value).then((settings) => {

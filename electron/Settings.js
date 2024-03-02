@@ -10,7 +10,7 @@ export default class Settings {
     const isDevelopment = !app.isPackaged;
     const basePath = isDevelopment ? '.' : app.getPath('userData');
     this.filePath = path.join(basePath, fileName);
-    this.settings = {};
+    this.settings = {}
 
     this.load();
   }
@@ -30,6 +30,8 @@ export default class Settings {
       // If the settings file doesn't exist, use the default settings
       this.settings = this.defaultSettings;
     }
+
+    this.settings.isDevelopment = !app.isPackaged
   }
 
   save() {

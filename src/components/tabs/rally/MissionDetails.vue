@@ -36,7 +36,8 @@ window.electronAPI.onTranscribeDone((resp) => {
   // console.log('onTranscribeDone')
   // console.log(resp)
   // rallyStore.setLastTranscriptResp(resp)
-  rallyStore.$patch({ lastTranscriptResp: resp })
+  // rallyStore.$patch({ lastTranscriptResp: resp })
+  rallyStore.addTranscription(resp)
 })
 
 // window.electronAPI.onServerRecordingStart((resp) => {
@@ -80,18 +81,34 @@ window.electronAPI.onServerRecordingCut((cutReq) => {
           <!-- <Button :disabled="!rallyStore.recordingSetup || !rallyStore.isRecording" class='mr-2' @click="onRecordingStop"> -->
           <!--   Stop -->
           <!-- </Button> -->
-          <Button :disabled="!rallyStore.recorder" @click="onRecordingCut">
-            Cut
-          </Button>
-          <div >
-            recording: {{rallyStore.recordingStatus}}
+          <div class='flex pb-2'>
+            <Button :disabled="!rallyStore.recorder" @click="onRecordingCut">Cut</Button>
+            <div class='ml-5'>
+              <span v-if="rallyStore.recordingStatus === 'recording'" class="pi pi-circle-fill text-red-600 align-middle"></span>
+              <span v-else="rallyStore.recordingStatus !== 'recording'" class="pi pi-circle-fill align-middle"></span>
+              <span class="m-1 align-baseline">
+                recording
+                <span v-if="rallyStore.recordingStatus === 'recording' && rallyStore.recordingAutostop >= 0"> ({{ rallyStore.recordingAutostop }}s)</span>
+              </span>
+            </div>
           </div>
-          <div v-if="!rallyStore.lastTranscriptResp.error">
-            Last Transcript: "{{rallyStore.lastTranscriptResp.text}}"
-          </div>
-          <div v-if="rallyStore.lastTranscriptResp.error" class='text-red-400'>
-            Last Transcript: ERROR!!!
-          </div>
+
+          <DataTable :value="rallyStore.transcriptionHistory" tableStyle="min-width: 10rem">
+            <Column field="error" header="Status">
+              <template #body="slotProps">
+                <InlineMessage v-if="!slotProps.data.error" severity="success">ok</InlineMessage>
+                <InlineMessage v-else severity="error">fail</InlineMessage>
+              </template>
+            </Column>
+            <Column field="text" header="Text"></Column>
+          </DataTable>
+
+          <!-- <div v-if="!rallyStore.lastTranscriptResp.error"> -->
+          <!--   Last Transcript: "{{rallyStore.lastTranscriptResp.text}}" -->
+          <!-- </div> -->
+          <!-- <div v-if="rallyStore.lastTranscriptResp.error" class='text-red-400'> -->
+          <!--   Last Transcript: ERROR!!! -->
+          <!-- </div> -->
         </TabPanel>
       </TabView>
     </div>

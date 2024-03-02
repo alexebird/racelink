@@ -62,17 +62,18 @@ function toTreeData(missionScanResults) {
 }
 
 const onNodeSelect = (node) => {
-  // console.log(selectedKey)
   if (node.selectable) {
     // toast.add({ severity: 'success', summary: 'Node Selected', detail: node.data.fname, life: 1000 });
-    rallyStore.$patch({selectedMission: node.data})
+    // rallyStore.$patch({selectedMission: node.data})
+    rallyStore.selectMission(node.data)
   }
 }
 
 const onNodeUnselect = (node) => {
   if (node.selectable) {
     // toast.add({ severity: 'warn', summary: 'Node Unselected', detail: node.data.fname, life: 1000 });
-    rallyStore.$patch({selectedMission: null})
+    // rallyStore.$patch({selectedMission: null})
+    rallyStore.selectMission(null)
   }
 }
 
@@ -101,32 +102,37 @@ const expandedKeys = ref({})
 
 let timer = null
 
+function setDevDefaultMission() {
+  if (!settingsStore.settings.isDevelopment) return
+
+  const selectedMissionId = "driver_training/rallyStage/aip-test3"
+  const node = getMissionWithKey(selectedMissionId)
+
+  if (node) {
+    let [levelId, missionType, missionId] = selectedMissionId.split('/')
+    missionType = `${levelId}/${missionType}`
+    selectedKey.value = {[selectedMissionId]: true}
+    expandedKeys.value = {[levelId]: true, [missionType]: true}
+    onNodeSelect(node)
+    // window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
+  }
+}
+
 onMounted(() => {
   window.electronAPI.loadModConfigFiles().then(() =>{
     window.electronAPI.scan().then((results) => {
       results = toTreeData(results)
       rallyStore.$patch({missionsTree: results})
-
-      const selectedMissionId = "driver_training/rallyStage/aip-test3"
-      const node = getMissionWithKey(selectedMissionId)
-
-      if (node) {
-        let [levelId, missionType, missionId] = selectedMissionId.split('/')
-        missionType = `${levelId}/${missionType}`
-        selectedKey.value = {[selectedMissionId]: true}
-        expandedKeys.value = {[levelId]: true, [missionType]: true}
-        onNodeSelect(node)
-
-        window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
-
-        timer = setInterval(() => {
-          window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
-        }, 1000)
-      }
+      setDevDefaultMission()
     })
 
-    rallyStore.recorder.setup()
+    timer = setInterval(() => {
+      window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
+    }, 1000)
   })
+
+
+  rallyStore.recorder.setup()
 })
 
 onUnmounted(() => {

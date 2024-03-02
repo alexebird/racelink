@@ -5,12 +5,14 @@ import Recorder from '@/voice/recorder'
 export const useRallyStore = defineStore('rally', {
   state: () => ({
     selectedMissionDetailsTab: 1,
+    selectedMission: null,
+    transcriptionHistory: [],
+    missionsTree: [],
+    notebooks: [],
+
     recorder: new Recorder(),
     recordingStatus: 'not_recording',
-    lastTranscriptResp: {error: false, text: "<none>"},
-    missionsTree: [],
-    selectedMission: null,
-    notebooks: [],
+    recordingAutostop: 0,
   }),
   getters: {
     serializedSelectedMission: (state) => {
@@ -22,5 +24,25 @@ export const useRallyStore = defineStore('rally', {
     }
   },
   actions: {
+    addTranscription(newItem) {
+      this.transcriptionHistory.push(newItem)
+    },
+    clearTranscriptionHistory() {
+      this.transcriptionHistory = []
+    },
+    selectMission(nodeData) {
+      this.selectedMission = nodeData
+      this.clearTranscriptionHistory()
+
+      // if (this.selectedMission) {
+      //   this.resetRecorder()
+      // } else {
+      //   this.recorder.teardown()
+      // }
+    },
+    // resetRecorder() {
+    //   this.recorder.setup()
+    //   this.recordingStatus = 'not_recording'
+    // }
   },
 })

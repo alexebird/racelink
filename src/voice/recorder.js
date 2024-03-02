@@ -1,4 +1,5 @@
 import { useRallyStore } from "@/stores/rally"
+import { useSettingsStore } from "@/stores/settings"
 
 // const mediaDeviceConf = { audio: true }
 const mediaDeviceConf = {
@@ -87,12 +88,12 @@ export default class Recorder {
     }
 
     watchdog() {
-        // if (this.mediaRecorder) {
-        //     console.log(this.mediaRecorder.state)
-        // }
-
         const now = Date.now()/1000
-        if (now - this.lastCut > 5) {
+        const timeout = now - this.lastCut
+        const threshold = useSettingsStore().autostopThreshold
+        useRallyStore().$patch({ recordingAutostop: Math.round(threshold - timeout) })
+
+        if (timeout > threshold) {
             if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
                 this.autocut = true
                 console.log('auto-stopping recording')

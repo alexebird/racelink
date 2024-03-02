@@ -27,8 +27,10 @@ let win = null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
+const isDevelopment = !app.isPackaged
 const defaultSettings = {
-  beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31')
+  beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31'),
+  autostopThreshold: isDevelopment ? 5 : 30,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
 }
@@ -75,7 +77,10 @@ function createWindow() {
   }
 
   // Open the DevTools.
-  win.webContents.openDevTools();
+  if (isDevelopment) {
+    win.webContents.openDevTools();
+  }
+
   startServer({
     // onRecordingStart: () => {
     //   console.log('start recording from express')
@@ -92,9 +97,16 @@ function createWindow() {
     },
     onGetTranscripts: (count) => {
       console.log('get transcripts', count)
-      const isRecording = false
-      const transcripts = [{error: false, text: 'foo'}]
-      return [isRecording, transcripts]
+
+      fs.existsSync(this.audioFname())
+
+      if (count === -1) {
+        tscHist.pop()
+        tscHist.pop()
+      }
+
+      // const transcripts = [{error: false, text: 'foo'}]
+      return tscHist.toReversed()
     }
   })
 }
@@ -248,9 +260,21 @@ function closeAudioFile() {
   }
 }
 
+const tscHist = []
+const UNKNOWN_PLACEHOLDER = '[unknown]';
+
 function transcribeAudio(fname, cutId, selectedMission) {
   flaskClient.postTranscribe(fname).then((resp) => {
+    if (resp.text === null) {
+      resp.text = UNKNOWN_PLACEHOLDER
+    }
+
     const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'transcripts', 'primary', 'transcripts.json');
+
+    tscHist.push(resp)
+    if (tscHist.length > 2) {
+      tscHist.shift()
+    }
     const jsonLine = JSON.stringify({ cutId, resp }) + '\n';
 
     try {

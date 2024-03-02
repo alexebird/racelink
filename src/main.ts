@@ -61,6 +61,8 @@ import ColumnGroup from 'primevue/columngroup';   // optional
 app.component('ColumnGroup', ColumnGroup);
 import Row from 'primevue/row';                   // optional
 app.component('Row', Row);
+import InlineMessage from 'primevue/inlinemessage'
+app.component('InlineMessage', InlineMessage)
 
 // import Card from 'primevue/card'
 // app.component('Card', Card)

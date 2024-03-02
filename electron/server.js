@@ -39,10 +39,10 @@ app.get('/transcripts/:count', (req, resp) => {
   const count = req.params.count;
   // const transcripts = serverThread.getTranscripts(count);
 
-  callbacks.onGetTranscripts(count).then(([isRecording, transcripts]) => {
+  callbacks.onGetTranscripts(count).then((transcripts) => {
     resp.json({
       ok: true,
-      is_recording: isRecording,
+      is_recording: false,
       transcripts: transcripts,
     });
   })
