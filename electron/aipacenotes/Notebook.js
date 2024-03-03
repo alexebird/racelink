@@ -36,6 +36,10 @@ class Pacenote {
     return this.noteData.codriver.voice
   }
 
+  language() {
+    return this.noteData.language
+  }
+
   noteHash() {
     const note = this.noteData.note
     // Assuming note is already a string; if not, you might need to encode it from UTF-16 to UTF-8.
@@ -110,11 +114,38 @@ class Notebook {
   }
 
   toIpcData() {
+    const children = this.cachedPacenotes.map((pn) => {
+      // return {
+      //   key: pn.name(),
+      //   data: {
+      //     name: pn.name()
+      //   }
+      // }
+      return {
+        name: pn.name(),
+        note: pn.joinedNote(),
+        language: pn.language(),
+        voice: pn.voice(),
+        audioFname: pn.audioFname(),
+      }
+    })
+
+    // return {
+    //   key: this.basename(),
+    //   data: {
+    //     updatesCount: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
+    //     pacenotesCount: this.cachedPacenotes.length,
+    //     basename: this.basename(),
+    //     name: this.content.name,
+    //   },
+    //   children: children,
+    // }
     return {
-      updates: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
-      pacenotes: this.cachedPacenotes.length,
+      updatesCount: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
+      pacenotesCount: this.cachedPacenotes.length,
       basename: this.basename(),
       name: this.content.name,
+      pacenotes: children,
     }
   }
 
@@ -138,9 +169,7 @@ class Notebook {
       after = '';
     }
 
-    const rv = [before, note, after].join(' ').trim();
-    if (rv === '') {
-      return EMPTY_PLACEHOLDER;
+    const rv = [before, note, after].join(' ').trim(); if (rv === '') { return EMPTY_PLACEHOLDER;
     }
 
     return rv;

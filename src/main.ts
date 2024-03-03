@@ -55,6 +55,8 @@ app.component('Tree', Tree)
 
 import DataTable from 'primevue/datatable';
 app.component('DataTable', DataTable);
+import TreeTable from 'primevue/treetable';
+app.component('TreeTable', TreeTable);
 import Column from 'primevue/column';
 app.component('Column', Column);
 import ColumnGroup from 'primevue/columngroup';   // optional
@@ -63,6 +65,8 @@ import Row from 'primevue/row';                   // optional
 app.component('Row', Row);
 import InlineMessage from 'primevue/inlinemessage'
 app.component('InlineMessage', InlineMessage)
+import Badge from 'primevue/badge'
+app.component('Badge', Badge)
 
 // import Card from 'primevue/card'
 // app.component('Card', Card)

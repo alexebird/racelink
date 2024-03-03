@@ -48,6 +48,19 @@ app.get('/transcripts/:count', (req, resp) => {
   })
 });
 
+app.post('/remoteAudio/playFile', (req, resp) => {
+  const audioFname = req.body.audioFname
+  callbacks.onRemoteAudioPlayFile(audioFname).then(() => {
+    resp.json({ ok: true });
+  })
+});
+
+app.post('/remoteAudio/reset', (req, resp) => {
+  callbacks.onRemoteAudioReset().then(() => {
+    resp.json({ ok: true });
+  })
+});
+
 function startServer(cbs) {
   // callbacks.onRecordingStart = () => {
   //   return new Promise((resolve, reject) => {
@@ -89,6 +102,30 @@ function startServer(cbs) {
     return new Promise((resolve, reject) => {
       try {
         const rv = cbs.onGetTranscripts(count)
+        resolve(rv)
+      }
+      catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  callbacks.onRemoteAudioPlayFile = (audioFname) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const rv = cbs.onRemoteAudioPlayFile(audioFname)
+        resolve(rv)
+      }
+      catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  callbacks.onRemoteAudioReset = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const rv = cbs.onRemoteAudioReset()
         resolve(rv)
       }
       catch (error) {

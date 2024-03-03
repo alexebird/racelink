@@ -58,6 +58,7 @@ function createWindow() {
     height: 1200,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
     },
   })
@@ -98,7 +99,7 @@ function createWindow() {
     onGetTranscripts: (count) => {
       console.log('get transcripts', count)
 
-      fs.existsSync(this.audioFname())
+      // fs.existsSync(this.audioFname())
 
       if (count === -1) {
         tscHist.pop()
@@ -107,7 +108,17 @@ function createWindow() {
 
       // const transcripts = [{error: false, text: 'foo'}]
       return tscHist.toReversed()
-    }
+    },
+    onRemoteAudioPlayFile: (audioFname) => {
+      console.log('onRemoteAudioPlayFile', audioFname)
+      if (win)
+        win.webContents.send('server-remote-audio-play', audioFname)
+    },
+    onRemoteAudioReset: () => {
+      console.log('onRemoteAudioReset')
+      if (win)
+        win.webContents.send('server-remote-audio-reset')
+    },
   })
 }
 
