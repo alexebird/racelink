@@ -10,6 +10,7 @@ export default class FlaskApiClient {
     // this.baseURL = settings.get_local_vocalizer() ? "http://localhost:8080" : "https://aipacenotes.alxb.us/f";
     this.baseURL = "https://aipacenotes.alxb.us/f"
     // this.baseURL = "http://127.0.0.1:8080"
+    console.log(`vocalizer url: ${this.baseURL}`)
     this.headerUUID = 'X-Aip-Client-UUID'
     this.userUUID = uuidv4()
   }
@@ -55,7 +56,28 @@ export default class FlaskApiClient {
     }
   }
 
-  async postTranscribe(fname) {
+  async postCreatePacenoteAudioB64(noteName, noteText, voiceConfig) {
+    const url = this.mkurl('/pacenotes/audio/createB64');
+    const data = {
+      note_name: noteName,
+      note_text: noteText,
+      voice_config: voiceConfig,
+    };
+    const headers = {
+      "Content-Type": "application/json",
+      [this.headerUUID]: this.userUUID,
+    };
+
+    try {
+      const response = await axios.post(url, data, { headers: headers });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating pacenote audio:', error);
+      return null;
+    }
+  }
+
+  async postTranscribe(fname, noiseLevel, minSilenceDuration) {
     const url = this.mkurl('/transcribe');
     const formData = new FormData();
     formData.append('audio', fs.createReadStream(fname));
@@ -64,8 +86,10 @@ export default class FlaskApiClient {
       ...formData.getHeaders(), // This line is necessary for setting multipart/form-data headers
     };
 
+    const params = { noiseLevel, minSilenceDuration }
+
     try {
-      const response = await axios.post(url, formData, { headers });
+      const response = await axios.post(url, formData, { params, headers });
       return response.data;
     } catch (error) {
       console.error('Error transcribing audio:', error);

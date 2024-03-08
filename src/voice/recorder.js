@@ -53,7 +53,7 @@ export default class Recorder {
             reader.onloadend = () => {
                 window.electronAPI.writeAudioChunk(reader.result)
 
-                if (this.mediaRecorder.state === 'inactive') {
+                if (this.mediaRecorder && this.mediaRecorder.state === 'inactive') {
                     this.onBufferingDone()
                 }
             }

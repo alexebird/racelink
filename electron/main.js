@@ -10,6 +10,7 @@ import BeamUserDir from './aipacenotes/BeamUserDir'
 import readFileFromZip from './aipacenotes/Zip'
 import startServer from './server'
 import Settings from './Settings'
+import { storeMetadata } from './aipacenotes/MetadataManager'
 
 // The built directory structure
 //
@@ -31,6 +32,8 @@ const isDevelopment = !app.isPackaged
 const defaultSettings = {
   beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31'),
   autostopThreshold: isDevelopment ? 5 : 30,
+  trimSilenceNoiseLevel: -40.0,
+  trimSilenceMinSilenceDuration: 0.5,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
 }
@@ -42,6 +45,10 @@ const flaskClient = new FlaskApiClient()
 const inFlightMissions = new Set()
 let audioFileStream = null
 let audioFileFname = null
+const tscHist = []
+const UNKNOWN_PLACEHOLDER = '[unknown]';
+let lastQueueSize = 0
+let lastAudioPlayerPausedState = true
 
 function createWindow() {
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -119,6 +126,13 @@ function createWindow() {
       if (win)
         win.webContents.send('server-remote-audio-reset')
     },
+    onRemoteAudioQueueSize: () => {
+      // console.log('onRemoteAudioQueueSize')
+      return {
+        queueSize: lastQueueSize,
+        paused: lastAudioPlayerPausedState,
+      }
+    },
   })
 }
 
@@ -163,6 +177,8 @@ function recordingFname() {
 }
 
 async function handleMissionGeneratePacenotes(_event, selectedMission) {
+  // console.log(`selectedMission: ${selectedMission.mission.fname}`)
+  // console.log(inFlightMissions)
   if (!selectedMission) {
     return
   }
@@ -173,6 +189,7 @@ async function handleMissionGeneratePacenotes(_event, selectedMission) {
   }
 
   inFlightMissions.add(selectedMission.mission.fname)
+  // console.log(inFlightMissions)
 
   const nb = new NotebookScanner(selectedMission.mission.fname)
   const files = nb.scan()
@@ -198,25 +215,55 @@ async function handleMissionGeneratePacenotes(_event, selectedMission) {
 
       const voiceConfig = beamUserDir.voices()[pn.voice()]
 
-      return flaskClient.postCreatePacenoteAudio(pn.name(), pn.joinedNote(), voiceConfig)
-        .then((resp) => {
-          fs.mkdirSync(path.dirname(audioFname), { recursive: true });
+      // return flaskClient.postCreatePacenoteAudio(pn.name(), pn.joinedNote(), voiceConfig)
+      //   .then((resp) => {
+      //     fs.mkdirSync(path.dirname(audioFname), { recursive: true });
+      //
+      //     try {
+      //       resp = Buffer.from(resp)
+      //       fs.writeFileSync(audioFname, resp);
+      //       console.log(`File written successfully: ${audioFname}`);
+      //
+      //       const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
+      //       if (win)
+      //         win.webContents.send('notebooks-updated', ipcNotebooks);
+      //     } catch (error) {
+      //       console.error('Error writing file:', error);
+      //     }
+      //   })
+      //   .catch(error => {
+      //     console.error('error creating parent dirs for pacenote file', error)
+      //   })
 
+
+      return flaskClient.postCreatePacenoteAudioB64(pn.name(), pn.joinedNote(), voiceConfig)
+        .then((response) => {
+          // Assuming `response` is the parsed JSON object from the Flask server
+          const audioContentBase64 = response.file_content; // The property names should match your Flask response
+          const audioBuffer = Buffer.from(audioContentBase64, 'base64');
+          const noteName = response.note_name;
+          const audioLen = response.audio_length_sec;
+          console.log(`noteName: ${noteName}`)
+          console.log(`audioLen: ${audioLen}`)
+
+          fs.mkdirSync(path.dirname(audioFname), { recursive: true });
           try {
-            resp = Buffer.from(resp)
-            fs.writeFileSync(audioFname, resp);
+            fs.writeFileSync(audioFname, audioBuffer);
             console.log(`File written successfully: ${audioFname}`);
 
-            const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
-            if (win)
+            const ipcNotebooks = notebooks.map((nb) => nb.toIpcData());
+            if (win) {
               win.webContents.send('notebooks-updated', ipcNotebooks);
+            }
           } catch (error) {
             console.error('Error writing file:', error);
           }
+
+          storeMetadata(audioFname, audioLen, pn.name())
         })
         .catch(error => {
-          console.error('error creating parent dirs for pacenote file', error)
-        })
+          console.error('Error creating parent dirs for pacenote file', error);
+        });
     })
 
     Promise.allSettled(promises).then(results => {
@@ -271,16 +318,15 @@ function closeAudioFile() {
   }
 }
 
-const tscHist = []
-const UNKNOWN_PLACEHOLDER = '[unknown]';
-
 function transcribeAudio(fname, cutId, selectedMission) {
-  flaskClient.postTranscribe(fname).then((resp) => {
+  let noiseLevel = appSettings.get('trimSilenceNoiseLevel')
+  let minSilenceDuration = appSettings.get('trimSilenceMinSilenceDuration')
+  flaskClient.postTranscribe(fname, noiseLevel, minSilenceDuration).then((resp) => {
     if (resp.text === null) {
       resp.text = UNKNOWN_PLACEHOLDER
     }
 
-    const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'transcripts', 'primary', 'transcripts.json');
+    const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'recce', 'primary', 'transcripts.json');
 
     tscHist.push(resp)
     if (tscHist.length > 2) {
@@ -321,7 +367,7 @@ function discardAudio(fname) {
 
 function setupIPC() {
   ipcMain.handle('settings:getAll', (_event) => {
-    return appSettings.settings
+    return { settings: appSettings.settings, defaults: defaultSettings }
   });
 
   ipcMain.handle('settings:set', (_event, key, value) => {
@@ -365,6 +411,11 @@ function setupIPC() {
 
   ipcMain.on('discard-audio-file', (_event) => {
     discardAudio(audioFileFname)
+  });
+
+  ipcMain.on('update-queue-size', (_event, queueSize, paused) => {
+    lastQueueSize = queueSize
+    lastAudioPlayerPausedState = paused
   });
 
   ipcMain.on('open-file-picker', async (event) => {

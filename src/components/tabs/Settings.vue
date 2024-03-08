@@ -19,6 +19,14 @@ const openFilePicker = () => {
 window.electronAPI.onDirectorySelected((event, path) => {
   settingsStore.setSetting('beamUserDir', path)
 })
+
+const slideEndedDur = () => {
+  settingsStore.setSetting('trimSilenceMinSilenceDuration', settingsStore.settings.trimSilenceMinSilenceDuration)
+}
+
+const slideEndedNoise = () => {
+  settingsStore.setSetting('trimSilenceNoiseLevel', settingsStore.settings.trimSilenceNoiseLevel)
+}
 </script>
 
 <template>
@@ -33,6 +41,29 @@ window.electronAPI.onDirectorySelected((event, path) => {
       <div class='ml-4'>
         <span class="font-mono">{{settingsStore.settings.beamUserDir}}</span>
         <Button class='!block w-28 mt-2' @click="openFilePicker">Change</Button>
+      </div>
+    </div>
+
+    <div class='p-4'>
+      <div>
+        Voice Recording
+        <div class='ml-4'>
+          Trim Silence
+          <div class='ml-4'>
+            Noise Level (default={{settingsStore.defaults.trimSilenceNoiseLevel}} dB)
+            <div>
+              <span>{{settingsStore.settings.trimSilenceNoiseLevel}} dB</span>
+              <Slider @slideend="slideEndedNoise" v-model="settingsStore.settings.trimSilenceNoiseLevel" :min="-60" :max="-10" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
+            </div>
+          </div>
+          <div class='ml-4'>
+            Minimum Silence Duration (default={{settingsStore.defaults.trimSilenceMinSilenceDuration}} sec)
+            <div>
+              <span>{{settingsStore.settings.trimSilenceMinSilenceDuration}} sec</span>
+              <Slider @slideend="slideEndedDur" v-model="settingsStore.settings.trimSilenceMinSilenceDuration" :min="0.1" :max="5" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

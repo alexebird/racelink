@@ -61,6 +61,16 @@ app.post('/remoteAudio/reset', (req, resp) => {
   })
 });
 
+app.get('/remoteAudio/queueSize', (req, resp) => {
+  callbacks.onRemoteAudioQueueSize().then((data) => {
+    resp.json({
+      ok: true,
+      queueSize: data.queueSize,
+      paused: data.paused,
+    });
+  })
+});
+
 function startServer(cbs) {
   // callbacks.onRecordingStart = () => {
   //   return new Promise((resolve, reject) => {
@@ -126,6 +136,18 @@ function startServer(cbs) {
     return new Promise((resolve, reject) => {
       try {
         const rv = cbs.onRemoteAudioReset()
+        resolve(rv)
+      }
+      catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  callbacks.onRemoteAudioQueueSize = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const rv = cbs.onRemoteAudioQueueSize()
         resolve(rv)
       }
       catch (error) {

@@ -17,7 +17,9 @@ onMounted(() => {
   // setupAudioListeners()
   checkQueueInterval = setInterval(() => {
     playCurrentItem();
-  }, 10); // Check every 1000 milliseconds (1 second)
+
+    window.electronAPI.updateQueueSize(audioQueue.value.length, audioElement.value.paused)
+  }, 50)
 })
 
 onUnmounted(() => {
@@ -75,12 +77,12 @@ window.electronAPI.onServerRecordingCut((cutReq) => {
 window.electronAPI.onServerRemoteAudioPlay((audioFname) => {
   const beamDir = settingsStore.settings.beamUserDir
   audioFname = `${beamDir}/${audioFname}`
-  console.log('onServerRemoteAudioPlay', audioFname)
+  // console.log('onServerRemoteAudioPlay', audioFname)
   audioQueue.value.push(audioFname)
 })
 
 window.electronAPI.onServerRemoteAudioReset(() => {
-  console.log('onServerRemoteAudioReset')
+  // console.log('onServerRemoteAudioReset')
   audioQueue.value = []
   if (audioElement.value) {
     audioElement.value.pause()
@@ -103,6 +105,7 @@ window.electronAPI.onServerRemoteAudioReset(() => {
 
 const onPlayClick = (url) => {
   url = fileProtoAudioFname(url)
+  console.log(url)
   audioQueue.value.push(url)
 
   // if (!isAudioPlaying()) {
@@ -204,7 +207,7 @@ const currentIndex = ref(-1);
             </template>
           </DataTable>
         </TabPanel>
-        <TabPanel header="Transcripts">
+        <TabPanel header="Voice Recording">
           <!-- <Button :disabled="!rallyStore.recordingSetup || rallyStore.isRecording" class='mr-2' @click="onRecordingStart"> -->
           <!--   Start -->
           <!-- </Button> -->

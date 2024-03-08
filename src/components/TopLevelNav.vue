@@ -24,8 +24,10 @@ const items = ref([
 const activeIndex = ref(0)
 
 onMounted(() => {
-  window.electronAPI.getSettings().then((settings) => {
-    settingsStore.$patch({settings: settings})
+  window.electronAPI.getSettings().then((resp) => {
+    const settings = resp.settings
+    const defaults = resp.defaults
+    settingsStore.$patch({settings: settings, defaults})
   })
 })
 </script>

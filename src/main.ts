@@ -67,9 +67,11 @@ import InlineMessage from 'primevue/inlinemessage'
 app.component('InlineMessage', InlineMessage)
 import Badge from 'primevue/badge'
 app.component('Badge', Badge)
+import Slider from 'primevue/slider';
+app.component('Slider', Slider);
 
-// import Card from 'primevue/card'
-// app.component('Card', Card)
+import Card from 'primevue/card'
+app.component('Card', Card)
 
 // import { useToast } from 'primevue/useToast'
 // app.component('useToast', useToast)

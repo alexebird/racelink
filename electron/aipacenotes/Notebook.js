@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-
+import { gcMetadata } from './MetadataManager'
 
 function cleanNameForPath(aString) {
   aString = aString.replace(/[^a-zA-Z0-9]/g, '_'); // Replace everything but letters and numbers with '_'
@@ -246,6 +246,7 @@ class Notebook {
     const pacenotesDirPath = this.pacenotesDir(); // Assuming this returns the directory path
     let allOggFiles = new Set();
     let pacenoteFiles = new Set();
+    let pacenoteDirs = new Set();
 
     // Recursive function to list all .ogg files
     const listOggFiles = (dir) => {
@@ -256,6 +257,8 @@ class Notebook {
           listOggFiles(fullPath); // Recurse into subdirectories
         } else if (path.extname(file.name) === '.ogg') {
           allOggFiles.add(fullPath); // Store the full path for deletion
+          const dirName = path.dirname(fullPath);
+          pacenoteDirs.add(dirName)
         }
       });
     };
@@ -279,6 +282,12 @@ class Notebook {
       fs.unlinkSync(file);
       console.log(`Deleted file: ${file}`);
     });
+
+    // 5. GC all pacenote dirs
+    pacenoteDirs.forEach(pd => {
+      gcMetadata(pd)
+    });
+
   }
 }
 

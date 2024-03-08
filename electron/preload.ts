@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onServerRecordingCut: (callback) => ipcRenderer.on('server-recording-cut', (_event, value) => callback(value)),
   onServerRemoteAudioPlay: (callback) => ipcRenderer.on('server-remote-audio-play', (_event, audioFname) => callback(audioFname)),
   onServerRemoteAudioReset: (callback) => ipcRenderer.on('server-remote-audio-reset', (_event) => callback()),
+  // onServerRemoteAudioQueueSize: (callback) => ipcRenderer.on('server-remote-audio-queuesize', (_event) => callback()),
+  updateQueueSize: (queueSize, paused) => ipcRenderer.send('update-queue-size', queueSize, paused),
 })
 
 
