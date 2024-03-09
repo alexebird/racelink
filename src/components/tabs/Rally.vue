@@ -105,7 +105,8 @@ let timer = null
 function setDevDefaultMission() {
   if (!settingsStore.settings.isDevelopment) return
 
-  const selectedMissionId = "driver_training/rallyStage/aip-test3"
+  // const selectedMissionId = "driver_training/rallyStage/aip-test3"
+  const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
   const node = getMissionWithKey(selectedMissionId)
 
   if (node) {
@@ -146,13 +147,14 @@ onUnmounted(() => {
 
 <template>
   <!-- <Toast /> -->
-  <Tree class="min-w-72 max-w-72 rounded-none"
+  <Tree class="min-w-72 max-w-72 rounded-none h-screen overflow-auto"
     :value="rallyStore.missionsTree"
     v-model:selectionKeys="selectedKey"
     v-model:expandedKeys="expandedKeys"
     selectionMode="single"
     @nodeSelect="onNodeSelect"
-    @nodeUnselect="onNodeUnselect" ></Tree>
+    @nodeUnselect="onNodeUnselect" >
+  </Tree>
   <MissionDetails />
 </template>
 

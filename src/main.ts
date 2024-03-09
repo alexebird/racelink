@@ -69,6 +69,8 @@ import Badge from 'primevue/badge'
 app.component('Badge', Badge)
 import Slider from 'primevue/slider';
 app.component('Slider', Slider);
+import ScrollPanel from 'primevue/scrollpanel'
+app.component('ScrollPanel', ScrollPanel);
 
 import Card from 'primevue/card'
 app.component('Card', Card)

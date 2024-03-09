@@ -70,7 +70,7 @@ export default class Recorder {
         window.electronAPI.closeAudioFile().then(() => {
             console.log('closeAudioFile done')
             if (this.autocut) {
-                window.electronAPI.discardAudioFile()
+                window.electronAPI.discardCurrentAudioRecordingFile()
             } else {
                 window.electronAPI.transcribeAudioFile(this.cutId, useRallyStore().serializedSelectedMission)
             }

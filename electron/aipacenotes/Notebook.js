@@ -146,6 +146,7 @@ class Notebook {
       basename: this.basename(),
       name: this.content.name,
       pacenotes: children,
+      pacenotesDir: this.pacenotesDir(),
     }
   }
 

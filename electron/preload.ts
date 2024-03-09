@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSettings: () => ipcRenderer.invoke('settings:getAll'),
   setSetting: (key, value) => ipcRenderer.invoke('settings:set', key, value),
   openFilePicker: () => ipcRenderer.send('open-file-picker'),
+  openFileExplorer: (dirname) => ipcRenderer.send('open-file-explorer', dirname),
+  deleteFile: (fname) => ipcRenderer.send('delete-file', fname),
   onDirectorySelected: (callback) => ipcRenderer.on('directory-selected', callback),
   onNotebooksUpdated: (callback) => ipcRenderer.on('notebooks-updated', callback),
   loadModConfigFiles: () => ipcRenderer.invoke('load-mod-configs'),
@@ -19,7 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // cutRecording: () => ipcRenderer.send('cut-recording'),
 
   transcribeAudioFile: (cutId, selectedMission) => ipcRenderer.send('transcribe-audio-file', cutId, selectedMission),
-  discardAudioFile: () => ipcRenderer.send('discard-audio-file'),
+  discardCurrentAudioRecordingFile: () => ipcRenderer.send('discard-current-audio-recording-file'),
   onTranscribeDone: (callback) => ipcRenderer.on('transcribe-done', (_event, value) => callback(value)),
   // onServerRecordingStart: (callback) => ipcRenderer.on('server-recording-start', (_event, value) => callback(value)),
   // onServerRecordingStop: (callback) => ipcRenderer.on('server-recording-stop', (_event, value) => callback(value)),

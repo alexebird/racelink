@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
 import crypto from 'node:crypto'
@@ -356,13 +356,13 @@ function transcribeAudio(fname, cutId, selectedMission) {
   });
 }
 
-function discardAudio(fname) {
-  // try {
-  //   fs.unlinkSync(fname)
-  //   console.log('File deleted successfully');
-  // } catch (err) {
-  //   console.error('Error deleting the file:', err);
-  // }
+function deleteFile(fname) {
+  try {
+    fs.unlinkSync(fname)
+    console.log('File deleted successfully');
+  } catch (err) {
+    console.error('Error deleting the file:', err);
+  }
 }
 
 function setupIPC() {
@@ -409,8 +409,12 @@ function setupIPC() {
     transcribeAudio(audioFileFname, cutId, selectedMission)
   });
 
-  ipcMain.on('discard-audio-file', (_event) => {
-    discardAudio(audioFileFname)
+  ipcMain.on('discard-current-audio-recording-file', (_event) => {
+    deleteFile(audioFileFname)
+  });
+
+  ipcMain.on('delete-file', (_event, fname) => {
+    deleteFile(fname)
   });
 
   ipcMain.on('update-queue-size', (_event, queueSize, paused) => {
@@ -429,6 +433,17 @@ function setupIPC() {
     if (!result.canceled && result.filePaths.length > 0) {
       event.sender.send('directory-selected', result.filePaths[0]);
     }
+  });
+
+  ipcMain.on('open-file-explorer', (event, dirname) => {
+    shell.openPath(dirname)
+      .then((error) => {
+        if (error) {
+          console.error('An error occurred:', error);
+        } else {
+          console.log(`File Explorer opened at path: ${dirname}`);
+        }
+      });
   });
 
   ipcMain.handle('load-mod-configs', async (_event) => {
