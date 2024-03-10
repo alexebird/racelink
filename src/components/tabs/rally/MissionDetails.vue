@@ -7,7 +7,16 @@ const rallyStore = useRallyStore()
 import { useSettingsStore } from "@/stores/settings"
 const settingsStore = useSettingsStore()
 
-let checkQueueInterval
+// let checkQueueInterval
+
+const activeTab = ref(0)
+
+const audioElement = ref(null)
+const expandedRows = ref({})
+const source = ref('')
+
+// const audioQueue = ref([]);
+const currentIndex = ref(-1);
 
 onMounted(() => {
   window.electronAPI.onNotebooksUpdated((event, notebooks) => {
@@ -15,18 +24,16 @@ onMounted(() => {
   })
 
   // setupAudioListeners()
-  checkQueueInterval = setInterval(() => {
-    playCurrentItem();
+  // checkQueueInterval = setInterval(() => {
+    // playCurrentItem();
 
-    window.electronAPI.updateQueueSize(audioQueue.value.length, audioElement.value.paused)
-  }, 50)
+    // window.electronAPI.updateQueueSize(audioQueue.value.length, audioElement.value.paused)
+  // }, 50)
 })
 
 onUnmounted(() => {
-  clearInterval(checkQueueInterval)
+  // clearInterval(checkQueueInterval)
 })
-
-const activeTab = ref(0)
 
 const onRecordingStart = () => {
   rallyStore.recorder.startRecording()
@@ -74,21 +81,21 @@ window.electronAPI.onServerRecordingCut((cutReq) => {
   doCut(cutReq)
 })
 
-window.electronAPI.onServerRemoteAudioPlay((audioFname) => {
-  const beamDir = settingsStore.settings.beamUserDir
-  audioFname = `${beamDir}/${audioFname}`
-  // console.log('onServerRemoteAudioPlay', audioFname)
-  audioQueue.value.push(audioFname)
-})
-
-window.electronAPI.onServerRemoteAudioReset(() => {
-  // console.log('onServerRemoteAudioReset')
-  audioQueue.value = []
-  if (audioElement.value) {
-    audioElement.value.pause()
-    audioElement.value.currentTime = 0
-  }
-})
+// window.electronAPI.onServerRemoteAudioPlay((audioFname) => {
+//   const beamDir = settingsStore.settings.beamUserDir
+//   audioFname = `${beamDir}/${audioFname}`
+//   // console.log('onServerRemoteAudioPlay', audioFname)
+//   audioQueue.value.push(audioFname)
+// })
+//
+// window.electronAPI.onServerRemoteAudioReset(() => {
+//   // console.log('onServerRemoteAudioReset')
+//   audioQueue.value = []
+//   if (audioElement.value) {
+//     audioElement.value.pause()
+//     audioElement.value.currentTime = 0
+//   }
+// })
 
 // works
 // const onPlayClick = async (url) => {
@@ -105,8 +112,13 @@ window.electronAPI.onServerRemoteAudioReset(() => {
 
 const onPlayClick = (url) => {
   url = fileProtoAudioFname(url)
-  console.log(url)
-  audioQueue.value.push(url)
+  // console.log(url)
+
+  audioElement.value.src = url
+  audioElement.value.volume = 0.3
+  audioElement.value.play().catch(error => console.error("Error playing audio:", error));
+
+  // audioQueue.value.push(url)
 
   // if (!isAudioPlaying()) {
   //   playCurrentItem();
@@ -118,14 +130,14 @@ const onRegenOneClick = (fname) => {
   window.electronAPI.deleteFile(fname)
 };
 
-const playCurrentItem = () => {
-  if (audioQueue.value.length > 0 && audioElement.value && audioElement.value.paused) {
-    const currentItem = audioQueue.value.shift(); // Get and remove the first item from the queue
-    audioElement.value.src = currentItem; // Set the source of the audio element
-    audioElement.value.volume = 0.3
-    audioElement.value.play().catch(error => console.error("Error playing audio:", error));
-  }
-};
+// const playCurrentItem = () => {
+//   if (audioQueue.value.length > 0 && audioElement.value && audioElement.value.paused) {
+//     const currentItem = audioQueue.value.shift(); // Get and remove the first item from the queue
+//     audioElement.value.src = currentItem; // Set the source of the audio element
+//     audioElement.value.volume = 0.3
+//     audioElement.value.play().catch(error => console.error("Error playing audio:", error));
+//   }
+// };
 
 const openFileExplorer = () => {
   window.electronAPI.openFileExplorer(rallyStore.selectedMission.fname)
@@ -138,13 +150,6 @@ const onOpenNotebookClick = (fname) => {
 // const addToQueue = (url) => {
 //   audioQueue.value.push(url);
 // };
-
-const audioElement = ref(null)
-const expandedRows = ref({})
-const source = ref('')
-
-const audioQueue = ref([]);
-const currentIndex = ref(-1);
 
 </script>
 

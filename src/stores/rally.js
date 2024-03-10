@@ -18,7 +18,7 @@ export const useRallyStore = defineStore('rally', {
   getters: {
     serializedSelectedMission: (state) => {
       if (state.selectedMission) {
-        return { mission: { fname: state.selectedMission.fname } }
+        return { mission: { fname: state.selectedMission.fname, fullId: state.selectedMission.fullId } }
       } else  {
         return null
       }

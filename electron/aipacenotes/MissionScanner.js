@@ -15,6 +15,7 @@ class Mission {
       levelId: this.levelId,
       missionType: this.missionType,
       missionId: this.missionId,
+      fullId: this.fullId(),
     }
   }
 

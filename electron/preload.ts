@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
   scan: () => ipcRenderer.invoke('scanner:scan'),
-  missionGeneratePacenotes: (mission) => ipcRenderer.send('mission:generate-pacenotes', mission),
+  missionGeneratePacenotes: (mission) => ipcRenderer.send('missionGeneratePacenotes', mission),
   // saveAudio: (data, fname) => ipcRenderer.send('save-audio', data, fname),
 
   openAudioFile: () => ipcRenderer.invoke('open-audio-file'),
@@ -26,10 +26,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // onServerRecordingStart: (callback) => ipcRenderer.on('server-recording-start', (_event, value) => callback(value)),
   // onServerRecordingStop: (callback) => ipcRenderer.on('server-recording-stop', (_event, value) => callback(value)),
   onServerRecordingCut: (callback) => ipcRenderer.on('server-recording-cut', (_event, value) => callback(value)),
-  onServerRemoteAudioPlay: (callback) => ipcRenderer.on('server-remote-audio-play', (_event, audioFname) => callback(audioFname)),
-  onServerRemoteAudioReset: (callback) => ipcRenderer.on('server-remote-audio-reset', (_event) => callback()),
+  // onServerRemoteAudioPlay: (callback) => ipcRenderer.on('server-remote-audio-play', (_event, audioFname) => callback(audioFname)),
+  // onServerRemoteAudioReset: (callback) => ipcRenderer.on('server-remote-audio-reset', (_event) => callback()),
   // onServerRemoteAudioQueueSize: (callback) => ipcRenderer.on('server-remote-audio-queuesize', (_event) => callback()),
-  updateQueueSize: (queueSize, paused) => ipcRenderer.send('update-queue-size', queueSize, paused),
+  // updateQueueSize: (queueSize, paused) => ipcRenderer.send('update-queue-size', queueSize, paused),
 })
 
 

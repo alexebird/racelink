@@ -105,8 +105,8 @@ let timer = null
 function setDevDefaultMission() {
   if (!settingsStore.settings.isDevelopment) return
 
-  // const selectedMissionId = "driver_training/rallyStage/aip-test3"
-  const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
+  const selectedMissionId = "driver_training/rallyStage/aip-test4"
+  // const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
   const node = getMissionWithKey(selectedMissionId)
 
   if (node) {

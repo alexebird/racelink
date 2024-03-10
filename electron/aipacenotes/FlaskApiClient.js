@@ -17,6 +17,28 @@ export default class FlaskApiClient {
     return `${this.baseURL}${suffix}`;
   }
 
+  parseAxiosError(error) {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      // console.error('Error', error.response.status);
+      // console.error('Data:', error.response.data);
+      // console.error('Headers:', error.response.headers);
+      // Example of a more human-readable message
+      return `Error ${error.response.status}: ${error.response.data.message || error.response.statusText}`;
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      // console.error('Error', error.request);
+      return 'The request was made but no response was received';
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      // console.error('Error', error.message);
+      return 'Error: ' + error.message;
+    }
+  }
+
   async getHealthcheck() {
     const url = this.mkurl('/healthcheck');
     const headers = {
@@ -26,33 +48,33 @@ export default class FlaskApiClient {
 
     try {
       const response = await axios.get(url);
-      return response.data;
+      return [response.data, null];
     } catch (error) {
-      console.error('Error translating:', error);
-      return null;
+      console.error('error doing healthcheck');
+      return [null, this.parseAxiosError(error)];
     }
   }
 
-  async postCreatePacenoteAudio(noteName, noteText, voiceConfig) {
-    const url = this.mkurl('/pacenotes/audio/create');
-    const data = {
-      note_name: noteName,
-      note_text: noteText,
-      voice_config: voiceConfig,
-    };
-    const headers = {
-      "Content-Type": "application/json",
-      [this.headerUUID]: this.userUUID,
-    };
-
-    try {
-      const response = await axios.post(url, data, { headers: headers, responseType: 'arraybuffer' });
-      return response.data;
-    } catch (error) {
-      console.error('Error creating pacenote audio:', error);
-      return null;
-    }
-  }
+  // async postCreatePacenoteAudio(noteName, noteText, voiceConfig) {
+  //   const url = this.mkurl('/pacenotes/audio/create');
+  //   const data = {
+  //     note_name: noteName,
+  //     note_text: noteText,
+  //     voice_config: voiceConfig,
+  //   };
+  //   const headers = {
+  //     "Content-Type": "application/json",
+  //     [this.headerUUID]: this.userUUID,
+  //   };
+  //
+  //   try {
+  //     const response = await axios.post(url, data, { headers: headers, responseType: 'arraybuffer' });
+  //     return [response.data, null];
+  //   } catch (error) {
+  //     console.error('error creating pacenote audio');
+  //     return [null, this.parseAxiosError(error)];
+  //   }
+  // }
 
   async postCreatePacenoteAudioB64(noteName, noteText, voiceConfig) {
     const url = this.mkurl('/pacenotes/audio/createB64');
@@ -68,10 +90,10 @@ export default class FlaskApiClient {
 
     try {
       const response = await axios.post(url, data, { headers: headers });
-      return response.data;
+      return [response.data, null];
     } catch (error) {
-      console.error('Error creating pacenote audio:', error);
-      return null;
+      console.error('error creating pacenote audio');
+      return [null, this.parseAxiosError(error)];
     }
   }
 
@@ -88,10 +110,10 @@ export default class FlaskApiClient {
 
     try {
       const response = await axios.post(url, formData, { params, headers });
-      return response.data;
+      return [response.data, null];
     } catch (error) {
-      console.error('Error transcribing audio:', error);
-      return null;
+      console.error('error transcribing audio');
+      return [null, this.parseAxiosError(error)];
     }
   }
 
@@ -104,10 +126,10 @@ export default class FlaskApiClient {
 
     try {
       const response = await axios.post(url, body, { headers });
-      return response.data;
+      return [response.data, null];
     } catch (error) {
-      console.error('Error translating:', error);
-      return null;
+      console.error('error translating' );
+      return [null, this.parseAxiosError(error)];
     }
   }
 }
