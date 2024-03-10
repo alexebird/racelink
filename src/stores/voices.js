@@ -149,5 +149,12 @@ export const useVoicesStore = defineStore('voices', {
 
       this.setUserVoicesData()
     },
+    testVoice(text) {
+      const [name, voiceConfig] = this.formVoice
+      console.log(voiceConfig)
+      if (voiceConfig) {
+        window.electronAPI.testUserVoice(voiceConfig, text)
+      }
+    },
   },
 })

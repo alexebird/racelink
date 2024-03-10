@@ -28,6 +28,11 @@ export default class BeamUserDir {
     return `${beamDir}/settings/aipacenotes/user.voices.json`
   }
 
+  voiceTestAudioFname() {
+    const beamDir = this.appSettings.get('beamUserDir')
+    return `${beamDir}/temp/aipacenotes/voice_test.ogg`
+  }
+
   _voiceSearchPaths() {
     const beamDir = this.appSettings.get('beamUserDir')
     return [

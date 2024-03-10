@@ -11,6 +11,10 @@ const confirm = useConfirm();
 // const rallyStore = useRallyStore()
 const voicesStore = useVoicesStore()
 
+const audioElement = ref(null)
+const audioSource = ref('')
+const spinnerClass = ref('hidden')
+
 onMounted(() => {
   voicesStore.loadVoiceData()
   voicesStore.loadUserVoiceData()
@@ -21,10 +25,26 @@ onUnmounted(() => {
   voicesStore.$reset()
 })
 
-
 window.electronAPI.onVoiceStoreDataUpdated((event) => {
   console.log('voice data updated')
   voicesStore.loadVoiceData()
+})
+
+function fileProtoAudioFname(audioFname) {
+  const url = new URL(`file://${audioFname}`)
+  url.searchParams.set('t', Date.now());
+  return url.href
+}
+
+window.electronAPI.onVoiceTestFileReady((event, fname) => {
+  const url = fileProtoAudioFname(fname)
+  console.log('voice test file ready', url)
+
+  audioElement.value.src = url
+  audioElement.value.volume = 0.3
+  audioElement.value.play().catch(error => console.error("Error playing audio:", error));
+
+  spinnerClass.value = 'hidden'
 })
 
 const refreshVoices = () => {
@@ -42,6 +62,12 @@ const saveVoice = () => {
 
 const newVoice = () => {
   voicesStore.newVoice()
+}
+
+const testVoice = () => {
+  spinnerClass.value = ''
+  const text = "into three right opens over crest? fifty."
+  voicesStore.testVoice(text)
 }
 
 const onListSelectionChange = () => {
@@ -71,6 +97,9 @@ const confirmDelete = (event) => {
 </script>
 
 <template>
+  <audio ref="audioElement">
+    <source type="audio/ogg">
+  </audio>
   <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
     <div class="text-lg m-2">
       Voices
@@ -147,8 +176,14 @@ const confirmDelete = (event) => {
           </div>
 
           <ConfirmPopup></ConfirmPopup>
-          <Button @click="saveVoice" class="w-16" label="Save"></Button>
-          <Button @click="confirmDelete($event)" class="w-16" label="Delete" severity="danger"></Button>
+          <div class="flex gap-2">
+            <Button @click="saveVoice" class="w-16" label="Save"></Button>
+            <Button @click="confirmDelete($event)" class="w-16" label="Delete" severity="danger"></Button>
+            <div class="flex w-32">
+              <Button @click="testVoice" class="w-16" label="Test" severity="secondary"></Button>
+              <ProgressSpinner :class='spinnerClass' style="width: 30px; height: 30px" strokeWidth="4" animationDuration=".5s" />
+            </div>
+          </div>
 
         </div>
       </div>

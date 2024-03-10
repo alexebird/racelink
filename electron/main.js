@@ -323,7 +323,34 @@ function executeCreatePacenoteAudio(notebooks, pn, voiceConfig, audioFname) {
       storeMetadata(audioFname, audioLen, pn.name())
     })
     .catch(error => {
-      console.error('Error creating parent dirs for pacenote file', error);
+      console.error('error in postCreatePacenoteAudioB64', error);
+    });
+
+  return req
+}
+
+function executeVoiceTest(text, voiceConfig, audioFname) {
+  const req = flaskClient.postCreatePacenoteAudioB64('voice_test', text, voiceConfig)
+    .then(([resp, err]) => {
+      const audioContentBase64 = resp.file_content;
+      const audioBuffer = Buffer.from(audioContentBase64, 'base64');
+      const noteName = resp.note_name;
+      // const audioLen = resp.audio_length_sec;
+      console.log(`noteName: ${noteName}`)
+      // console.log(`audioLen: ${audioLen}`)
+
+      fs.mkdirSync(path.dirname(audioFname), { recursive: true });
+      try {
+        fs.writeFileSync(audioFname, audioBuffer);
+        if (win) {
+          win.webContents.send('voiceTestFileReady', audioFname);
+        }
+      } catch (error) {
+        console.error('Error writing file for voice test:', error);
+      }
+    })
+    .catch(error => {
+      console.error('Error in executeVoiceTest postCreatePacenoteAudioB64', error);
     });
 
   return req
@@ -529,6 +556,12 @@ function setupIPC() {
   ipcMain.handle('setUserVoices', async (_event, data) => {
     const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
     userVoices.update(data)
+  });
+
+  ipcMain.on('testUserVoice', async (_event, voiceConfig, text) => {
+    const audioFname = beamUserDir.voiceTestAudioFname()
+    const req = await executeVoiceTest(text, voiceConfig, audioFname)
+    win.webContents.send('onVoiceTestFileReady', audioFname);
   });
 }
 

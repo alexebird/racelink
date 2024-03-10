@@ -33,6 +33,10 @@ app.use(PrimeVue, {
   pt: CustomPreset,
 })
 
+
+import ProgressSpinner from 'primevue/progressspinner';
+app.component('ProgressSpinner', ProgressSpinner)
+
 import Button from 'primevue/button'
 app.component('Button', Button)
 
