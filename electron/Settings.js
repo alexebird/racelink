@@ -1,6 +1,7 @@
 import { app } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
+import _ from 'lodash'
 
 export default class Settings {
   constructor(fileName, defaultSettings = {}) {
@@ -36,7 +37,9 @@ export default class Settings {
 
   save() {
     try {
-      const fileContent = JSON.stringify(this.settings, null, 2);
+      const copy = _.cloneDeep(this.settings)
+      delete copy.isDevelopment
+      const fileContent = JSON.stringify(copy, null, 2);
       fs.writeFileSync(this.filePath, fileContent, 'utf8');
       console.log(`wrote settings to ${this.filePath}`)
     } catch (error) {

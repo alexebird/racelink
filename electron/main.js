@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
 import crypto from 'node:crypto'
+const { v4: uuidv4 } = require('uuid')
 import { MissionScanner } from './aipacenotes/MissionScanner'
 import NotebookScanner from './aipacenotes/NotebookScanner'
 import Notebook from './aipacenotes/Notebook'
@@ -34,14 +35,16 @@ const defaultSettings = {
   autostopThreshold: isDevelopment ? 5 : 15,
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
+  uuid: uuidv4(),
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
 }
 
 const appSettings = new Settings('settings.json', defaultSettings)
+appSettings.save()
 const beamUserDir = new BeamUserDir(appSettings)
 const scanner = new MissionScanner()
-const flaskClient = new FlaskApiClient()
+const flaskClient = new FlaskApiClient(appSettings.get('uuid'))
 const inFlightMissions = new Set()
 let audioFileStream = null
 let audioFileFname = null

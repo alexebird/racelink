@@ -1,18 +1,16 @@
 const axios = require('axios');
-const { v4: uuidv4 } = require('uuid')
 const FormData = require('form-data')
 import fs from 'node:fs'
 
 // const settings = require('./aipacenotes/settings'); // Adjust the import path as necessary
 
 export default class FlaskApiClient {
-  constructor() {
-    // this.baseURL = settings.get_local_vocalizer() ? "http://localhost:8080" : "https://aipacenotes.alxb.us/f";
-    this.baseURL = "https://aipacenotes.alxb.us/f"
-    // this.baseURL = "http://127.0.0.1:8080"
+  constructor(uuid) {
+    // this.baseURL = "https://aipacenotes.alxb.us/f"
+    this.baseURL = "http://127.0.0.1:8080"
     console.log(`vocalizer url: ${this.baseURL}`)
     this.headerUUID = 'X-Aip-Client-UUID'
-    this.userUUID = uuidv4()
+    this.userUUID = uuid
   }
 
   mkurl(suffix) {

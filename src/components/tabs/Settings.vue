@@ -20,11 +20,11 @@ window.electronAPI.onDirectorySelected((event, path) => {
   settingsStore.setSetting('beamUserDir', path)
 })
 
-const slideEndedDur = () => {
+const settingChangeMinSilenceDuration = () => {
   settingsStore.setSetting('trimSilenceMinSilenceDuration', settingsStore.settings.trimSilenceMinSilenceDuration)
 }
 
-const slideEndedNoise = () => {
+const settingChangeNoiseLevel = () => {
   settingsStore.setSetting('trimSilenceNoiseLevel', settingsStore.settings.trimSilenceNoiseLevel)
 }
 </script>
@@ -53,14 +53,14 @@ const slideEndedNoise = () => {
             Noise Level (default={{settingsStore.defaults.trimSilenceNoiseLevel}} dB)
             <div>
               <span>{{settingsStore.settings.trimSilenceNoiseLevel}} dB</span>
-              <Slider @slideend="slideEndedNoise" v-model="settingsStore.settings.trimSilenceNoiseLevel" :min="-60" :max="-10" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
+              <Slider @change="settingChangeNoiseLevel" @slideend="settingChangeNoiseLevel" v-model="settingsStore.settings.trimSilenceNoiseLevel" :min="-60" :max="-10" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
             </div>
           </div>
           <div class='ml-4'>
             Minimum Silence Duration (default={{settingsStore.defaults.trimSilenceMinSilenceDuration}} sec)
             <div>
               <span>{{settingsStore.settings.trimSilenceMinSilenceDuration}} sec</span>
-              <Slider @slideend="slideEndedDur" v-model="settingsStore.settings.trimSilenceMinSilenceDuration" :min="0.1" :max="5" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
+              <Slider @change="settingChangeMinSilenceDuration" @slideend="settingChangeMinSilenceDuration" v-model="settingsStore.settings.trimSilenceMinSilenceDuration" :min="0.1" :max="5" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
             </div>
           </div>
         </div>
