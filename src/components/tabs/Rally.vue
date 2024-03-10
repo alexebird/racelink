@@ -132,8 +132,7 @@ onMounted(() => {
     }, 1000)
   })
 
-
-  rallyStore.recorder.setup()
+  // rallyStore.recorder.setup()
 })
 
 onUnmounted(() => {

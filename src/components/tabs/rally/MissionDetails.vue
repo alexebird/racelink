@@ -179,7 +179,7 @@ const currentIndex = ref(-1);
         pt:navcontainer:class="ml-1"
         pt:content:class="!rounded-none"
       >
-        <TabPanel header="Notebooks" :scrollable="true">
+        <TabPanel header="Notebooks">
           <DataTable
             :value="rallyStore.notebooks"
             dataKey="basename"
@@ -261,6 +261,7 @@ const currentIndex = ref(-1);
               <span class="m-1 align-baseline">
                 recording
                 <span v-if="rallyStore.recordingStatus === 'recording' && rallyStore.recordingAutostop >= 0"> ({{ rallyStore.recordingAutostop }}s)</span>
+                <span class="text-red-600" v-if="rallyStore.recordingError">{{rallyStore.recordingError}}</span>
               </span>
             </div>
           </div>

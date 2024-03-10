@@ -30,8 +30,8 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 const isDevelopment = !app.isPackaged
 const defaultSettings = {
-  beamUserDir: path.join(app.getPath('appData'), 'Local', 'BeamNG.drive', '0.31'),
-  autostopThreshold: isDevelopment ? 5 : 30,
+  beamUserDir: path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.31'),
+  autostopThreshold: isDevelopment ? 5 : 15,
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
   // windowSize: { width: 800, height: 600 },
@@ -63,7 +63,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1800,
     height: 1200,
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
     webPreferences: {
       webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),

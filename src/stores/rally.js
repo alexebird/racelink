@@ -12,6 +12,7 @@ export const useRallyStore = defineStore('rally', {
 
     recorder: new Recorder(),
     recordingStatus: 'not_recording',
+    recordingError: null,
     recordingAutostop: 0,
   }),
   getters: {

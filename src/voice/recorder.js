@@ -17,7 +17,7 @@ export default class Recorder {
         this.cutHappened = false
         this.mediaRecorder = null
         // this.audioChunks = null
-        this.stream = null
+        // this.stream = null
         this.lastCut = 0
         this.autocut = false
         this.cutId = -1
@@ -27,43 +27,68 @@ export default class Recorder {
         }, 1000)
     }
 
-    setup(callback) {
+    // setup(callback) {
+    //    navigator.mediaDevices.getUserMedia(mediaDeviceConf)
+    //         .then(stream => {
+    //             this.stream = stream
+    //             if (callback) {
+    //                 callback()
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('error setting up recording', error)
+    //         })
+    // }
+
+     createMediaRecorder(cb) {
+        this.lastCut = Date.now()/1000
+        this.autocut = false
+        // this.setup()
+
         navigator.mediaDevices.getUserMedia(mediaDeviceConf)
             .then(stream => {
-                this.stream = stream
-                if (callback) {
-                    callback()
+                // this.stream = stream
+
+                useRallyStore().$patch({ recordingError: null })
+
+                try {
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.mediaRecorder.ondataavailable = event => {
+                        const audioChunks = []
+                        audioChunks.push(event.data)
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+
+                        reader.onloadend = () => {
+                            window.electronAPI.writeAudioChunk(reader.result)
+
+                            if (this.mediaRecorder && this.mediaRecorder.state === 'inactive') {
+                                this.onBufferingDone()
+                            }
+                        }
+
+                        reader.readAsArrayBuffer(audioBlob);
+                    }
+                    if (cb)
+                        cb()
+
+                    // this.mediaRecorder.onstop = () => {
+                    // this.writeAudioChunks()
+                    // }
+                }
+                catch (error) {
+                    console.error('error creating mediaRecorder', error)
+                    if (error.message.includes("Failed to construct 'MediaRecorder'")) {
+                        useRallyStore().$patch({ recordingError: "No input device found" })
+                    }
                 }
             })
             .catch(error => {
                 console.error('error setting up recording', error)
-            })
-    }
-
-    createMediaRecorder() {
-        this.lastCut = Date.now()/1000
-        this.autocut = false
-        this.mediaRecorder = new MediaRecorder(this.stream);
-        this.mediaRecorder.ondataavailable = event => {
-            const audioChunks = []
-            audioChunks.push(event.data)
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const reader = new FileReader();
-
-            reader.onloadend = () => {
-                window.electronAPI.writeAudioChunk(reader.result)
-
-                if (this.mediaRecorder && this.mediaRecorder.state === 'inactive') {
-                    this.onBufferingDone()
+                if (error.message.includes("Requested device not found")) {
+                    useRallyStore().$patch({ recordingError: "No input device found" })
                 }
-            }
-
-            reader.readAsArrayBuffer(audioBlob);
-        };
-
-        // this.mediaRecorder.onstop = () => {
-            // this.writeAudioChunks()
-        // }
+            })
     }
 
     onBufferingDone() {
@@ -116,9 +141,12 @@ export default class Recorder {
 
     startRecording() {
         window.electronAPI.openAudioFile().then(() => {
-            useRallyStore().$patch({ recordingStatus: 'recording' })
-            this.createMediaRecorder()
-            this.mediaRecorder.start(1000)
+            this.createMediaRecorder(() => {
+                if (this.mediaRecorder) {
+                    useRallyStore().$patch({ recordingStatus: 'recording' })
+                    this.mediaRecorder.start(1000)
+                }
+            })
         })
     }
 
