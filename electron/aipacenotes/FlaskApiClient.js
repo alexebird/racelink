@@ -132,4 +132,19 @@ export default class FlaskApiClient {
       return [null, this.parseAxiosError(error)];
     }
   }
+
+  async getVoicesList() {
+    const url = this.mkurl('/voices/list');
+    const headers = {
+      [this.headerUUID]: this.userUUID,
+    };
+
+    try {
+      const response = await axios.get(url, { headers });
+      return [response.data, null];
+    } catch (error) {
+      console.error('error doing getting voices');
+      return [null, this.parseAxiosError(error)];
+    }
+  }
 }

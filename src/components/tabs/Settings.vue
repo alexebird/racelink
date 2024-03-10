@@ -71,4 +71,3 @@ const settingChangeNoiseLevel = () => {
 
 <style scoped>
 </style>
-

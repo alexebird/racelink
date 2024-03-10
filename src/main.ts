@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
+import './flags.css'
 import App from './App.vue'
 import router from './router'
 
@@ -35,8 +36,14 @@ app.use(PrimeVue, {
 import Button from 'primevue/button'
 app.component('Button', Button)
 
-// import InputText from 'primevue/inputtext'
-// app.component('InputText', InputText)
+import ConfirmPopup from 'primevue/confirmpopup'
+app.component('ConfirmPopup', ConfirmPopup)
+
+import InputText from 'primevue/inputtext'
+app.component('InputText', InputText)
+
+import Dropdown from 'primevue/dropdown'
+app.component('Dropdown', Dropdown)
 
 import TabMenu from 'primevue/tabmenu'
 app.component('TabMenu', TabMenu)
@@ -46,6 +53,9 @@ app.component('TabView', TabView)
 
 import TabPanel from 'primevue/tabpanel'
 app.component('TabPanel', TabPanel)
+
+import Listbox from 'primevue/listbox';
+app.component('Listbox', Listbox)
 
 // import Menu from 'primevue/menu'
 // app.component('Menu', Menu)
@@ -80,6 +90,9 @@ app.component('Card', Card)
 
 import ToastService from 'primevue/toastservice';
 app.use(ToastService);
+
+import ConfirmationService from 'primevue/confirmationservice'
+app.use(ConfirmationService)
 
 app.mount('#app')
 // .$nextTick(() => {

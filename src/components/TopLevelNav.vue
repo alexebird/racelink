@@ -10,6 +10,11 @@ const items = ref([
     route: '/rally'
   },
   {
+    label: 'Voices',
+    icon: 'pi pi-comment',
+    route: '/voices'
+  },
+  {
     label: 'Settings',
     icon: 'pi pi-sliders-h',
     route: '/settings'
@@ -21,7 +26,7 @@ const items = ref([
   // }
 ])
 
-const activeIndex = ref(0)
+const activeIndex = ref(1)
 
 onMounted(() => {
   window.electronAPI.getSettings().then((resp) => {

@@ -10,6 +10,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onNotebooksUpdated: (callback) => ipcRenderer.on('notebooks-updated', callback),
   loadModConfigFiles: () => ipcRenderer.invoke('load-mod-configs'),
 
+  // voices
+  updateVoicesStore: () => ipcRenderer.send('updateVoicesStore'),
+  getVoiceStoreData: () => ipcRenderer.invoke('getVoiceStoreData'),
+  onVoiceStoreDataUpdated: (callback) => ipcRenderer.on('onVoiceStoreDataUpdated', callback),
+  getUserVoices: () => ipcRenderer.invoke('getUserVoices'),
+  setUserVoices: (data) => ipcRenderer.invoke('setUserVoices', data),
+
   // configureScanner: (config) => ipcRenderer.send('scanner:configure', config),
   scan: () => ipcRenderer.invoke('scanner:scan'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('missionGeneratePacenotes', mission),

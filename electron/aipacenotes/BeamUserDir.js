@@ -23,6 +23,11 @@ export default class BeamUserDir {
     // console.log(this.cachedStaticPacenotes)
   }
 
+  userVoicesFile() {
+    const beamDir = this.appSettings.get('beamUserDir')
+    return `${beamDir}/settings/aipacenotes/user.voices.json`
+  }
+
   _voiceSearchPaths() {
     const beamDir = this.appSettings.get('beamUserDir')
     return [
@@ -30,7 +35,7 @@ export default class BeamUserDir {
       `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/default.voices.json`,
-      `${beamDir}/settings/aipacenotes/user.voices.json`,
+      this.userVoicesFile()
     ];
   }
 

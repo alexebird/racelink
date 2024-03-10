@@ -9,9 +9,11 @@ import NotebookScanner from './aipacenotes/NotebookScanner'
 import Notebook from './aipacenotes/Notebook'
 import FlaskApiClient from './aipacenotes/FlaskApiClient'
 import BeamUserDir from './aipacenotes/BeamUserDir'
+import UserVoicesFile from './aipacenotes/UserVoicesFile'
 import readFileFromZip from './aipacenotes/Zip'
 import startServer from './server'
 import Settings from './Settings'
+import VoicesStore from './aipacenotes/VoicesStore'
 import { storeMetadata } from './aipacenotes/MetadataManager'
 
 // The built directory structure
@@ -45,6 +47,7 @@ const queue = new PQueue({concurrency: 1});
 
 const appSettings = new Settings('settings.json', defaultSettings)
 appSettings.save()
+const voicesStore = new VoicesStore()
 const beamUserDir = new BeamUserDir(appSettings)
 const scanner = new MissionScanner()
 const flaskClient = new FlaskApiClient(appSettings.get('uuid'))
@@ -502,6 +505,30 @@ function setupIPC() {
   ipcMain.handle('load-mod-configs', async (_event) => {
     await beamUserDir.load()
     return
+  });
+
+  ipcMain.on('updateVoicesStore', (_event) => {
+    flaskClient.getVoicesList().then(([resp, err]) => {
+      // console.log(resp)
+      const newData = resp
+      voicesStore.update(newData)
+
+      win.webContents.send('onVoiceStoreDataUpdated');
+    })
+  });
+
+  ipcMain.handle('getVoiceStoreData', async (_event) => {
+    return voicesStore.getData()
+  });
+
+  ipcMain.handle('getUserVoices', async (_event) => {
+    const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
+    return userVoices.getData()
+  });
+
+  ipcMain.handle('setUserVoices', async (_event, data) => {
+    const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
+    userVoices.update(data)
   });
 }
 
