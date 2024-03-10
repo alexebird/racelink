@@ -6,8 +6,8 @@ import fs from 'node:fs'
 
 export default class FlaskApiClient {
   constructor(uuid) {
-    // this.baseURL = "https://aipacenotes.alxb.us/f"
-    this.baseURL = "http://127.0.0.1:8080"
+    this.baseURL = "https://aipacenotes.alxb.us/f"
+    // this.baseURL = "http://127.0.0.1:8080" // cant be localhost
     console.log(`vocalizer url: ${this.baseURL}`)
     this.headerUUID = 'X-Aip-Client-UUID'
     this.userUUID = uuid
@@ -143,7 +143,7 @@ export default class FlaskApiClient {
       const response = await axios.get(url, { headers });
       return [response.data, null];
     } catch (error) {
-      console.error('error doing getting voices');
+      console.error('error getting voices');
       return [null, this.parseAxiosError(error)];
     }
   }

@@ -7,7 +7,7 @@ export default class VoiceStore {
   constructor() {
     const basePath = !app.isPackaged ? '.' : app.getPath('userData');
     this.filePath = path.join(basePath, 'voicesStore.json');
-    this.data = {}
+    this.data = { voices: []}
     this.load();
   }
 
@@ -22,10 +22,10 @@ export default class VoiceStore {
         this.data = JSON.parse(fileContent);
       } catch (error) {
         console.error('Failed to load voices:', error);
-        this.data = {}
+        this.data = { voices: []}
       }
     } else {
-      this.data = {}
+      this.data = { voices: []}
     }
   }
 
@@ -40,7 +40,7 @@ export default class VoiceStore {
   }
 
   update(newData) {
-    this.data = newData
+    this.data = newData || { voices: []}
     this.save()
   }
 }

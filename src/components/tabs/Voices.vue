@@ -114,14 +114,14 @@ const confirmDelete = (event) => {
 
       <div class="flex flex-col gap-2">
 
-        <Button @click="newVoice" class="w-24">New Voice</Button>
+        <Button @click="newVoice" class="w-24 ml-2">New Voice</Button>
 
         <Listbox
           @change="onListSelectionChange"
           v-model="voicesStore.selectedUserVoice"
           :options="voicesStore.listboxUserVoices"
           optionLabel="name"
-          class="min-h-96"
+          class="min-h-96 ml-2"
         >
         </Listbox>
       </div>
