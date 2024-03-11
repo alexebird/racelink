@@ -16,6 +16,7 @@ import Settings from './Settings'
 import VoicesStore from './aipacenotes/VoicesStore'
 import { storeMetadata } from './aipacenotes/MetadataManager'
 
+
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -28,6 +29,8 @@ import { storeMetadata } from './aipacenotes/MetadataManager'
 process.env.DIST = path.join(__dirname, '../dist')
 process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
 
+const pkg = require(path.join(__dirname, '../package.json'));
+
 let win = null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -39,6 +42,7 @@ const defaultSettings = {
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
   uuid: uuidv4(),
+  versionString: `v${pkg.version}`,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
 }
@@ -436,8 +440,8 @@ function transcribeAudio(fname, cutId, selectedMission) {
 
 function deleteFile(fname) {
   try {
-    fs.unlinkSync(fname)
-    console.log('File deleted successfully');
+    // fs.unlinkSync(fname)
+    // console.log('File deleted successfully');
   } catch (err) {
     console.error('Error deleting the file:', err);
   }

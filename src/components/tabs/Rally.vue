@@ -124,7 +124,7 @@ onMounted(() => {
     window.electronAPI.scan().then((results) => {
       results = toTreeData(results)
       rallyStore.$patch({missionsTree: results})
-      setDevDefaultMission()
+      // setDevDefaultMission()
     })
 
     timer = setInterval(() => {

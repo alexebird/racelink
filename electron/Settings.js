@@ -39,6 +39,8 @@ export default class Settings {
     try {
       const copy = _.cloneDeep(this.settings)
       delete copy.isDevelopment
+      delete copy.autostopThreshold
+      delete copy.versionString
       const fileContent = JSON.stringify(copy, null, 2);
       fs.writeFileSync(this.filePath, fileContent, 'utf8');
       console.log(`wrote settings to ${this.filePath}`)
