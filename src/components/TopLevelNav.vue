@@ -26,7 +26,7 @@ const items = ref([
   // }
 ])
 
-const activeIndex = ref(1)
+const activeIndex = ref(0)
 
 onMounted(() => {
   window.electronAPI.getSettings().then((resp) => {
