@@ -105,8 +105,9 @@ let timer = null
 function setDevDefaultMission() {
   if (!settingsStore.settings.isDevelopment) return
 
-  const selectedMissionId = "driver_training/rallyStage/aip-test4"
+  // const selectedMissionId = "driver_training/rallyStage/aip-test4"
   // const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
+  const selectedMissionId = "lvl/rallyStage/aip-test"
   const node = getMissionWithKey(selectedMissionId)
 
   if (node) {
@@ -124,7 +125,7 @@ onMounted(() => {
     window.electronAPI.scan().then((results) => {
       results = toTreeData(results)
       rallyStore.$patch({missionsTree: results})
-      // setDevDefaultMission()
+      setDevDefaultMission()
     })
 
     timer = setInterval(() => {

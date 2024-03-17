@@ -23,7 +23,7 @@ export default class NotebookScanner {
         }
       });
     } catch (err) {
-      console.error('Error scanning directory:', err)
+      console.error(`error scanning directory: `, err)
     }
 
     return fileList

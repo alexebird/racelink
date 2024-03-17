@@ -4,6 +4,7 @@ RACELINK
 dev setup
 ```
 cd .\Desktop\beam-bird\gh_repos\racelink\
+yarn install
 npm run dev
 ```
 

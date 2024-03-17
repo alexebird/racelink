@@ -10,7 +10,6 @@ import Notebook from './aipacenotes/Notebook'
 import FlaskApiClient from './aipacenotes/FlaskApiClient'
 import BeamUserDir from './aipacenotes/BeamUserDir'
 import UserVoicesFile from './aipacenotes/UserVoicesFile'
-import readFileFromZip from './aipacenotes/Zip'
 import startServer from './server'
 import Settings from './Settings'
 import VoicesStore from './aipacenotes/VoicesStore'
@@ -36,8 +35,17 @@ let win = null
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 const isDevelopment = !app.isPackaged
+
+function defaultBeamUserDir() {
+  if (process.platform === 'darwin') {
+    return '/Users/bird/beamng/code/racelink/test/data'
+  } else {
+    return path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.31')
+  }
+}
+
 const defaultSettings = {
-  beamUserDir: path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.31'),
+  beamUserDir: defaultBeamUserDir(),
   autostopThreshold: isDevelopment ? 5 : 15,
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
@@ -90,6 +98,7 @@ function createWindow() {
   })
 
   setupIPC()
+  setupExpressServer()
 
   // Test active push message to Renderer-process.
   // win.webContents.on('did-finish-load', () => {
@@ -107,52 +116,6 @@ function createWindow() {
   if (isDevelopment) {
     win.webContents.openDevTools();
   }
-
-  startServer({
-    // onRecordingStart: () => {
-    //   console.log('start recording from express')
-    //   win.webContents.send('server-recording-start')
-    // },
-    // onRecordingStop: () => {
-    //   console.log('stop recording from express')
-    //   win.webContents.send('server-recording-stop')
-    // },
-    onRecordingCut: (cutReq) => {
-      console.log('cut recording from express', cutReq)
-      if (win)
-        win.webContents.send('server-recording-cut', cutReq)
-    },
-    onGetTranscripts: (count) => {
-      console.log('get transcripts', count)
-
-      // fs.existsSync(this.audioFname())
-
-      if (count === -1) {
-        tscHist.pop()
-        tscHist.pop()
-      }
-
-      // const transcripts = [{error: false, text: 'foo'}]
-      return tscHist.toReversed()
-    },
-    // onRemoteAudioPlayFile: (audioFname) => {
-    //   console.log('onRemoteAudioPlayFile', audioFname)
-    //   if (win)
-    //     win.webContents.send('server-remote-audio-play', audioFname)
-    // },
-    // onRemoteAudioReset: () => {
-    //   console.log('onRemoteAudioReset')
-    //   if (win)
-    //     win.webContents.send('server-remote-audio-reset')
-    // },
-    // onRemoteAudioQueueSize: () => {
-    //   // console.log('onRemoteAudioQueueSize')
-    //   return {
-    //     queueSize: lastQueueSize,
-    //     paused: lastAudioPlayerPausedState,
-    //   }
-    // },
-  })
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -165,18 +128,24 @@ app.on('window-all-closed', () => {
   }
 })
 
+// function testNetwork() {
+//   flaskClient.getHealthcheck().then(([resp, err]) => {
+//     console.log(resp)
+//   })
+// }
+
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
-    testNetwork()
+    // testNetwork()
   }
 })
 
-async function handleScannerConfigure(_event, config) {
-  scanner.configure(config)
-}
+app.whenReady().then(() => {
+  createWindow()
+})
 
 async function handleScannerScan(_event, _args) {
   scanner.configure({
@@ -242,33 +211,8 @@ async function handleMissionGeneratePacenotes(_event, selectedMission) {
     console.log('------------------------------------------------------')
     const audioFname = pn.audioFname()
     console.log(`${pn.joinedNote()}`)
-    // console.log(audioFname)
-
     const voiceConfig = beamUserDir.voices()[pn.voice()]
-
-    // return flaskClient.postCreatePacenoteAudio(pn.name(), pn.joinedNote(), voiceConfig)
-    //   .then(([resp, err]) => {
-    //     fs.mkdirSync(path.dirname(audioFname), { recursive: true });
-    //
-    //     try {
-    //       resp = Buffer.from(resp)
-    //       fs.writeFileSync(audioFname, resp);
-    //       console.log(`File written successfully: ${audioFname}`);
-    //
-    //       const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
-    //       if (win)
-    //         win.webContents.send('notebooks-updated', ipcNotebooks);
-    //     } catch (error) {
-    //       console.error('Error writing file:', error);
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.error('error creating parent dirs for pacenote file', error)
-    //   })
-
-
     const rv = executeCreatePacenoteAudio(notebooks, pn, voiceConfig, audioFname)
-    // const rv = () => executeCreatePacenoteAudio(notebooks, pn, voiceConfig, audioFname)
     return rv
   })
 
@@ -360,7 +304,7 @@ function executeVoiceTest(text, voiceConfig, audioFname) {
   return req
 }
 
-function openAudioFile() {
+function openRecordingFile() {
     audioFileFname = recordingFname()
 
     // Ensure there's no open stream already
@@ -381,7 +325,7 @@ function openAudioFile() {
     });
 }
 
-function closeAudioFile() {
+function closeRecordingFile() {
   if (audioFileStream) {
     audioFileStream.end(() => {
       console.log('File stream closed successfully.');
@@ -392,9 +336,16 @@ function closeAudioFile() {
   }
 }
 
-function transcribeAudio(fname, cutId, selectedMission) {
+function transcribeAudioFile(_event, cutId, selectedMission) {
+  if (lastNetworkError && nowTs() - lastNetworkError < networkErrorDebounceSec) {
+    console.log(`updates slowed due to network error.`)
+    return
+  }
+
+  const fname = audioFileFname
   let noiseLevel = appSettings.get('trimSilenceNoiseLevel')
   let minSilenceDuration = appSettings.get('trimSilenceMinSilenceDuration')
+
   flaskClient.postTranscribe(fname, noiseLevel, minSilenceDuration).then(([resp, err]) => {
     if (err) {
       console.error('error from postCreatePacenoteAudioB64', err)
@@ -423,10 +374,6 @@ function transcribeAudio(fname, cutId, selectedMission) {
       console.error('Error appending to the file:', err);
     }
 
-    // console.log(selectedMission);
-    // console.log(cutId);
-    // console.log(resp);
-
     win.webContents.send('transcribe-done', resp);
 
     // try {
@@ -435,10 +382,10 @@ function transcribeAudio(fname, cutId, selectedMission) {
     // } catch (err) {
     //   console.error('Error deleting the file:', err);
     // }
-  });
+  })
 }
 
-function deleteFile(fname) {
+function deleteFileWithName(fname) {
   try {
     // fs.unlinkSync(fname)
     // console.log('File deleted successfully');
@@ -448,137 +395,171 @@ function deleteFile(fname) {
 }
 
 function setupIPC() {
-  ipcMain.handle('settings:getAll', (_event) => {
-    return { settings: appSettings.settings, defaults: defaultSettings }
-  });
-
-  ipcMain.handle('settings:set', (_event, key, value) => {
-    console.log(`setting ${key} to ${value}`)
-    appSettings.set(key, value)
-    return appSettings.settings
-  });
-
-  ipcMain.handle('scanner:scan', handleScannerScan)
+  ipcMain.handle('settingsGetAll', settingsGetAll)
+  ipcMain.handle('settingsSet', settingsSet)
+  ipcMain.handle('scannerScan', handleScannerScan)
   ipcMain.on('missionGeneratePacenotes', handleMissionGeneratePacenotes)
+  ipcMain.handle('openAudioFile', openAudioFile)
+  ipcMain.on('writeAudioChunk', writeAudioChunk)
+  ipcMain.handle('closeAudioFile', closeAudioFile)
+  ipcMain.on('transcribeAudioFile', transcribeAudioFile)
+  ipcMain.on('discardCurrentAudioRecordingFile', discardCurrentAudioRecordingFile)
+  ipcMain.on('deleteFile', deleteFile)
+  ipcMain.on('openFilePicker', openFilePicker)
+  ipcMain.on('openFileExplorer', openFileExplorer)
+  ipcMain.handle('loadModConfigFiles', loadModConfigFiles)
+  ipcMain.on('updateVoicesStore', updateVoicesStore)
+  ipcMain.handle('getVoiceStoreData', getVoiceStoreData)
+  ipcMain.handle('getUserVoices', getUserVoices)
+  ipcMain.handle('setUserVoices', setUserVoices)
+  ipcMain.on('testUserVoice', testUserVoice)
+}
 
-  ipcMain.handle('open-audio-file', (_event) => {
-    openAudioFile()
-    return true
-  });
+function settingsGetAll(_event) {
+  return { settings: appSettings.settings, defaults: defaultSettings }
+}
 
-  ipcMain.on('write-audio-chunk', (event, audioChunk) => {
-    if (!audioFileStream) {
-      console.error('File stream is not open. Cannot write audio chunk.');
-      return;
+function settingsSet(_event, key, value) {
+  console.log(`setting ${key} to ${value}`)
+  appSettings.set(key, value)
+  return appSettings.settings
+}
+
+function openAudioFile(_event) {
+  openRecordingFile()
+  return true
+}
+
+function writeAudioChunk(event, audioChunk) {
+  if (!audioFileStream) {
+    console.error('File stream is not open. Cannot write audio chunk.');
+    return;
+  }
+
+  // Write the chunk to the file
+  audioFileStream.write(Buffer.from(audioChunk), (err) => {
+    console.log(`wrote audio to ${audioFileFname}: ${audioChunk.byteLength}b`);
+    // console.log(audioChunk);
+    if (err) {
+      console.error('Error writing audio chunk:', err);
     }
-
-    // Write the chunk to the file
-    audioFileStream.write(Buffer.from(audioChunk), (err) => {
-      console.log(`wrote audio to ${audioFileFname}: ${audioChunk.byteLength}b`);
-      // console.log(audioChunk);
-      if (err) {
-        console.error('Error writing audio chunk:', err);
-      }
-    });
-  });
-
-  ipcMain.handle('close-audio-file', () => {
-    closeAudioFile()
-    return
-  });
-
-  ipcMain.on('transcribe-audio-file', (_event, cutId, selectedMission) => {
-    if (lastNetworkError && nowTs() - lastNetworkError < networkErrorDebounceSec) {
-      console.log(`updates slowed due to network error.`)
-      return
-    }
-
-    transcribeAudio(audioFileFname, cutId, selectedMission)
-  });
-
-  ipcMain.on('discard-current-audio-recording-file', (_event) => {
-    deleteFile(audioFileFname)
-  });
-
-  ipcMain.on('delete-file', (_event, fname) => {
-    deleteFile(fname)
-  });
-
-  // ipcMain.on('update-queue-size', (_event, queueSize, paused) => {
-  //   lastQueueSize = queueSize
-  //   lastAudioPlayerPausedState = paused
-  // });
-
-  ipcMain.on('open-file-picker', async (event) => {
-    const lastPath = appSettings.get('beamUserDir');
-
-    const result = await dialog.showOpenDialog(win, {
-      properties: ['openDirectory'],
-      defaultPath: lastPath,
-    });
-
-    if (!result.canceled && result.filePaths.length > 0) {
-      event.sender.send('directory-selected', result.filePaths[0]);
-    }
-  });
-
-  ipcMain.on('open-file-explorer', (event, dirname) => {
-    shell.openPath(dirname)
-      .then((error) => {
-        if (error) {
-          console.error('An error occurred:', error);
-        } else {
-          console.log(`File Explorer opened at path: ${dirname}`);
-        }
-      });
-  });
-
-  ipcMain.handle('load-mod-configs', async (_event) => {
-    await beamUserDir.load()
-    return
-  });
-
-  ipcMain.on('updateVoicesStore', (_event) => {
-    flaskClient.getVoicesList().then(([resp, err]) => {
-      // console.log(resp)
-      const newData = resp
-      voicesStore.update(newData)
-
-      win.webContents.send('onVoiceStoreDataUpdated');
-    })
-  });
-
-  ipcMain.handle('getVoiceStoreData', async (_event) => {
-    return voicesStore.getData()
-  });
-
-  ipcMain.handle('getUserVoices', async (_event) => {
-    const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
-    return userVoices.getData()
-  });
-
-  ipcMain.handle('setUserVoices', async (_event, data) => {
-    const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
-    userVoices.update(data)
-  });
-
-  ipcMain.on('testUserVoice', async (_event, voiceConfig, text) => {
-    const audioFname = beamUserDir.voiceTestAudioFname()
-    const req = await executeVoiceTest(text, voiceConfig, audioFname)
-    win.webContents.send('onVoiceTestFileReady', audioFname);
   });
 }
 
-function testNetwork() {
-  flaskClient.getHealthcheck().then(([resp, err]) => {
-    console.log(resp)
+function discardCurrentAudioRecordingFile(_event) {
+  deleteFile(audioFileFname)
+}
+
+function closeAudioFile(_event) {
+  closeRecordingFile(audioFileFname)
+}
+
+function deleteFile(_event, fname) {
+  deleteFileWithName(fname)
+}
+
+async function openFilePicker(event) {
+  const lastPath = appSettings.get('beamUserDir')
+
+  const result = await dialog.showOpenDialog(win, {
+    properties: ['openDirectory'],
+    defaultPath: lastPath,
+  });
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    event.sender.send('directory-selected', result.filePaths[0])
+  }
+}
+
+function openFileExplorer(event, dirname) {
+  shell.openPath(dirname)
+    .then((error) => {
+      if (error) {
+        console.error('An error occurred:', error)
+      } else {
+        console.log(`File Explorer opened at path: ${dirname}`)
+      }
+    })
+}
+
+async function loadModConfigFiles(_event) {
+  await beamUserDir.load()
+  return
+}
+
+function updateVoicesStore(_event) {
+  flaskClient.getVoicesList().then(([resp, err]) => {
+    const newData = resp
+    voicesStore.update(newData)
+
+    win.webContents.send('onVoiceStoreDataUpdated')
   })
 }
 
-app.whenReady().then(() => {
-  createWindow()
+async function getVoiceStoreData(_event) {
+  return voicesStore.getData()
+}
 
-  // const zipFilePath = 'test/data/aipacenotes.zip';
-  // const targetFileName = 'gitsha.txt';
-  // readFileFromZip(zipFilePath, targetFileName);
-})
+async function getUserVoices(_event) {
+  const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
+  return userVoices.getData()
+}
+
+async function setUserVoices(_event, data) {
+  const userVoices = new UserVoicesFile(beamUserDir.userVoicesFile())
+  userVoices.update(data)
+}
+
+async function testUserVoice(_event, voiceConfig, text) {
+  const audioFname = beamUserDir.voiceTestAudioFname()
+  await executeVoiceTest(text, voiceConfig, audioFname)
+  win.webContents.send('onVoiceTestFileReady', audioFname)
+}
+
+function setupExpressServer() {
+  startServer({
+    // onRecordingStart: () => {
+    //   console.log('start recording from express')
+    //   win.webContents.send('server-recording-start')
+    // },
+    // onRecordingStop: () => {
+    //   console.log('stop recording from express')
+    //   win.webContents.send('server-recording-stop')
+    // },
+    onRecordingCut: (cutReq) => {
+      console.log('cut recording from express', cutReq)
+      if (win)
+        win.webContents.send('server-recording-cut', cutReq)
+    },
+    onGetTranscripts: (count) => {
+      console.log('get transcripts', count)
+
+      // fs.existsSync(this.audioFname())
+
+      if (count === -1) {
+        tscHist.pop()
+        tscHist.pop()
+      }
+
+      // const transcripts = [{error: false, text: 'foo'}]
+      return tscHist.toReversed()
+    },
+    // onRemoteAudioPlayFile: (audioFname) => {
+    //   console.log('onRemoteAudioPlayFile', audioFname)
+    //   if (win)
+    //     win.webContents.send('server-remote-audio-play', audioFname)
+    // },
+    // onRemoteAudioReset: () => {
+    //   console.log('onRemoteAudioReset')
+    //   if (win)
+    //     win.webContents.send('server-remote-audio-reset')
+    // },
+    // onRemoteAudioQueueSize: () => {
+    //   // console.log('onRemoteAudioQueueSize')
+    //   return {
+    //     queueSize: lastQueueSize,
+    //     paused: lastAudioPlayerPausedState,
+    //   }
+    // },
+  })
+}

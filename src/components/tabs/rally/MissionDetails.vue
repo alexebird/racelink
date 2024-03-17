@@ -214,12 +214,14 @@ const onOpenNotebookClick = (fname) => {
                   <Column field="name" header="Name"></Column>
                   <Column header="">
                     <template #body="slotProps">
-                      <Button @click="() => onPlayClick(slotProps.data.audioFname)">
-                        <span class="pi pi-play"></span>
-                      </Button>
-                      <Button class="ml-2" @click="() => onRegenOneClick(slotProps.data.audioFname)">
-                        <span class="pi pi-refresh"></span>
-                      </Button>
+                      <div class="flex">
+                        <Button @click="() => onPlayClick(slotProps.data.audioFname)">
+                          <span class="pi pi-play"></span>
+                        </Button>
+                        <Button class="ml-2" @click="() => onRegenOneClick(slotProps.data.audioFname)">
+                          <span class="pi pi-refresh"></span>
+                        </Button>
+                      </div>
                     </template>
                   </Column>
                   <Column field="note" header="Note">
