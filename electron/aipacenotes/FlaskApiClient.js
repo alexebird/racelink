@@ -4,6 +4,8 @@ import fs from 'node:fs'
 
 // const settings = require('./aipacenotes/settings'); // Adjust the import path as necessary
 
+const timeoutMs = 1000;
+
 export default class FlaskApiClient {
   constructor(uuid) {
     this.baseURL = "https://aipacenotes.alxb.us/f"
@@ -25,33 +27,32 @@ export default class FlaskApiClient {
       // console.error('Data:', error.response.data);
       // console.error('Headers:', error.response.headers);
       // Example of a more human-readable message
-      return `Error ${error.response.status}: ${error.response.data.message || error.response.statusText}`;
+      return `error ${error.response.status}: ${error.response.data.message || error.response.statusText}`;
     } else if (error.request) {
       // The request was made but no response was received
       // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
       // http.ClientRequest in node.js
       // console.error('Error', error.request);
-      return 'The request was made but no response was received';
+      return 'the request was made but no response was received';
     } else {
       // Something happened in setting up the request that triggered an Error
       // console.error('Error', error.message);
-      return 'Error: ' + error.message;
+      return 'error setting up request: ' + error.message;
     }
   }
 
   async getHealthcheck() {
-    const url = this.mkurl('/healthcheck');
-    const headers = {
-      // "Content-Type": "application/json",
-      [this.headerUUID]: this.userUUID,
-    };
+    const url = this.mkurl('/healthcheck')
+    // const headers = {
+    //   [this.headerUUID]: this.userUUID,
+    // }
 
     try {
-      const response = await axios.get(url);
-      return [response.data, null];
+      const response = await axios.get(url)
+      return [response.data, null]
     } catch (error) {
-      console.error('error doing healthcheck');
-      return [null, this.parseAxiosError(error)];
+      console.error('error doing healthcheck')
+      return [null, this.parseAxiosError(error)]
     }
   }
 
@@ -77,20 +78,27 @@ export default class FlaskApiClient {
   // }
 
   async postCreatePacenoteAudioB64(noteName, noteText, voiceConfig) {
-    const url = this.mkurl('/pacenotes/audio/createB64');
+    const url = this.mkurl('/pacenotes/audio/createB64')
     const data = {
       note_name: noteName,
       note_text: noteText,
       voice_config: voiceConfig,
-    };
+    }
     const headers = {
       "Content-Type": "application/json",
       [this.headerUUID]: this.userUUID,
-    };
+    }
+
+    const timeoutGenerateMs = 20 * 1000
+    const config = {
+      headers: headers,
+      timeout: timeoutGenerateMs,
+      signal: AbortSignal.timeout(timeoutGenerateMs),
+    }
 
     try {
-      const response = await axios.post(url, data, { headers: headers });
-      return [response.data, null];
+      const response = await axios.post(url, data, config)
+      return [response.data, null]
     } catch (error) {
       console.error('error creating pacenote audio');
       return [null, this.parseAxiosError(error)];
@@ -134,17 +142,23 @@ export default class FlaskApiClient {
   }
 
   async getVoicesList() {
-    const url = this.mkurl('/voices/list');
+    const url = this.mkurl('/voices/list')
     const headers = {
       [this.headerUUID]: this.userUUID,
-    };
+    }
+
+    const config = {
+      headers,
+      timeout: timeoutMs,
+      signal: AbortSignal.timeout(timeoutMs),
+    }
 
     try {
-      const response = await axios.get(url, { headers });
-      return [response.data, null];
+      const response = await axios.get(url, config)
+      return [response.data, null]
     } catch (error) {
-      console.error('error getting voices');
-      return [null, this.parseAxiosError(error)];
+      console.error('error getting voices')
+      return [null, this.parseAxiosError(error)]
     }
   }
 }

@@ -27,4 +27,4 @@ release
 
 out
 settings.json
-voicesStore.json
+voice-db.json

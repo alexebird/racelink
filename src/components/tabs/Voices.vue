@@ -1,60 +1,39 @@
 <script setup lang="js">
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, inject, onMounted, onUnmounted } from "vue"
 // import { useSettingsStore } from "@/stores/settings"
+// const settingsStore = useSettingsStore()
 // import { useRallyStore } from "@/stores/rally"
+// const rallyStore = useRallyStore()
 import { useVoicesStore } from "@/stores/voices"
+const voicesStore = useVoicesStore()
+import { useAudioPlayerStore } from "@/stores/audioPlayer"
+const audioPlayerStore = useAudioPlayerStore()
 
 import { useConfirm } from "primevue/useconfirm";
 const confirm = useConfirm();
 
-// const settingsStore = useSettingsStore()
-// const rallyStore = useRallyStore()
-const voicesStore = useVoicesStore()
-
-const audioElement = ref(null)
-const audioSource = ref('')
 const spinnerClass = ref('hidden')
 
 onMounted(() => {
-  voicesStore.loadVoiceData()
-  voicesStore.loadUserVoiceData()
-  refreshVoices()
+  voicesStore.refreshVoices()
+  voicesStore.getUserVoices()
 })
 
 onUnmounted(() => {
   voicesStore.$reset()
 })
 
-window.electronAPI.onVoiceStoreDataUpdated((event) => {
-  console.log('voice data updated')
-  voicesStore.loadVoiceData()
-})
-
-function fileProtoAudioFname(audioFname) {
-  const url = new URL(`file://${audioFname}`)
-  url.searchParams.set('t', Date.now());
-  return url.href
+function showSpinner() {
+  spinnerClass.value = ''
 }
 
-window.electronAPI.onVoiceTestFileReady((event, fname) => {
-  const url = fileProtoAudioFname(fname)
-  console.log('voice test file ready', url)
-
-  audioElement.value.src = url
-  audioElement.value.volume = 0.3
-  audioElement.value.play().catch(error => console.error("Error playing audio:", error));
-
+function hideSpinner() {
   spinnerClass.value = 'hidden'
-})
-
-const refreshVoices = () => {
-  window.electronAPI.updateVoicesStore()
 }
 
 const saveVoice = () => {
   const formVoice = voicesStore.formVoice
   if (formVoice) {
-    // console.log(formVoice)
     const [name, voiceData] = formVoice
     voicesStore.updateUserVoices(name, voiceData)
   }
@@ -65,16 +44,17 @@ const newVoice = () => {
 }
 
 const testVoice = () => {
-  spinnerClass.value = ''
-  const text = "into three right opens over crest? fifty."
-  voicesStore.testVoice(text)
+  showSpinner()
+  voicesStore.testVoice().then((audioFname) => {
+    hideSpinner()
+    if (audioFname) {
+      audioPlayerStore.play(audioFname)
+    }
+  })
 }
 
 const onListSelectionChange = () => {
-  // const selected = voicesStore.selectedUserVoice
-  // if (selected) {
-    voicesStore.setFormToSelectedVoice()
-  // }
+  voicesStore.setFormToSelectedVoice()
 }
 
 const confirmDelete = (event) => {
@@ -91,15 +71,11 @@ const confirmDelete = (event) => {
     },
     reject: () => {
     }
-  });
-};
-
+  })
+}
 </script>
 
 <template>
-  <audio ref="audioElement">
-    <source type="audio/ogg">
-  </audio>
   <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
     <div class="text-lg m-2">
       Voices
@@ -111,23 +87,18 @@ const confirmDelete = (event) => {
         <!-- </div> -->
 
     <div class="flex">
-
       <div class="flex flex-col gap-2">
-
         <Button @click="newVoice" class="w-24 ml-2">New Voice</Button>
-
         <Listbox
           @change="onListSelectionChange"
           v-model="voicesStore.selectedUserVoice"
           :options="voicesStore.listboxUserVoices"
           optionLabel="name"
           class="min-h-96 ml-2"
-        >
-        </Listbox>
+        ></Listbox>
       </div>
 
       <div class="ml-4">
-
         <div class="flex flex-col gap-2">
           <div class="flex flex-col gap-2 w-64 ">
             <label for="user_voice_name">Name</label>
@@ -159,6 +130,9 @@ const confirmDelete = (event) => {
                 </div>
               </template>
             </Dropdown>
+            <small v-if="voicesStore.voiceDataFetchError" class="text-red-400">
+              {{voicesStore.voiceDataFetchError}}
+            </small>
             <small>
               <div class="font-bold">Recommended voice type is Neural2, then Wavenet, then Standard.</div>
               Voice types:
@@ -175,16 +149,20 @@ const confirmDelete = (event) => {
             </small>
           </div>
 
-          <ConfirmPopup></ConfirmPopup>
           <div class="flex gap-2">
             <Button @click="saveVoice" class="w-16" label="Save"></Button>
+            <ConfirmPopup></ConfirmPopup>
             <Button @click="confirmDelete($event)" class="w-16" label="Delete" severity="danger"></Button>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="test_voice">Test</label>
+            <InputText id="test_voice" type="text" v-model="voicesStore.testText" />
             <div class="flex w-32">
               <Button @click="testVoice" class="w-16" label="Test" severity="secondary"></Button>
               <ProgressSpinner :class='spinnerClass' style="width: 30px; height: 30px" strokeWidth="4" animationDuration=".5s" />
             </div>
           </div>
-
         </div>
       </div>
     </div>

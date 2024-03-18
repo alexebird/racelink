@@ -3,12 +3,17 @@ import path from 'node:path'
 import fs from 'node:fs'
 import _ from 'lodash'
 
-export default class VoiceStore {
-  constructor() {
-    const basePath = !app.isPackaged ? '.' : app.getPath('userData');
-    this.filePath = path.join(basePath, 'voicesStore.json');
-    this.data = { voices: []}
-    this.load();
+function blankData() {
+  return { voices: [] }
+}
+
+export default class VoiceManager {
+  constructor(flaskClient) {
+    const basePath = !app.isPackaged ? '.' : app.getPath('userData')
+    this.flaskClient = flaskClient
+    this.filePath = path.join(basePath, 'voice-db.json')
+    this.data = blankData()
+    this.load()
   }
 
   getData() {
@@ -22,10 +27,10 @@ export default class VoiceStore {
         this.data = JSON.parse(fileContent);
       } catch (error) {
         console.error('Failed to load voices:', error);
-        this.data = { voices: []}
+        this.data = blankData()
       }
     } else {
-      this.data = { voices: []}
+      this.data = blankData()
     }
   }
 
@@ -40,7 +45,14 @@ export default class VoiceStore {
   }
 
   update(newData) {
-    this.data = newData || { voices: []}
+    this.data = newData || blankData()
     this.save()
+  }
+
+  async refreshVoices() {
+    const [resp, err] = await this.flaskClient.getVoicesList()
+    const newData = resp
+    this.update(newData)
+    return [newData, err]
   }
 }

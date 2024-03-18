@@ -10,6 +10,9 @@ import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
 
 const settingsStore = useSettingsStore()
 const rallyStore = useRallyStore()
+const selectedKey = ref({})
+const expandedKeys = ref({})
+let timer = null
 
 function toTreeData(missionScanResults) {
   const data = [];
@@ -79,28 +82,23 @@ const onNodeUnselect = (node) => {
 
 function getMissionWithKey(missionId) {
   for (let i = 0; i < rallyStore.missionsTree.length; i++) {
-    const levelNode = rallyStore.missionsTree[i];
+    const levelNode = rallyStore.missionsTree[i]
 
     for (let j = 0; j < levelNode.children.length; j++) {
-      const missionTypeNode = levelNode.children[j];
+      const missionTypeNode = levelNode.children[j]
 
       for (let k = 0; k < missionTypeNode.children.length; k++) {
-        const missionNode = missionTypeNode.children[k];
+        const missionNode = missionTypeNode.children[k]
 
         if (missionNode.key === missionId) {
-          return missionNode;
+          return missionNode
         }
       }
     }
   }
 
-  return null;
+  return null
 }
-
-const selectedKey = ref({})
-const expandedKeys = ref({})
-
-let timer = null
 
 function setDevDefaultMission() {
   if (!settingsStore.settings.isDevelopment) return
@@ -108,6 +106,7 @@ function setDevDefaultMission() {
   // const selectedMissionId = "driver_training/rallyStage/aip-test4"
   // const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
   const selectedMissionId = "lvl/rallyStage/aip-test"
+
   const node = getMissionWithKey(selectedMissionId)
 
   if (node) {
@@ -116,7 +115,6 @@ function setDevDefaultMission() {
     selectedKey.value = {[selectedMissionId]: true}
     expandedKeys.value = {[levelId]: true, [missionType]: true}
     onNodeSelect(node)
-    // window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
   }
 }
 
@@ -132,8 +130,6 @@ onMounted(() => {
       window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
     }, 1000)
   })
-
-  // rallyStore.recorder.setup()
 })
 
 onUnmounted(() => {
@@ -142,7 +138,6 @@ onUnmounted(() => {
     clearInterval(timer)
   }
 })
-
 </script>
 
 <template>

@@ -1,48 +1,28 @@
 <script setup lang='js'>
 import { ref, onMounted, onUnmounted, nextTick } from "vue"
-
 import { useRallyStore } from "@/stores/rally"
 const rallyStore = useRallyStore()
-
 import { useSettingsStore } from "@/stores/settings"
 const settingsStore = useSettingsStore()
-
-// let checkQueueInterval
+import { useAudioPlayerStore } from "@/stores/audioPlayer"
+const audioPlayerStore = useAudioPlayerStore()
 
 const activeTab = ref(0)
-
-const audioElement = ref(null)
 const expandedRows = ref({})
-const source = ref('')
-
-// const audioQueue = ref([]);
 const currentIndex = ref(-1);
 
 onMounted(() => {
   window.electronAPI.onNotebooksUpdated((event, notebooks) => {
     rallyStore.$patch({ notebooks: notebooks })
   })
-
-  // setupAudioListeners()
-  // checkQueueInterval = setInterval(() => {
-    // playCurrentItem();
-
-    // window.electronAPI.updateQueueSize(audioQueue.value.length, audioElement.value.paused)
-  // }, 50)
 })
 
 onUnmounted(() => {
-  // clearInterval(checkQueueInterval)
 })
 
 const onRecordingStart = () => {
   rallyStore.recorder.startRecording()
 }
-
-// const onRecordingStop = () => {
-//   rallyStore.recorder.stopRecordingAfter()
-//   rallyStore.setIsRecording(false)
-// }
 
 const doCut = (cutReq) => {
   if (!rallyStore.recorder.isRecording()) {
@@ -57,87 +37,22 @@ const onRecordingCut = () => {
 }
 
 window.electronAPI.onTranscribeDone((resp) => {
-  // console.log('onTranscribeDone')
-  // console.log(resp)
-  // rallyStore.setLastTranscriptResp(resp)
-  // rallyStore.$patch({ lastTranscriptResp: resp })
   rallyStore.addTranscription(resp)
 })
-
-// window.electronAPI.onServerRecordingStart((resp) => {
-//   onRecordingStart()
-// })
-//
-// window.electronAPI.onServerRecordingStop((resp) => {
-//   onRecordingStop()
-// })
-
-
-function fileProtoAudioFname(audioFname) {
-  return new URL(`file://${audioFname}`).href
-}
 
 window.electronAPI.onServerRecordingCut((cutReq) => {
   doCut(cutReq)
 })
 
-// window.electronAPI.onServerRemoteAudioPlay((audioFname) => {
-//   const beamDir = settingsStore.settings.beamUserDir
-//   audioFname = `${beamDir}/${audioFname}`
-//   // console.log('onServerRemoteAudioPlay', audioFname)
-//   audioQueue.value.push(audioFname)
-// })
-//
-// window.electronAPI.onServerRemoteAudioReset(() => {
-//   // console.log('onServerRemoteAudioReset')
-//   audioQueue.value = []
-//   if (audioElement.value) {
-//     audioElement.value.pause()
-//     audioElement.value.currentTime = 0
-//   }
-// })
-
-// works
-// const onPlayClick = async (url) => {
-//   // source.value = url
-//   // await nextTick()
-//   // audioElement.value.load()
-//   // console.log(url)
-//   // await audioElement.value.play();
-// }
-
-// const isAudioPlaying = () => {
-//   return audioElement.value && !audioElement.value.paused && audioElement.value.currentTime > 0;
-// };
-
-const onPlayClick = (url) => {
-  url = fileProtoAudioFname(url)
-  // console.log(url)
-
-  audioElement.value.src = url
-  audioElement.value.volume = 0.3
-  audioElement.value.play().catch(error => console.error("Error playing audio:", error));
-
-  // audioQueue.value.push(url)
-
-  // if (!isAudioPlaying()) {
-  //   playCurrentItem();
-  // }
-};
-
+const onPlayClick = (audioFname) => {
+  if (audioFname) {
+    audioPlayerStore.play(audioFname)
+  }
+}
 
 const onRegenOneClick = (fname) => {
   window.electronAPI.deleteFile(fname)
-};
-
-// const playCurrentItem = () => {
-//   if (audioQueue.value.length > 0 && audioElement.value && audioElement.value.paused) {
-//     const currentItem = audioQueue.value.shift(); // Get and remove the first item from the queue
-//     audioElement.value.src = currentItem; // Set the source of the audio element
-//     audioElement.value.volume = 0.3
-//     audioElement.value.play().catch(error => console.error("Error playing audio:", error));
-//   }
-// };
+}
 
 const openFileExplorer = () => {
   window.electronAPI.openFileExplorer(rallyStore.selectedMission.fname)
@@ -145,20 +60,11 @@ const openFileExplorer = () => {
 
 const onOpenNotebookClick = (fname) => {
   window.electronAPI.openFileExplorer(fname)
-};
-
-// const addToQueue = (url) => {
-//   audioQueue.value.push(url);
-// };
-
+}
 </script>
 
 <template>
   <div class='flex flex-col w-full h-screen overflow-hidden text-surface-0 bg-surface-800'>
-    <audio ref="audioElement" :key="source">
-      <source :src="source" type="audio/ogg">
-    </audio>
-
     <div v-if="rallyStore.selectedMission">
       <div class="text-xl m-2">
         {{rallyStore.selectedMission.missionId}}
