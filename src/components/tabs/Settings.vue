@@ -1,16 +1,6 @@
 <script setup lang="js">
-// import { ref, onMounted, onUnmounted } from "vue"
 import { useSettingsStore } from "@/stores/settings"
 const settingsStore = useSettingsStore()
-
-// import { useRallyStore } from "@/stores/rally"
-// const rallyStore = useRallyStore()
-
-// onMounted(() => {
-// })
-//
-// onUnmounted(() => {
-// })
 
 const openFilePicker = () => {
   window.electronAPI.openFilePicker()
@@ -53,14 +43,20 @@ const settingChangeNoiseLevel = () => {
             Noise Level (default={{settingsStore.defaults.trimSilenceNoiseLevel}} dB)
             <div>
               <span>{{settingsStore.settings.trimSilenceNoiseLevel}} dB</span>
-              <Slider @change="settingChangeNoiseLevel" @slideend="settingChangeNoiseLevel" v-model="settingsStore.settings.trimSilenceNoiseLevel" :min="-60" :max="-10" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
+              <Slider @change="settingChangeNoiseLevel"
+                      @slideend="settingChangeNoiseLevel"
+                      v-model="settingsStore.settings.trimSilenceNoiseLevel"
+                      :min="-60" :max="-10" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
             </div>
           </div>
           <div class='ml-4'>
             Minimum Silence Duration (default={{settingsStore.defaults.trimSilenceMinSilenceDuration}} sec)
             <div>
               <span>{{settingsStore.settings.trimSilenceMinSilenceDuration}} sec</span>
-              <Slider @change="settingChangeMinSilenceDuration" @slideend="settingChangeMinSilenceDuration" v-model="settingsStore.settings.trimSilenceMinSilenceDuration" :min="0.1" :max="5" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
+              <Slider @change="settingChangeMinSilenceDuration"
+                      @slideend="settingChangeMinSilenceDuration"
+                      v-model="settingsStore.settings.trimSilenceMinSilenceDuration"
+                      :min="0.1" :max="5" :step="0.1" class="!w-10 mt-4 mb-8 inline" />
             </div>
           </div>
         </div>

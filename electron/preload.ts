@@ -16,7 +16,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getUserVoices: () => ipcRenderer.invoke('getUserVoices'),
   setUserVoices: (data) => ipcRenderer.invoke('setUserVoices', data),
   testVoice: (voiceConfig, text) => ipcRenderer.invoke('testVoice', voiceConfig, text),
-  // onVoiceTestFileReady: (callback) => ipcRenderer.on('onVoiceTestFileReady', callback),
 
   scan: () => ipcRenderer.invoke('scannerScan'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('missionGeneratePacenotes', mission),
