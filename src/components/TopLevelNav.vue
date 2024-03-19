@@ -1,5 +1,5 @@
 <script setup lang='js'>
-import { ref, onMounted } from "vue";
+import { toRaw, ref, onMounted } from "vue";
 import { useSettingsStore } from "@/stores/settings"
 const settingsStore = useSettingsStore()
 
@@ -30,9 +30,8 @@ const activeIndex = ref(0)
 
 onMounted(() => {
   window.electronAPI.getSettings().then((resp) => {
-    const settings = resp.settings
-    const defaults = resp.defaults
-    settingsStore.$patch({settings: settings, defaults})
+    settingsStore.$patch({settings: resp.settings, defaults: resp.defaults})
+    // console.log(toRaw(settingsStore.settings.lastSelectedMission))
   })
 })
 </script>
@@ -55,7 +54,9 @@ onMounted(() => {
         </router-link>
       </template>
     </TabMenu>
-    <div class="version-info font-mono text-stone-400 text-center">{{settingsStore.settings.versionString}}</div>
+    <div class="version-info font-mono text-stone-400 text-center">
+      {{settingsStore.settings.versionString}}
+    </div>
   </div>
 </template>
 

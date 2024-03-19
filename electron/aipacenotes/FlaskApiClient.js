@@ -5,6 +5,8 @@ import fs from 'node:fs'
 // const settings = require('./aipacenotes/settings'); // Adjust the import path as necessary
 
 const timeoutMs = 1000;
+const timeoutTranscribeMs = 20 * 1000
+const timeoutGenerateMs = 20 * 1000
 
 export default class FlaskApiClient {
   constructor(uuid) {
@@ -89,9 +91,8 @@ export default class FlaskApiClient {
       [this.headerUUID]: this.userUUID,
     }
 
-    const timeoutGenerateMs = 20 * 1000
     const config = {
-      headers: headers,
+      headers,
       timeout: timeoutGenerateMs,
       signal: AbortSignal.timeout(timeoutGenerateMs),
     }
@@ -116,8 +117,15 @@ export default class FlaskApiClient {
 
     const params = { noiseLevel, minSilenceDuration }
 
+    const config = {
+      headers,
+      params,
+      timeout: timeoutTranscribeMs,
+      signal: AbortSignal.timeout(timeoutTranscribeMs),
+    }
+
     try {
-      const response = await axios.post(url, formData, { params, headers });
+      const response = await axios.post(url, formData, config);
       return [response.data, null];
     } catch (error) {
       console.error('error transcribing audio');
@@ -130,10 +138,14 @@ export default class FlaskApiClient {
     const headers = {
       "Content-Type": "application/json",
       [this.headerUUID]: this.userUUID,
-    };
+    }
+
+    const config = {
+      headers
+    }
 
     try {
-      const response = await axios.post(url, body, { headers });
+      const response = await axios.post(url, body, config);
       return [response.data, null];
     } catch (error) {
       console.error('error translating' );

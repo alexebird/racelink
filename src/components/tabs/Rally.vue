@@ -1,5 +1,5 @@
 <script setup lang="js">
-import { ref, onMounted, onUnmounted } from "vue"
+import { toRaw, ref, onMounted, onUnmounted } from "vue"
 import { useRallyStore } from "@/stores/rally"
 import { useSettingsStore } from "@/stores/settings"
 import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
@@ -13,56 +13,9 @@ const rallyStore = useRallyStore()
 const selectedKey = ref({})
 const expandedKeys = ref({})
 let timer = null
+const scanIntervalMs = 1000
 
-function toTreeData(missionScanResults) {
-  const data = [];
-
-  missionScanResults.forEach((mission, index) => {
-    const levelIndex = data.findIndex(item => item.label === mission.levelId);
-    let levelNode;
-    if (levelIndex === -1) {
-      levelNode = {
-        key: mission.levelId,
-        label: mission.levelId,
-        // data: 'level id',
-        icon: 'pi pi-fw pi-image',
-        selectable: false,
-        children: []
-      }
-      data.push(levelNode)
-    } else {
-      levelNode = data[levelIndex]
-    }
-
-    const typeIndex = levelNode.children.findIndex(item => item.label === mission.missionType);
-    let typeNode
-    if (typeIndex === -1) {
-      typeNode = {
-        key: `${levelNode.key}/${mission.missionType}`,
-        label: mission.missionType,
-        // data: 'mission type',
-        selectable: false,
-        icon: 'pi pi-fw pi-car',
-        children: []
-      }
-      levelNode.children.push(typeNode);
-    } else {
-      typeNode = levelNode.children[typeIndex];
-    }
-
-    const missionNode = {
-      key: `${typeNode.key}/${mission.missionId}`,
-      label: mission.missionId,
-      data: mission,
-      selectable: true,
-      icon: 'pi pi-fw pi-flag-fill'
-    }
-    // console.log(missionNode.key)
-    typeNode.children.push(missionNode);
-  })
-
-  return data
-}
+const missionsRefreshing = ref(false)
 
 const onNodeSelect = (node) => {
   if (node.selectable) {
@@ -100,12 +53,18 @@ function getMissionWithKey(missionId) {
   return null
 }
 
-function setDevDefaultMission() {
-  if (!settingsStore.settings.isDevelopment) return
+function selectMissionWithFullId(selectedMissionId) {
+  // if (!settingsStore.settings.isDevelopment) return
 
   // const selectedMissionId = "driver_training/rallyStage/aip-test4"
   // const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
-  const selectedMissionId = "lvl/rallyStage/aip-test"
+  // const selectedMissionId = "lvl/rallyStage/aip-test"
+
+  console.log(`setting selected mission to ${selectedMissionId}`)
+
+  if (!selectedMissionId) {
+    return
+  }
 
   const node = getMissionWithKey(selectedMissionId)
 
@@ -119,16 +78,15 @@ function setDevDefaultMission() {
 }
 
 onMounted(() => {
-  window.electronAPI.loadModConfigFiles().then(() =>{
-    window.electronAPI.scan().then((results) => {
-      results = toTreeData(results)
-      rallyStore.$patch({missionsTree: results})
-      setDevDefaultMission()
-    })
+  refreshMissions(() => {
+    // console.log(toRaw(settingsStore.settings.lastSelectedMission))
+    // console.log(toRaw(settingsStore.lastSelectedMission))
+    selectMissionWithFullId(settingsStore.lastSelectedMission)
+    scanNotebooks()
 
     timer = setInterval(() => {
-      window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
-    }, 1000)
+      scanNotebooks()
+    }, scanIntervalMs)
   })
 })
 
@@ -136,20 +94,50 @@ onUnmounted(() => {
   rallyStore.recorder.teardown()
   if (timer) {
     clearInterval(timer)
+    timer = null
   }
 })
+
+function scanNotebooks() {
+  window.electronAPI.missionGeneratePacenotes(rallyStore.serializedSelectedMission)
+}
+
+function refreshMissions(cb) {
+  missionsRefreshing.value = true
+  window.electronAPI.scanMissions().then((results) => {
+    rallyStore.setMissionScanResults(results)
+    if (cb) {
+      cb()
+    }
+    missionsRefreshing.value = false
+  })
+}
+
+const btnRefreshMissions = () => {
+  refreshMissions()
+}
 </script>
 
 <template>
   <!-- <Toast /> -->
-  <Tree class="min-w-72 max-w-72 rounded-none h-screen overflow-auto"
-    :value="rallyStore.missionsTree"
-    v-model:selectionKeys="selectedKey"
-    v-model:expandedKeys="expandedKeys"
-    selectionMode="single"
-    @nodeSelect="onNodeSelect"
-    @nodeUnselect="onNodeUnselect" >
-  </Tree>
+  <div class="flex flex-col text-surface-0 bg-surface-700">
+    <div class="flex align-left p-2 text-xl">
+      <span>
+        Missions
+      </span>
+      <Button @click="btnRefreshMissions" class="ml-2" icon="pi pi-refresh" :loading="missionsRefreshing"></Button>
+    </div>
+    <Tree class="min-w-72 max-w-72 rounded-none h-screen overflow-auto"
+      :value="rallyStore.missionsTree"
+      v-model:selectionKeys="selectedKey"
+      v-model:expandedKeys="expandedKeys"
+      selectionMode="single"
+      @nodeSelect="onNodeSelect"
+      @nodeUnselect="onNodeUnselect"
+      pt:root:class="!bg-surface-700"
+    >
+    </Tree>
+  </div>
   <MissionDetails />
 </template>
 

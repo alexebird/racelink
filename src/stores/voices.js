@@ -185,22 +185,7 @@ export const useVoicesStore = defineStore('voices', {
 
     testVoice() {
       const [_name, voiceConfig] = this.formVoice
-      // console.log(voiceConfig)
-      // if (voiceConfig) {
-        return window.electronAPI.testVoice(voiceConfig, this.testText)
-        // window.electronAPI.testVoice(voiceConfig, this.testText).then((audioFname) => {
-          // const url = fileProtoAudioFname(fname)
-          // console.log('voice test file ready', url)
-
-          // audioElement.value.src = url
-          // audioElement.value.volume = 0.3
-          // audioElement.value.play().catch(error => console.error("Error playing audio:", error));
-
-          // spinnerClass.value = 'hidden'
-
-          // inject('playAudio')(audioFname)
-        // })
-      // }
+      return window.electronAPI.testVoice(voiceConfig, this.testText)
     },
   },
 })

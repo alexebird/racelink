@@ -1,32 +1,35 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  // settings
+  // loadModConfigFiles: () => ipcRenderer.invoke('loadModConfigFiles'),
   getSettings: () => ipcRenderer.invoke('settingsGetAll'),
   setSetting: (key, value) => ipcRenderer.invoke('settingsSet', key, value),
-  openFilePicker: () => ipcRenderer.send('openFilePicker'),
-  openFileExplorer: (dirname) => ipcRenderer.send('openFileExplorer', dirname),
-  deleteFile: (fname) => ipcRenderer.send('deleteFile', fname),
-  onDirectorySelected: (callback) => ipcRenderer.on('directory-selected', callback),
-  onNotebooksUpdated: (callback) => ipcRenderer.on('notebooks-updated', callback),
-  loadModConfigFiles: () => ipcRenderer.invoke('loadModConfigFiles'),
 
-  // voices
+  // file explorer stuff
+  openFileExplorer: (dirname) => ipcRenderer.send('openFileExplorer', dirname),
+  selectDirectory: () => ipcRenderer.invoke('selectDirectory'),
+
+  // voices tab
   refreshVoices: () => ipcRenderer.invoke('refreshVoices'),
   getVoiceManagerData: () => ipcRenderer.invoke('getVoiceManagerData'),
   getUserVoices: () => ipcRenderer.invoke('getUserVoices'),
   setUserVoices: (data) => ipcRenderer.invoke('setUserVoices', data),
   testVoice: (voiceConfig, text) => ipcRenderer.invoke('testVoice', voiceConfig, text),
 
-  scan: () => ipcRenderer.invoke('scannerScan'),
+  // mission and notebook scanning
+  scanMissions: () => ipcRenderer.invoke('scanMissions'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('missionGeneratePacenotes', mission),
+  onNotebooksUpdated: (callback) => ipcRenderer.on('notebooksUpdated', callback),
+  rmNotebooksUpdated: (callback) => ipcRenderer.removeAllListeners('notebooksUpdated'),
+  regeneratePacenote: (mission, fname) => ipcRenderer.send('regeneratePacenote', mission, fname),
 
-  openAudioFile: () => ipcRenderer.invoke('openAudioFile'),
+  // recording
+  openRecordingFile: () => ipcRenderer.invoke('openRecordingFile'),
   writeAudioChunk: (audioChunk) => ipcRenderer.send('writeAudioChunk', audioChunk),
   closeAudioFile: () => ipcRenderer.invoke('closeAudioFile'),
-
-  transcribeAudioFile: (cutId, selectedMission) => ipcRenderer.send('transcribeAudioFile', cutId, selectedMission),
+  transcribeAudioFile: (cutId, selectedMission) => ipcRenderer.handle('transcribeAudioFile', cutId, selectedMission),
   discardCurrentAudioRecordingFile: () => ipcRenderer.send('discardCurrentAudioRecordingFile'),
-  onTranscribeDone: (callback) => ipcRenderer.on('transcribe-done', (_event, value) => callback(value)),
-  onServerRecordingCut: (callback) => ipcRenderer.on('server-recording-cut', (_event, value) => callback(value)),
-  //TODO make as may ipcRenderer.on into invoke as possible
+  onServerRecordingCut: (callback) => ipcRenderer.on('serverRecordingCut', (_event, value) => callback(value)),
+  rmServerRecordingCut: () => ipcRenderer.removeAllListeners('serverRecordingCut'),
 })

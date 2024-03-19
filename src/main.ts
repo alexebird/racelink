@@ -34,8 +34,11 @@ app.use(PrimeVue, {
 })
 
 
-import ProgressSpinner from 'primevue/progressspinner';
+import ProgressSpinner from 'primevue/progressspinner'
 app.component('ProgressSpinner', ProgressSpinner)
+
+import ProgressBar from 'primevue/progressbar'
+app.component('ProgressBar', ProgressBar)
 
 import Button from 'primevue/button'
 app.component('Button', Button)
@@ -99,19 +102,3 @@ import ConfirmationService from 'primevue/confirmationservice'
 app.use(ConfirmationService)
 
 app.mount('#app')
-// .$nextTick(() => {
-  // Remove Preload scripts loading
-  // postMessage({ payload: 'removeLoading' }, '*')
-
-  // Use contextBridge
-  // ipcRenderer.on('main-process-message', (_event, message) => {
-  //   console.log(message)
-  // })
-
-  // setInterval(() => {
-    // console.log('scanning');
-    // ipcRenderer.send('scan-missions');
-    // const matchingDirs = listMatchingDirectories(baseDir);
-    // Process the matching directories as needed
-  // }, 1000); // Check every 10000 milliseconds (10 seconds)
-// })

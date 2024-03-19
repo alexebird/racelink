@@ -17,9 +17,9 @@ export default class BeamUserDir {
     return this.cachedStaticPacenotes
   }
 
-  async load() {
-    this.cachedVoices = await this.loadAndMergeVoices()
-    this.cachedStaticPacenotes = await this.loadStaticPacenotes()
+  load() {
+    this.cachedVoices = this.loadAndMergeVoices()
+    this.cachedStaticPacenotes = this.loadStaticPacenotes()
     // console.log(this.cachedStaticPacenotes)
   }
 
@@ -103,29 +103,29 @@ export default class BeamUserDir {
     }, {});
   }
 
-  async loadAndMergeVoices() {
-    const contents = await Promise.all(this._voiceSearchPaths().map(path => {
+  loadAndMergeVoices() {
+    const contents = this._voiceSearchPaths().map(path => {
       if (path.includes('.zip/')) {
         const [zipPath, internalPath] = path.split('.zip/').map((part, index) => index === 0 ? `${part}.zip` : part);
         return this.readFileFromZip(zipPath, internalPath);
       } else {
         return this.readFileNormally(path);
       }
-    }));
+    })
 
     const mergedJson = this.mergeJsonContents(contents.filter(content => content !== null));
     return mergedJson;
   }
 
-  async loadStaticPacenotes() {
+  loadStaticPacenotes() {
     for (const path of this._staticPacenotesSearchPaths()) {
       try {
         let content;
         if (path.includes('.zip/')) {
           const [zipPath, internalPath] = path.split('.zip/').map((part, index) => index === 0 ? `${part}.zip` : part);
-          content = await this.readFileFromZip(zipPath, internalPath);
+          content = this.readFileFromZip(zipPath, internalPath);
         } else {
-          content = await this.readFileNormally(path);
+          content = this.readFileNormally(path);
         }
         if (content) {
           const json = JSON.parse(content);

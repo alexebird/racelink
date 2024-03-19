@@ -6,7 +6,6 @@ import PQueue from 'p-queue'
 const { v4: uuidv4 } = require('uuid')
 import { MissionScanner } from './aipacenotes/MissionScanner'
 import NotebookScanner from './aipacenotes/NotebookScanner'
-import Notebook from './aipacenotes/Notebook'
 import FlaskApiClient from './aipacenotes/FlaskApiClient'
 import BeamUserDir from './aipacenotes/BeamUserDir'
 import UserVoicesFile from './aipacenotes/UserVoicesFile'
@@ -51,6 +50,7 @@ const defaultSettings = {
   trimSilenceMinSilenceDuration: 0.5,
   uuid: uuidv4(),
   versionString: `v${pkg.version}`,
+  lastSelectedMission: null,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
 }
@@ -62,7 +62,7 @@ appSettings.save()
 const flaskClient = new FlaskApiClient(appSettings.get('uuid'))
 const voiceManager = new VoiceManager(flaskClient)
 const beamUserDir = new BeamUserDir(appSettings)
-const scanner = new MissionScanner()
+const missionScanner = new MissionScanner()
 const inFlightMissions = new Set()
 let audioFileStream = null
 let audioFileFname = null
@@ -97,6 +97,7 @@ function createWindow() {
     },
   })
 
+  beamUserDir.load()
   setupIPC()
   setupExpressServer()
 
@@ -147,11 +148,11 @@ app.whenReady().then(() => {
   createWindow()
 })
 
-async function handleScannerScan(_event, _args) {
-  scanner.configure({
+function scanMissions(_event) {
+  missionScanner.configure({
     basePath: appSettings.get('beamUserDir'),
   })
-  return scanner.scan()
+  return missionScanner.scan()
 }
 
 function recordingFname() {
@@ -164,8 +165,17 @@ function recordingFname() {
   return outputFile
 }
 
+function sendIpcNotebooks(notebookScanner) {
+  if (win) {
+    win.webContents.send('notebooksUpdated', notebookScanner.getNotebooksAsIpcData());
+  }
+}
+
 async function missionGeneratePacenotes(_event, selectedMission) {
-  if (!selectedMission) {
+  if (selectedMission) {
+    appSettings.set('lastSelectedMission', selectedMission.mission.fullId)
+  } else {
+    appSettings.set('lastSelectedMission', null)
     return
   }
 
@@ -179,49 +189,25 @@ async function missionGeneratePacenotes(_event, selectedMission) {
     return
   }
 
-  // get all of the mission's notebooks
-  const notebookScanner = new NotebookScanner(selectedMission.mission.fname)
-  const files = notebookScanner.scan()
-
-  if (!files) {
-    // no notebooks found
-    console.log(`no notebooks found for ${selectedMission.mission.fullId}`)
-    return
-  }
-
   inFlightMissions.add(selectedMission.mission.fname)
 
-  // read all notebook files
-  const notebooks = files.map((file) => {
-    return new Notebook(file, beamUserDir.voices(), beamUserDir.staticPacenotes())
-  })
-
-  // collect pacenote updates across all notesbooks in the mission.
-  const pacenotesToUpdate = notebooks.map(notebook => {
-    return notebook.updatePacenotes()
-  }).flat()
-
-  const ipcNotebooks = notebooks.map((nb) => nb.toIpcData())
-
-  if (win) {
-    win.webContents.send('notebooks-updated', ipcNotebooks);
-  }
+  const notebookScanner = new NotebookScanner(beamUserDir, selectedMission.mission.fname)
+  const pacenotesToUpdate = notebookScanner.getUpdatesToDo()
+  sendIpcNotebooks(notebookScanner)
 
   const promises = pacenotesToUpdate.map((pn) => {
     console.log('------------------------------------------------------')
     const audioFname = pn.audioFname()
     const noteName = pn.name()
-    console.log(`${pn.joinedNote()}`)
+    const noteText = pn.joinedNote()
     const voiceConfig = beamUserDir.voices()[pn.voice()]
-    // const rv = executeCreatePacenoteAudio(notebooks, pn, voiceConfig, audioFname)
+    console.log(`${noteText}`)
 
-    return generateAudioFile(noteName, voiceConfig, audioFname).then((data) => {
+    return generateAudioFile(noteText, voiceConfig, audioFname).then((data) => {
       const [ok, audioLen] = data
       if (ok) {
-        if (win) {
-          win.webContents.send('notebooks-updated', ipcNotebooks);
-        }
         storeMetadata(audioFname, audioLen, noteName)
+        sendIpcNotebooks(notebookScanner)
       }
     })
   })
@@ -229,65 +215,17 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   Promise.allSettled(promises).then(results => {
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
-        // console.log(`Operation ${index + 1} succeeded.`);
+        // console.log(`Operation ${index + 1} succeeded.`)
       } else {
-        console.error(`Operation ${index + 1} failed:`, result.reason);
+        console.error(`pacenote update failed:`, result.reason)
       }
-    });
-
-    // Cleanup code here
-    // console.log('All operations completed. Running cleanup code...');
-    notebooks.forEach(nb => {
-      nb.cleanUpAudioFiles()
     })
 
+    // Cleanup code here
+    notebookScanner.cleanup()
     inFlightMissions.delete(selectedMission.mission.fname)
-  });
+  })
 }
-
-// function executeCreatePacenoteAudio(notebooks, pn, voiceConfig, audioFname) {
-//   const req = flaskClient.postCreatePacenoteAudioB64(pn.name(), pn.joinedNote(), voiceConfig)
-//     .then(([resp, err]) => {
-//       if (err) {
-//         console.error('error from postCreatePacenoteAudioB64', err)
-//         lastNetworkError = nowTs()
-//         return
-//       }
-//
-//       lastNetworkError = null
-//
-//       // Assuming `resp` is the parsed JSON object from the Flask server
-//       const audioContentBase64 = resp.file_content; // The property names should match your Flask response
-//       const audioBuffer = Buffer.from(audioContentBase64, 'base64');
-//       const noteName = resp.note_name;
-//       const audioLen = resp.audio_length_sec;
-//       console.log(`noteName: ${noteName}`)
-//       console.log(`audioLen: ${audioLen}`)
-//
-//       fs.mkdirSync(path.dirname(audioFname), { recursive: true });
-//       try {
-//         fs.writeFileSync(audioFname, audioBuffer);
-//         console.log(`File written successfully: ${audioFname}`);
-//
-//         const ipcNotebooks = notebooks.map((nb) => nb.toIpcData());
-//         if (win) {
-//           win.webContents.send('notebooks-updated', ipcNotebooks);
-//         }
-//       } catch (error) {
-//         console.error('Error writing file:', error);
-//       }
-//
-//       storeMetadata(audioFname, audioLen, pn.name())
-//     })
-//     .catch(error => {
-//       console.error('error in postCreatePacenoteAudioB64', error);
-//     });
-//
-//   return req
-// }
-
-// function onNetworkError(err) {
-// }
 
 async function generateAudioFile(text, voiceConfig, audioFname) {
   const [resp, err] = await flaskClient.postCreatePacenoteAudioB64('voice_test', text, voiceConfig)
@@ -316,66 +254,7 @@ async function generateAudioFile(text, voiceConfig, audioFname) {
   }
 }
 
-// function executeVoiceTest(text, voiceConfig, audioFname) {
-//   const req = flaskClient.postCreatePacenoteAudioB64('voice_test', text, voiceConfig)
-//     .then(([resp, err]) => {
-//       const audioContentBase64 = resp.file_content;
-//       const audioBuffer = Buffer.from(audioContentBase64, 'base64');
-//       const noteName = resp.note_name;
-//       // const audioLen = resp.audio_length_sec;
-//       console.log(`noteName: ${noteName}`)
-//       // console.log(`audioLen: ${audioLen}`)
-//
-//       fs.mkdirSync(path.dirname(audioFname), { recursive: true });
-//       try {
-//         fs.writeFileSync(audioFname, audioBuffer);
-//         if (win) {
-//           win.webContents.send('voiceTestFileReady', audioFname);
-//         }
-//       } catch (error) {
-//         console.error('Error writing file for voice test:', error);
-//       }
-//     })
-//     .catch(error => {
-//       console.error('Error in executeVoiceTest postCreatePacenoteAudioB64', error);
-//     });
-//
-//   return req
-// }
-
-function openRecordingFile() {
-    audioFileFname = recordingFname()
-
-    // Ensure there's no open stream already
-    if (audioFileStream) {
-      console.log('A file stream is already open. Closing it now without transcribe.');
-      audioFileStream.end();
-      audioFileStream = null;
-    }
-
-    audioFileStream = fs.createWriteStream(audioFileFname);
-
-    audioFileStream.on('open', () => {
-      console.log('File stream opened successfully.');
-    });
-
-    audioFileStream.on('error', (err) => {
-      console.error('Error with file stream:', err);
-    });
-}
-
-function closeRecordingFile() {
-  if (audioFileStream) {
-    audioFileStream.end(() => {
-      console.log('File stream closed successfully.');
-    });
-    audioFileStream = null; // Reset the variable for future use
-  } else {
-    console.log('No open file stream to close.');
-  }
-}
-
-function transcribeAudioFile(_event, cutId, selectedMission) {
+async function transcribeAudioFile(_event, cutId, selectedMission) {
   if (lastNetworkError && nowTs() - lastNetworkError < networkErrorDebounceSec) {
     console.log(`updates slowed due to network error.`)
     return
@@ -385,35 +264,41 @@ function transcribeAudioFile(_event, cutId, selectedMission) {
   let noiseLevel = appSettings.get('trimSilenceNoiseLevel')
   let minSilenceDuration = appSettings.get('trimSilenceMinSilenceDuration')
 
-  flaskClient.postTranscribe(fname, noiseLevel, minSilenceDuration).then(([resp, err]) => {
-    if (err) {
-      console.error('error from postCreatePacenoteAudioB64', err)
-      lastNetworkError = nowTs()
-      return
-    }
+  const [resp, err] = await flaskClient.postTranscribe(fname, noiseLevel, minSilenceDuration)
+  // .then(([resp, err]) => {
 
-    lastNetworkError = null
+  if (err) {
+    console.error('error from postCreatePacenoteAudioB64', err)
+    lastNetworkError = nowTs()
+    return
+  }
 
-    if (resp.text === null) {
-      resp.text = UNKNOWN_PLACEHOLDER
-    }
+  lastNetworkError = null
 
-    const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'recce', 'primary', 'transcripts.json');
+  if (resp.text === null) {
+    resp.text = UNKNOWN_PLACEHOLDER
+  }
 
-    tscHist.push(resp)
-    if (tscHist.length > 2) {
-      tscHist.shift()
-    }
-    const jsonLine = JSON.stringify({ cutId, resp }) + '\n';
+  const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'recce', 'primary', 'transcripts.json');
 
-    try {
-      fs.appendFileSync(filePath, jsonLine, 'utf8');
-      console.log('JSON line appended successfully');
-    } catch (err) {
-      console.error('Error appending to the file:', err);
-    }
+  tscHist.push(resp)
+  if (tscHist.length > 2) {
+    tscHist.shift()
+  }
+  const jsonLine = JSON.stringify({ cutId, resp }) + '\n';
 
-    win.webContents.send('transcribe-done', resp);
+  try {
+    fs.appendFileSync(filePath, jsonLine, 'utf8');
+    console.log('JSON line appended successfully');
+  } catch (err) {
+    console.error('Error appending to the file:', err);
+  }
+
+  deleteFileWithName(fname)
+
+  return resp
+
+    // win.webContents.send('transcribeDone', resp);
 
     // try {
     //   fs.unlinkSync(fname);
@@ -421,7 +306,7 @@ function transcribeAudioFile(_event, cutId, selectedMission) {
     // } catch (err) {
     //   console.error('Error deleting the file:', err);
     // }
-  })
+  // })
 }
 
 function deleteFileWithName(fname) {
@@ -436,17 +321,17 @@ function deleteFileWithName(fname) {
 function setupIPC() {
   ipcMain.handle('settingsGetAll', settingsGetAll)
   ipcMain.handle('settingsSet', settingsSet)
-  ipcMain.handle('scannerScan', handleScannerScan)
+  ipcMain.handle('scanMissions', scanMissions)
   ipcMain.on('missionGeneratePacenotes', missionGeneratePacenotes)
-  ipcMain.handle('openAudioFile', openAudioFile)
+  ipcMain.handle('openRecordingFile', openRecordingFile)
   ipcMain.on('writeAudioChunk', writeAudioChunk)
   ipcMain.handle('closeAudioFile', closeAudioFile)
-  ipcMain.on('transcribeAudioFile', transcribeAudioFile)
+  ipcMain.handle('transcribeAudioFile', transcribeAudioFile)
   ipcMain.on('discardCurrentAudioRecordingFile', discardCurrentAudioRecordingFile)
-  ipcMain.on('deleteFile', deleteFile)
-  ipcMain.on('openFilePicker', openFilePicker)
+  ipcMain.on('regeneratePacenote', regeneratePacenote)
+  ipcMain.handle('selectDirectory', selectDirectory)
   ipcMain.on('openFileExplorer', openFileExplorer)
-  ipcMain.handle('loadModConfigFiles', loadModConfigFiles)
+  // ipcMain.handle('loadModConfigFiles', loadModConfigFiles)
 
   // Voice tab
   ipcMain.handle('refreshVoices', refreshVoices)
@@ -466,9 +351,25 @@ function settingsSet(_event, key, value) {
   return appSettings.settings
 }
 
-function openAudioFile(_event) {
-  openRecordingFile()
-  return true
+function openRecordingFile(_event) {
+  // Ensure there's no open stream already
+  if (audioFileStream) {
+    console.log('A file stream is already open. Closing it now without transcribe.');
+    closeAudioFile()
+    // audioFileStream.end();
+    // audioFileStream = null;
+  }
+
+  audioFileFname = recordingFname()
+  audioFileStream = fs.createWriteStream(audioFileFname);
+
+  audioFileStream.on('open', () => {
+    console.log('File stream opened successfully.');
+  });
+
+  audioFileStream.on('error', (err) => {
+    console.error('Error with file stream:', err);
+  });
 }
 
 function writeAudioChunk(event, audioChunk) {
@@ -492,27 +393,42 @@ function discardCurrentAudioRecordingFile(_event) {
 }
 
 function closeAudioFile(_event) {
-  closeRecordingFile(audioFileFname)
+  if (audioFileStream) {
+    audioFileStream.end(() => {
+      console.log('File stream closed successfully.');
+    });
+    audioFileStream = null; // Reset the variable for future use
+  } else {
+    console.log('No open file stream to close.');
+  }
 }
 
-function deleteFile(_event, fname) {
+function regeneratePacenote(_event, selectedMission, fname) {
   deleteFileWithName(fname)
+
+  if (selectedMission) {
+    const notebookScanner = new NotebookScanner(beamUserDir, selectedMission.mission.fname)
+    notebookScanner.readNotebooks()
+    sendIpcNotebooks(notebookScanner)
+  }
 }
 
-async function openFilePicker(event) {
+async function selectDirectory(_event) {
   const lastPath = appSettings.get('beamUserDir')
 
   const result = await dialog.showOpenDialog(win, {
     properties: ['openDirectory'],
     defaultPath: lastPath,
-  });
+  })
 
   if (!result.canceled && result.filePaths.length > 0) {
-    event.sender.send('directory-selected', result.filePaths[0])
+    return result.filePaths[0]
+  } else {
+    return null
   }
 }
 
-function openFileExplorer(event, dirname) {
+function openFileExplorer(_event, dirname) {
   shell.openPath(dirname)
     .then((error) => {
       if (error) {
@@ -523,10 +439,9 @@ function openFileExplorer(event, dirname) {
     })
 }
 
-async function loadModConfigFiles(_event) {
-  await beamUserDir.load()
-  return
-}
+// async function loadModConfigFiles(_event) {
+//   return
+// }
 
 async function refreshVoices(_event) {
   return await voiceManager.refreshVoices()
@@ -572,48 +487,19 @@ async function testVoice(_event, voiceConfig, text) {
 
 function setupExpressServer() {
   startServer({
-    // onRecordingStart: () => {
-    //   console.log('start recording from express')
-    //   win.webContents.send('server-recording-start')
-    // },
-    // onRecordingStop: () => {
-    //   console.log('stop recording from express')
-    //   win.webContents.send('server-recording-stop')
-    // },
     onRecordingCut: (cutReq) => {
       console.log('cut recording from express', cutReq)
-      if (win)
-        win.webContents.send('server-recording-cut', cutReq)
+      if (win) {
+        win.webContents.send('serverRecordingCut', cutReq)
+      }
     },
     onGetTranscripts: (count) => {
       console.log('get transcripts', count)
-
-      // fs.existsSync(this.audioFname())
-
       if (count === -1) {
         tscHist.pop()
         tscHist.pop()
       }
-
-      // const transcripts = [{error: false, text: 'foo'}]
       return tscHist.toReversed()
     },
-    // onRemoteAudioPlayFile: (audioFname) => {
-    //   console.log('onRemoteAudioPlayFile', audioFname)
-    //   if (win)
-    //     win.webContents.send('server-remote-audio-play', audioFname)
-    // },
-    // onRemoteAudioReset: () => {
-    //   console.log('onRemoteAudioReset')
-    //   if (win)
-    //     win.webContents.send('server-remote-audio-reset')
-    // },
-    // onRemoteAudioQueueSize: () => {
-    //   // console.log('onRemoteAudioQueueSize')
-    //   return {
-    //     queueSize: lastQueueSize,
-    //     paused: lastAudioPlayerPausedState,
-    //   }
-    // },
   })
 }

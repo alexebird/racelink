@@ -3,177 +3,180 @@ import { useSettingsStore } from "@/stores/settings"
 
 // const mediaDeviceConf = { audio: true }
 const mediaDeviceConf = {
-    audio: {
-        autoGainControl: false,
-        noiseSuppression: false,
-        echoCancellation: false,
-    }
+  audio: {
+    autoGainControl: false,
+    noiseSuppression: false,
+    echoCancellation: false,
+  }
 }
 
 const stopRecordingDelayMs = 300
 
 export default class Recorder {
-    constructor() {
+  constructor() {
+    this.cutHappened = false
+    this.mediaRecorder = null
+    // this.audioChunks = null
+    // this.stream = null
+    this.lastCut = 0
+    this.autocut = false
+    this.cutId = -1
+
+    setInterval(() => {
+      this.watchdog()
+    }, 1000)
+  }
+
+  // setup(callback) {
+  //    navigator.mediaDevices.getUserMedia(mediaDeviceConf)
+  //         .then(stream => {
+  //             this.stream = stream
+  //             if (callback) {
+  //                 callback()
+  //             }
+  //         })
+  //         .catch(error => {
+  //             console.error('error setting up recording', error)
+  //         })
+  // }
+
+  createMediaRecorder(cb) {
+    this.lastCut = Date.now()/1000
+    this.autocut = false
+    // this.setup()
+
+    navigator.mediaDevices.getUserMedia(mediaDeviceConf)
+      .then(stream => {
+        // this.stream = stream
+
+        useRallyStore().$patch({ recordingError: null })
+
+        try {
+          this.mediaRecorder = new MediaRecorder(stream);
+          this.mediaRecorder.ondataavailable = (event) => {
+            const audioChunks = []
+            audioChunks.push(event.data)
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+
+            reader.onloadend = () => {
+              window.electronAPI.writeAudioChunk(reader.result)
+
+              if (this.mediaRecorder && this.mediaRecorder.state === 'inactive') {
+                this.onBufferingDone()
+              }
+            }
+
+            reader.readAsArrayBuffer(audioBlob);
+          }
+          if (cb) {
+            cb()
+          }
+
+          // this.mediaRecorder.onstop = () => {
+          // this.writeAudioChunks()
+          // }
+        }
+        catch (error) {
+          console.error('error creating mediaRecorder', error)
+          if (error.message.includes("Failed to construct 'MediaRecorder'")) {
+            useRallyStore().$patch({ recordingError: "No input device found" })
+          }
+        }
+      })
+      .catch(error => {
+        console.error('error setting up recording', error)
+        if (error.message.includes("Requested device not found")) {
+          useRallyStore().$patch({ recordingError: "No input device found" })
+        }
+      })
+  }
+
+  onBufferingDone() {
+    window.electronAPI.closeAudioFile().then(() => {
+      console.log('closeAudioFile done')
+      if (this.autocut) {
+        window.electronAPI.discardCurrentAudioRecordingFile()
+      } else {
+        window.electronAPI.transcribeAudioFile(this.cutId, useRallyStore().serializedSelectedMission).then((resp) => {
+          useRallyStore().addTranscription(resp)
+        })
+      }
+
+      if (this.cutHappened) {
         this.cutHappened = false
-        this.mediaRecorder = null
-        // this.audioChunks = null
-        // this.stream = null
-        this.lastCut = 0
-        this.autocut = false
-        this.cutId = -1
-
-        setInterval(() => {
-            this.watchdog()
-        }, 1000)
-    }
-
-    // setup(callback) {
-    //    navigator.mediaDevices.getUserMedia(mediaDeviceConf)
-    //         .then(stream => {
-    //             this.stream = stream
-    //             if (callback) {
-    //                 callback()
-    //             }
-    //         })
-    //         .catch(error => {
-    //             console.error('error setting up recording', error)
-    //         })
-    // }
-
-     createMediaRecorder(cb) {
         this.lastCut = Date.now()/1000
-        this.autocut = false
-        // this.setup()
+        this.startRecording()
+      }
+    })
+  }
 
-        navigator.mediaDevices.getUserMedia(mediaDeviceConf)
-            .then(stream => {
-                // this.stream = stream
+  teardown() {
+    this.mediaRecorder = null
+  }
 
-                useRallyStore().$patch({ recordingError: null })
+  watchdog() {
+    const now = Date.now()/1000
+    const timeout = now - this.lastCut
+    const threshold = useSettingsStore().autostopThreshold
+    useRallyStore().$patch({ recordingAutostop: Math.round(threshold - timeout) })
 
-                try {
-                    this.mediaRecorder = new MediaRecorder(stream);
-                    this.mediaRecorder.ondataavailable = event => {
-                        const audioChunks = []
-                        audioChunks.push(event.data)
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const reader = new FileReader();
-
-                        reader.onloadend = () => {
-                            window.electronAPI.writeAudioChunk(reader.result)
-
-                            if (this.mediaRecorder && this.mediaRecorder.state === 'inactive') {
-                                this.onBufferingDone()
-                            }
-                        }
-
-                        reader.readAsArrayBuffer(audioBlob);
-                    }
-                    if (cb)
-                        cb()
-
-                    // this.mediaRecorder.onstop = () => {
-                    // this.writeAudioChunks()
-                    // }
-                }
-                catch (error) {
-                    console.error('error creating mediaRecorder', error)
-                    if (error.message.includes("Failed to construct 'MediaRecorder'")) {
-                        useRallyStore().$patch({ recordingError: "No input device found" })
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('error setting up recording', error)
-                if (error.message.includes("Requested device not found")) {
-                    useRallyStore().$patch({ recordingError: "No input device found" })
-                }
-            })
+    if (timeout > threshold) {
+      if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+        this.autocut = true
+        console.log('auto-stopping recording')
+        this.stopRecording()
+      }
     }
+  }
 
-    onBufferingDone() {
-        window.electronAPI.closeAudioFile().then(() => {
-            console.log('closeAudioFile done')
-            if (this.autocut) {
-                window.electronAPI.discardCurrentAudioRecordingFile()
-            } else {
-                window.electronAPI.transcribeAudioFile(this.cutId, useRallyStore().serializedSelectedMission)
-            }
-
-            if (this.cutHappened) {
-                this.cutHappened = false
-                this.lastCut = Date.now()/1000
-                this.startRecording()
-            }
-        })
+  recordingStatus() {
+    if (this.mediaRecorder) {
+      return this.mediaRecorder.state
+    } else {
+      return 'none'
     }
+  }
 
-    teardown() {
-        this.mediaRecorder = null
-    }
+  isRecording() {
+    return this.recordingStatus() === 'recording'
+  }
 
-    watchdog() {
-        const now = Date.now()/1000
-        const timeout = now - this.lastCut
-        const threshold = useSettingsStore().autostopThreshold
-        useRallyStore().$patch({ recordingAutostop: Math.round(threshold - timeout) })
-
-        if (timeout > threshold) {
-            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-                this.autocut = true
-                console.log('auto-stopping recording')
-                this.stopRecording()
-            }
-        }
-    }
-
-    recordingStatus() {
+  startRecording() {
+    window.electronAPI.openRecordingFile().then(() => {
+      this.createMediaRecorder(() => {
         if (this.mediaRecorder) {
-            return this.mediaRecorder.state
-        } else {
-            return 'none'
+          useRallyStore().$patch({ recordingStatus: 'recording' })
+          this.mediaRecorder.start(1000)
         }
-    }
+      })
+    })
+  }
 
-    isRecording() {
-        return this.recordingStatus() === 'recording'
+  internalStopRecording() {
+    if (this.mediaRecorder) {
+      this.mediaRecorder.stop()
     }
+  }
 
-    startRecording() {
-        window.electronAPI.openAudioFile().then(() => {
-            this.createMediaRecorder(() => {
-                if (this.mediaRecorder) {
-                    useRallyStore().$patch({ recordingStatus: 'recording' })
-                    this.mediaRecorder.start(1000)
-                }
-            })
-        })
+  stopRecording() {
+    if (this.mediaRecorder) {
+      useRallyStore().$patch({ recordingStatus: 'not_recording' })
+      this.mediaRecorder.stop()
     }
+  }
 
-    internalStopRecording() {
-        if (this.mediaRecorder) {
-            this.mediaRecorder.stop()
-        }
-    }
+  // stopRecordingAfter() {
+  //     setTimeout(() => {
+  //         this.stopRecording()
+  //     }, stopRecordingDelayMs)
+  // }
 
-    stopRecording() {
-        if (this.mediaRecorder) {
-            useRallyStore().$patch({ recordingStatus: 'not_recording' })
-            this.mediaRecorder.stop()
-        }
-    }
-
-    // stopRecordingAfter() {
-    //     setTimeout(() => {
-    //         this.stopRecording()
-    //     }, stopRecordingDelayMs)
-    // }
-
-    cutRecording(cutReq) {
-        this.cutId = cutReq.cut_id
-        this.cutHappened = true
-        setTimeout(() => {
-            this.internalStopRecording()
-        }, stopRecordingDelayMs)
-    }
+  cutRecording(cutReq) {
+    this.cutId = cutReq.cut_id
+    this.cutHappened = true
+    setTimeout(() => {
+      this.internalStopRecording()
+    }, stopRecordingDelayMs)
+  }
 }

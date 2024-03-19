@@ -114,6 +114,10 @@ class Notebook {
   }
 
   toIpcData() {
+    this.cachedPacenotes.forEach((pn) => {
+      pn.setFileExists()
+    })
+
     const children = this.cachedPacenotes.map((pn) => {
       // return {
       //   key: pn.name(),
@@ -121,6 +125,7 @@ class Notebook {
       //     name: pn.name()
       //   }
       // }
+      //
       return {
         name: pn.name(),
         note: pn.joinedNote(),

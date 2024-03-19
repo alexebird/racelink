@@ -13,11 +13,21 @@ const currentIndex = ref(-1);
 
 onMounted(() => {
   window.electronAPI.onNotebooksUpdated((event, notebooks) => {
+    // console.log('onNotebooksUpdated', notebooks)
     rallyStore.$patch({ notebooks: notebooks })
+  })
+
+  // window.electronAPI.onTranscribeDone((resp) => {
+    // rallyStore.addTranscription(resp)
+  // })
+  window.electronAPI.onServerRecordingCut((cutReq) => {
+    doCut(cutReq)
   })
 })
 
 onUnmounted(() => {
+  window.electronAPI.rmServerRecordingCut()
+  window.electronAPI.rmNotebooksUpdated()
 })
 
 const onRecordingStart = () => {
@@ -36,14 +46,6 @@ const onRecordingCut = () => {
   doCut({cut_id: -1})
 }
 
-window.electronAPI.onTranscribeDone((resp) => {
-  rallyStore.addTranscription(resp)
-})
-
-window.electronAPI.onServerRecordingCut((cutReq) => {
-  doCut(cutReq)
-})
-
 const onPlayClick = (audioFname) => {
   if (audioFname) {
     audioPlayerStore.play(audioFname)
@@ -51,7 +53,7 @@ const onPlayClick = (audioFname) => {
 }
 
 const onRegenOneClick = (fname) => {
-  window.electronAPI.deleteFile(fname)
+  window.electronAPI.regeneratePacenote(rallyStore.serializedSelectedMission, fname)
 }
 
 const openFileExplorer = () => {
@@ -60,6 +62,11 @@ const openFileExplorer = () => {
 
 const onOpenNotebookClick = (fname) => {
   window.electronAPI.openFileExplorer(fname)
+}
+
+const progressBadgeStr = (slotProps) => {
+  const total = slotProps.data.pacenotesCount
+  return `${total - slotProps.data.updatesCount} / ${total}`
 }
 </script>
 
@@ -91,81 +98,67 @@ const onOpenNotebookClick = (fname) => {
         pt:content:class="!rounded-none"
       >
         <TabPanel header="Notebooks">
-          <DataTable
-            :value="rallyStore.notebooks"
-            dataKey="basename"
-            tableStyle="min-width: 10rem"
-            v-model:expandedRows="expandedRows"
-          >
-            <Column expander style="width: 3rem" />
-            <Column header="Notes" style="width: 6rem" >
-              <template #body="slotProps">
-                <Badge :value="slotProps.data.updatesCount" :severity="slotProps.data.updatesCount === 0 ? 'success' : 'danger'" class='ml-1'></Badge>
-                {{ slotProps.data.pacenotesCount }}
+          <div class="flex flex-col">
+            <ProgressBar :value="rallyStore.progressValue" :showValue="false"></ProgressBar>
+            <DataTable
+              :value="rallyStore.notebooks"
+              dataKey="basename"
+              tableStyle="min-width: 10rem"
+              v-model:expandedRows="expandedRows"
+            >
+              <Column expander style="width: 3rem" />
+              <Column header="Notes" style="width: 6rem" >
+                <template #body="slotProps">
+                  <Badge :value="progressBadgeStr(slotProps)" :severity="slotProps.data.updatesCount === 0 ? 'success' : 'danger'"></Badge>
+                </template>
+              </Column>
+              <Column field="name" header="Name"></Column>
+              <Column header="" style="width: 3rem">
+                <template #body="slotProps">
+                  <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)">
+                    <span class="pi pi-folder-open"></span>
+                  </Button>
+                </template>
+              </Column>
+              <Column field="basename" header="ID"></Column>
+              <template #expansion="slotProps">
+                <div class="p-3">
+                  <h5 class="text-xl">Pacenotes</h5>
+                  <DataTable
+                    :value="slotProps.data.pacenotes"
+                    scrollable scrollHeight="600px"
+                    paginator :rows="8"
+                  >
+                    <Column field="name" header="Name" style="width: 7rem"></Column>
+                    <Column header="">
+                      <template #body="slotProps">
+                        <div class="flex">
+                          <Button @click="() => onPlayClick(slotProps.data.audioFname)">
+                            <span class="pi pi-play"></span>
+                          </Button>
+                          <Button class="ml-2" @click="() => onRegenOneClick(slotProps.data.audioFname)">
+                            <span class="pi pi-refresh"></span>
+                          </Button>
+                        </div>
+                      </template>
+                    </Column>
+                    <Column field="note" header="Note">
+                      <template #body="slotProps">
+                        <span class="font-mono">
+                          {{ slotProps.data.note}}
+                        </span>
+                      </template>
+                    </Column>
+                    <Column field="language" header="Language"></Column>
+                    <Column field="voice" header="Voice"></Column>
+                  </DataTable>
+                </div>
               </template>
-            </Column>
-            <Column field="name" header="Name"></Column>
-            <Column header="" style="width: 3rem">
-              <template #body="slotProps">
-                <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)">
-                  <span class="pi pi-folder-open"></span>
-                </Button>
-              </template>
-            </Column>
-            <Column field="basename" header="ID"></Column>
-            <template #expansion="slotProps">
-              <div class="p-3">
-                <h5 class="text-xl">Pacenotes for {{ slotProps.data.name }}</h5>
-                <DataTable :value="slotProps.data.pacenotes" scrollable scrollHeight="600px">
-                  <Column field="name" header="Name"></Column>
-                  <Column header="">
-                    <template #body="slotProps">
-                      <div class="flex">
-                        <Button @click="() => onPlayClick(slotProps.data.audioFname)">
-                          <span class="pi pi-play"></span>
-                        </Button>
-                        <Button class="ml-2" @click="() => onRegenOneClick(slotProps.data.audioFname)">
-                          <span class="pi pi-refresh"></span>
-                        </Button>
-                      </div>
-                    </template>
-                  </Column>
-                  <Column field="note" header="Note">
-                    <template #body="slotProps">
-                      <span class="font-mono">
-                        {{ slotProps.data.note}}
-                      </span>
-                    </template>
-                  </Column>
-                  <Column field="language" header="Language"></Column>
-                  <Column field="voice" header="Voice"></Column>
-                  <!-- <Column field="amount" header="Amount" sortable> -->
-                  <!--   <template #body="slotProps"> -->
-                  <!--     {{ formatCurrency(slotProps.data.amount) }} -->
-                  <!--   </template> -->
-                  <!-- </Column> -->
-                  <!-- <Column field="status" header="Status" sortable> -->
-                  <!--   <template #body="slotProps"> -->
-                  <!--     <Tag :value="slotProps.data.status.toLowerCase()" :severity="getOrderSeverity(slotProps.data)" /> -->
-                  <!--   </template> -->
-                  <!-- </Column> -->
-                  <!-- <Column headerStyle="width:4rem"> -->
-                  <!--   <template #body> -->
-                  <!--     <Button icon="pi pi-search" /> -->
-                  <!--   </template> -->
-                  <!-- </Column> -->
-                </DataTable>
-              </div>
-            </template>
-          </DataTable>
+            </DataTable>
+          </div>
         </TabPanel>
+
         <TabPanel header="Voice Recording">
-          <!-- <Button :disabled="!rallyStore.recordingSetup || rallyStore.isRecording" class='mr-2' @click="onRecordingStart"> -->
-          <!--   Start -->
-          <!-- </Button> -->
-          <!-- <Button :disabled="!rallyStore.recordingSetup || !rallyStore.isRecording" class='mr-2' @click="onRecordingStop"> -->
-          <!--   Stop -->
-          <!-- </Button> -->
           <div class='flex pb-2'>
             <Button :disabled="!rallyStore.recorder" @click="onRecordingCut">Cut</Button>
             <div class='ml-5'>
@@ -188,19 +181,15 @@ const onOpenNotebookClick = (fname) => {
             </Column>
             <Column field="text" header="Text"></Column>
           </DataTable>
-
-          <!-- <div v-if="!rallyStore.lastTranscriptResp.error"> -->
-          <!--   Last Transcript: "{{rallyStore.lastTranscriptResp.text}}" -->
-          <!-- </div> -->
-          <!-- <div v-if="rallyStore.lastTranscriptResp.error" class='text-red-400'> -->
-          <!--   Last Transcript: ERROR!!! -->
-          <!-- </div> -->
         </TabPanel>
+
       </TabView>
     </div>
+
     <div v-else>
       Select a mission.
     </div>
+
   </div>
 </template>
 

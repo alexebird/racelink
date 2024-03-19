@@ -8,11 +8,11 @@ export const useSettingsStore = defineStore('settings', {
   }),
   getters: {
     autostopThreshold: (state) => state.settings.autostopThreshold,
+    lastSelectedMission: (state) => state.settings.lastSelectedMission,
   },
   actions: {
     setSetting(key, value) {
       window.electronAPI.setSetting(key, value).then((settings) => {
-        console.log(settings)
         this.settings = settings
       })
     }

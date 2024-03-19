@@ -3,12 +3,12 @@ import { useSettingsStore } from "@/stores/settings"
 const settingsStore = useSettingsStore()
 
 const openFilePicker = () => {
-  window.electronAPI.openFilePicker()
+  window.electronAPI.selectDirectory().then((selectedPath) => {
+    if (selectedPath) {
+      settingsStore.setSetting('beamUserDir', selectedPath)
+    }
+  })
 }
-
-window.electronAPI.onDirectorySelected((event, path) => {
-  settingsStore.setSetting('beamUserDir', path)
-})
 
 const settingChangeMinSilenceDuration = () => {
   settingsStore.setSetting('trimSilenceMinSilenceDuration', settingsStore.settings.trimSilenceMinSilenceDuration)

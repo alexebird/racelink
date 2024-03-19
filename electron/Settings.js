@@ -54,7 +54,10 @@ export default class Settings {
   }
 
   set(key, value) {
-    this.settings[key] = value;
-    this.save();
+    const currVal = this.get(key)
+    if (currVal !== value) {
+      this.settings[key] = value;
+      this.save();
+    }
   }
 }
