@@ -1,7 +1,6 @@
 import { useRallyStore } from "@/stores/rally"
 import { useSettingsStore } from "@/stores/settings"
 
-// const mediaDeviceConf = { audio: true }
 const mediaDeviceConf = {
   audio: {
     autoGainControl: false,
@@ -16,8 +15,6 @@ export default class Recorder {
   constructor() {
     this.cutHappened = false
     this.mediaRecorder = null
-    // this.audioChunks = null
-    // this.stream = null
     this.lastCut = 0
     this.autocut = false
     this.cutId = -1
@@ -27,28 +24,12 @@ export default class Recorder {
     }, 1000)
   }
 
-  // setup(callback) {
-  //    navigator.mediaDevices.getUserMedia(mediaDeviceConf)
-  //         .then(stream => {
-  //             this.stream = stream
-  //             if (callback) {
-  //                 callback()
-  //             }
-  //         })
-  //         .catch(error => {
-  //             console.error('error setting up recording', error)
-  //         })
-  // }
-
   createMediaRecorder(cb) {
     this.lastCut = Date.now()/1000
     this.autocut = false
-    // this.setup()
 
     navigator.mediaDevices.getUserMedia(mediaDeviceConf)
       .then(stream => {
-        // this.stream = stream
-
         useRallyStore().$patch({ recordingError: null })
 
         try {
@@ -74,7 +55,7 @@ export default class Recorder {
           }
 
           // this.mediaRecorder.onstop = () => {
-          // this.writeAudioChunks()
+          //   this.teardown()
           // }
         }
         catch (error) {
@@ -99,7 +80,9 @@ export default class Recorder {
         window.electronAPI.discardCurrentAudioRecordingFile()
       } else {
         window.electronAPI.transcribeAudioFile(this.cutId, useRallyStore().serializedSelectedMission).then((resp) => {
-          useRallyStore().addTranscription(resp)
+          if (resp) {
+            useRallyStore().addTranscription(resp)
+          }
         })
       }
 
@@ -162,15 +145,10 @@ export default class Recorder {
   stopRecording() {
     if (this.mediaRecorder) {
       useRallyStore().$patch({ recordingStatus: 'not_recording' })
+      useRallyStore().clearTranscriptionHistory()
       this.mediaRecorder.stop()
     }
   }
-
-  // stopRecordingAfter() {
-  //     setTimeout(() => {
-  //         this.stopRecording()
-  //     }, stopRecordingDelayMs)
-  // }
 
   cutRecording(cutReq) {
     this.cutId = cutReq.cut_id

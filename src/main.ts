@@ -33,6 +33,8 @@ app.use(PrimeVue, {
   pt: CustomPreset,
 })
 
+import Tooltip from 'primevue/tooltip'
+app.directive('tooltip', Tooltip)
 
 import ProgressSpinner from 'primevue/progressspinner'
 app.component('ProgressSpinner', ProgressSpinner)

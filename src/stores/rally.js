@@ -82,6 +82,12 @@ export const useRallyStore = defineStore('rally', {
     },
   },
   actions: {
+    resetRecording() {
+      this.recorder = new Recorder()
+      this.recordingStatus = 'not_recording'
+      this.recordingError = null
+      this.recordingAutostop = 0
+    },
     addTranscription(newItem) {
       this.transcriptionHistory.push(newItem)
     },

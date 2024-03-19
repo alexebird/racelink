@@ -19,11 +19,11 @@ const items = ref([
     icon: 'pi pi-sliders-h',
     route: '/settings'
   },
-  // {
-  //   label: 'Help',
-  //   icon: 'pi pi-question-circle',
-  //   route: '/help'
-  // }
+  {
+    label: 'Help',
+    icon: 'pi pi-question-circle',
+    route: '/help'
+  }
 ])
 
 const activeIndex = ref(0)
@@ -32,6 +32,8 @@ onMounted(() => {
   window.electronAPI.getSettings().then((resp) => {
     settingsStore.$patch({settings: resp.settings, defaults: resp.defaults})
     // console.log(toRaw(settingsStore.settings.lastSelectedMission))
+
+    document.title = `RaceLink ${settingsStore.settings.versionString}`
   })
 })
 </script>
@@ -54,7 +56,7 @@ onMounted(() => {
         </router-link>
       </template>
     </TabMenu>
-    <div class="version-info font-mono text-stone-400 text-center">
+    <div class="version-info font-mono text-sm text-stone-400 text-center">
       {{settingsStore.settings.versionString}}
     </div>
   </div>

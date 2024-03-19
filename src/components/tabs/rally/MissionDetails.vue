@@ -12,6 +12,8 @@ const expandedRows = ref({})
 const currentIndex = ref(-1);
 
 onMounted(() => {
+  rallyStore.resetRecording()
+
   window.electronAPI.onNotebooksUpdated((event, notebooks) => {
     // console.log('onNotebooksUpdated', notebooks)
     rallyStore.$patch({ notebooks: notebooks })
@@ -82,9 +84,10 @@ const progressBadgeStr = (slotProps) => {
             level: {{rallyStore.selectedMission.levelId}}
           </li>
           <li class="mt-2">
-            <Button class="mr-4" @click="openFileExplorer">
-              <span class="pi pi-folder-open"></span>
-            </Button>
+            <Button class="mr-4" @click="openFileExplorer"
+              icon="pi pi-folder-open" label="Open Mission"
+              v-tooltip="'Open an Explorer window for this mission'"
+            ></Button>
             <span class="font-mono text-xs">
               {{rallyStore.selectedMission.fname}}
             </span>
@@ -115,9 +118,9 @@ const progressBadgeStr = (slotProps) => {
               <Column field="name" header="Name"></Column>
               <Column header="" style="width: 3rem">
                 <template #body="slotProps">
-                  <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)">
-                    <span class="pi pi-folder-open"></span>
-                  </Button>
+                  <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)"
+                    v-tooltip.top="'Open an Explorer window for this notebook'"
+                    icon="pi pi-folder-open"></Button>
                 </template>
               </Column>
               <Column field="basename" header="ID"></Column>

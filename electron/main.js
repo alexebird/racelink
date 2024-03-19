@@ -49,7 +49,7 @@ const defaultSettings = {
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
   uuid: uuidv4(),
-  versionString: `v${pkg.version}`,
+  versionString: pkg.version,
   lastSelectedMission: null,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
@@ -257,20 +257,24 @@ async function generateAudioFile(text, voiceConfig, audioFname) {
 async function transcribeAudioFile(_event, cutId, selectedMission) {
   if (lastNetworkError && nowTs() - lastNetworkError < networkErrorDebounceSec) {
     console.log(`updates slowed due to network error.`)
-    return
+    return null
   }
 
   const fname = audioFileFname
   let noiseLevel = appSettings.get('trimSilenceNoiseLevel')
   let minSilenceDuration = appSettings.get('trimSilenceMinSilenceDuration')
 
+  tscHist.push({error: false, loading: true, text: "[...]"})
+  if (tscHist.length > 2) {
+    tscHist.shift()
+  }
+
   const [resp, err] = await flaskClient.postTranscribe(fname, noiseLevel, minSilenceDuration)
-  // .then(([resp, err]) => {
 
   if (err) {
     console.error('error from postCreatePacenoteAudioB64', err)
     lastNetworkError = nowTs()
-    return
+    return null
   }
 
   lastNetworkError = null
@@ -281,10 +285,9 @@ async function transcribeAudioFile(_event, cutId, selectedMission) {
 
   const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'recce', 'primary', 'transcripts.json');
 
+  const last = tscHist.pop()
   tscHist.push(resp)
-  if (tscHist.length > 2) {
-    tscHist.shift()
-  }
+
   const jsonLine = JSON.stringify({ cutId, resp }) + '\n';
 
   try {
@@ -297,16 +300,6 @@ async function transcribeAudioFile(_event, cutId, selectedMission) {
   deleteFileWithName(fname)
 
   return resp
-
-    // win.webContents.send('transcribeDone', resp);
-
-    // try {
-    //   fs.unlinkSync(fname);
-    //   console.log('File deleted successfully');
-    // } catch (err) {
-    //   console.error('Error deleting the file:', err);
-    // }
-  // })
 }
 
 function deleteFileWithName(fname) {
@@ -329,8 +322,10 @@ function setupIPC() {
   ipcMain.handle('transcribeAudioFile', transcribeAudioFile)
   ipcMain.on('discardCurrentAudioRecordingFile', discardCurrentAudioRecordingFile)
   ipcMain.on('regeneratePacenote', regeneratePacenote)
+
   ipcMain.handle('selectDirectory', selectDirectory)
   ipcMain.on('openFileExplorer', openFileExplorer)
+  ipcMain.on('openExternal', openExternal)
   // ipcMain.handle('loadModConfigFiles', loadModConfigFiles)
 
   // Voice tab
@@ -390,6 +385,9 @@ function writeAudioChunk(event, audioChunk) {
 
 function discardCurrentAudioRecordingFile(_event) {
   deleteFileWithName(audioFileFname)
+  while (tscHist.length > 0) {
+    tscHist.pop()
+  }
 }
 
 function closeAudioFile(_event) {
@@ -439,16 +437,19 @@ function openFileExplorer(_event, dirname) {
     })
 }
 
-// async function loadModConfigFiles(_event) {
-//   return
-// }
+function openExternal(_event, url) {
+  shell.openExternal(url)
+    .then((error) => {
+      if (error) {
+        console.error('An error occurred:', error)
+      } else {
+        console.log(`File Explorer opened at path: ${url}`)
+      }
+    })
+}
 
 async function refreshVoices(_event) {
   return await voiceManager.refreshVoices()
-  // voiceManager.refreshVoices().then((data) => {
-    // console.log(data)
-    // event.sender.send('onVoicesRefreshed', data)
-  // })
 }
 
 async function getVoiceManagerData(_event) {
@@ -494,7 +495,7 @@ function setupExpressServer() {
       }
     },
     onGetTranscripts: (count) => {
-      console.log('get transcripts', count)
+      // console.log('get transcripts', count)
       if (count === -1) {
         tscHist.pop()
         tscHist.pop()

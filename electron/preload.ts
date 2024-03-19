@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // file explorer stuff
   openFileExplorer: (dirname) => ipcRenderer.send('openFileExplorer', dirname),
+  openExternal: (url) => ipcRenderer.send('openExternal', url),
   selectDirectory: () => ipcRenderer.invoke('selectDirectory'),
 
   // voices tab
@@ -28,7 +29,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openRecordingFile: () => ipcRenderer.invoke('openRecordingFile'),
   writeAudioChunk: (audioChunk) => ipcRenderer.send('writeAudioChunk', audioChunk),
   closeAudioFile: () => ipcRenderer.invoke('closeAudioFile'),
-  transcribeAudioFile: (cutId, selectedMission) => ipcRenderer.handle('transcribeAudioFile', cutId, selectedMission),
+  transcribeAudioFile: (cutId, selectedMission) => ipcRenderer.invoke('transcribeAudioFile', cutId, selectedMission),
   discardCurrentAudioRecordingFile: () => ipcRenderer.send('discardCurrentAudioRecordingFile'),
   onServerRecordingCut: (callback) => ipcRenderer.on('serverRecordingCut', (_event, value) => callback(value)),
   rmServerRecordingCut: () => ipcRenderer.removeAllListeners('serverRecordingCut'),
