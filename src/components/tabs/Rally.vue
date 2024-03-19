@@ -120,14 +120,14 @@ const btnRefreshMissions = () => {
 
 <template>
   <!-- <Toast /> -->
-  <div class="flex flex-col text-surface-0 bg-surface-700">
+  <div class="flex flex-col h-screen text-surface-0 bg-surface-700">
     <div class="flex align-left p-2 text-xl">
       <span>
         Missions
       </span>
       <Button @click="btnRefreshMissions" class="ml-2" icon="pi pi-refresh" :loading="missionsRefreshing"></Button>
     </div>
-    <Tree class="min-w-72 max-w-72 rounded-none h-screen overflow-auto"
+    <Tree class="min-w-72 max-w-72 rounded-none overflow-auto"
       :value="rallyStore.missionsTree"
       v-model:selectionKeys="selectedKey"
       v-model:expandedKeys="expandedKeys"

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
+import { app, Menu, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
 import crypto from 'node:crypto'
@@ -78,6 +78,8 @@ function nowTs() {
 }
 
 function createWindow() {
+  Menu.setApplicationMenu(null)
+
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
   //   callback({
   //     responseHeaders: {
