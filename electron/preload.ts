@@ -22,7 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   scanMissions: () => ipcRenderer.invoke('scanMissions'),
   missionGeneratePacenotes: (mission) => ipcRenderer.send('missionGeneratePacenotes', mission),
   onNotebooksUpdated: (callback) => ipcRenderer.on('notebooksUpdated', callback),
-  rmNotebooksUpdated: (callback) => ipcRenderer.removeAllListeners('notebooksUpdated'),
+  rmNotebooksUpdated: () => ipcRenderer.removeAllListeners('notebooksUpdated'),
   regeneratePacenote: (mission, fname) => ipcRenderer.send('regeneratePacenote', mission, fname),
 
   // recording
