@@ -12,8 +12,7 @@ const settingsStore = useSettingsStore()
 const rallyStore = useRallyStore()
 const selectedKey = ref({})
 const expandedKeys = ref({})
-let timer = null
-const scanIntervalMs = 1000
+// let timer = null
 
 const missionsRefreshing = ref(false)
 
@@ -84,18 +83,34 @@ onMounted(() => {
     selectMissionWithFullId(settingsStore.lastSelectedMission)
     scanNotebooks()
 
-    timer = setInterval(() => {
-      scanNotebooks()
-    }, scanIntervalMs)
+    // timer = setInterval(() => {
+    //   const now = new Date();
+    //   const isoTimestamp = now.toISOString();
+    //   console.log(`setInterval ${isoTimestamp}`);
+    //   scanNotebooks()
+    // }, 1000)
+  })
+
+  // window.electronAPI.onPoke(() => {
+  //   console.log("poke")
+  // })
+
+  window.electronAPI.onTick(() => {
+    // const now = new Date();
+    // const isoTimestamp = now.toISOString();
+    // console.log(`tick ${isoTimestamp}`);
+    scanNotebooks()
+    rallyStore.fireRecorderWatchdog()
   })
 })
 
 onUnmounted(() => {
   rallyStore.recorder.teardown()
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
+  window.electronAPI.rmTick()
+  // if (timer) {
+    // clearInterval(timer)
+    // timer = null
+  // }
 })
 
 function scanNotebooks() {

@@ -19,9 +19,9 @@ export default class Recorder {
     this.autocut = false
     this.cutId = -1
 
-    setInterval(() => {
-      this.watchdog()
-    }, 1000)
+    // setInterval(() => {
+    //   this.watchdog()
+    // }, 1000)
   }
 
   createMediaRecorder(cb) {

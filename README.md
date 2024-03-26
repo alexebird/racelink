@@ -9,12 +9,26 @@ npm run dev
 ```
 
 releasing
+
+linux shell
 ```
-# open an admin powershell
+git tag "$(jq -r '.version' package.json )"
+git push
+git push --tag
+VER="$(jq -r '.version[1:] ' package.json)" ; cp -v "release/${VER}/RaceLink-${VER}-Setup.exe" "${BIRD}/build/" ; ls -ltrh "${BIRD}/build/"
+explorer.exe $(wslpath -w "${BIRD}/build/")
+```
+
+changelog
+```
+git --no-pager log $(git describe --tags --abbrev=0 $(git describe --tags --abbrev=0)^)..HEAD --pretty=format:"* %s" ; echo
+```
+
+windows shell (dont need to use an admin shell)
+```
 npm run build
 # then find the exe file
 ```
-
 
 # Vue 3 + TypeScript + Vite
 

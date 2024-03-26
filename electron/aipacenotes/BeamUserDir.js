@@ -20,7 +20,6 @@ export default class BeamUserDir {
   load() {
     this.cachedVoices = this.loadAndMergeVoices()
     this.cachedStaticPacenotes = this.loadStaticPacenotes()
-    // console.log(this.cachedStaticPacenotes)
   }
 
   userVoicesFile() {

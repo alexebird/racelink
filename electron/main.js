@@ -45,7 +45,7 @@ function defaultBeamUserDir() {
 
 const defaultSettings = {
   beamUserDir: defaultBeamUserDir(),
-  autostopThreshold: isDevelopment ? 5 : 15,
+  autostopThreshold: 20,
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
   uuid: uuidv4(),
@@ -94,6 +94,7 @@ function createWindow() {
     height: 1200,
     icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
     webPreferences: {
+      // backgroundThrottling: false,
       webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -119,6 +120,10 @@ function createWindow() {
   if (isDevelopment) {
     win.webContents.openDevTools();
   }
+
+  setInterval(() => {
+    win.webContents.send('tick')
+  }, 1000)
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -131,18 +136,11 @@ app.on('window-all-closed', () => {
   }
 })
 
-// function testNetwork() {
-//   flaskClient.getHealthcheck().then(([resp, err]) => {
-//     console.log(resp)
-//   })
-// }
-
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
-    // testNetwork()
   }
 })
 
@@ -150,11 +148,23 @@ app.whenReady().then(() => {
   createWindow()
 })
 
+function logNote(noteText, msg, fn=console.log) {
+  const hash = crypto.createHash('sha1')
+  hash.update(noteText)
+  const digest = hash.digest('hex')
+  const short = digest.substring(0,4)
+  msg = `[${short}] ${msg}`
+  fn(msg)
+}
+
 function scanMissions(_event) {
+  beamUserDir.load()
+  inFlightMissions.clear()
   missionScanner.configure({
     basePath: appSettings.get('beamUserDir'),
   })
-  return missionScanner.scan()
+  const missions = missionScanner.scan()
+  return missions.map((mission) => mission.asIpcData())
 }
 
 function recordingFname() {
@@ -198,14 +208,14 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   sendIpcNotebooks(notebookScanner)
 
   const promises = pacenotesToUpdate.map((pn) => {
-    console.log('------------------------------------------------------')
     const audioFname = pn.audioFname()
     const noteName = pn.name()
     const noteText = pn.joinedNote()
     const voiceConfig = beamUserDir.voices()[pn.voice()]
-    console.log(`${noteText}`)
+    const noteParams = pn.metadata()
+    logNote(noteText, `updating note: '${noteText}' noteName='${noteName}'`)
 
-    return generateAudioFile(noteText, voiceConfig, audioFname).then((data) => {
+    return generateAudioFile(noteName, noteParams, noteText, voiceConfig, audioFname).then((data) => {
       const [ok, audioLen] = data
       if (ok) {
         storeMetadata(audioFname, audioLen, noteName)
@@ -229,8 +239,8 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   })
 }
 
-async function generateAudioFile(text, voiceConfig, audioFname) {
-  const [resp, err] = await flaskClient.postCreatePacenoteAudioB64('voice_test', text, voiceConfig)
+async function generateAudioFile(noteName, noteParams, noteText, voiceConfig, audioFname) {
+  const [resp, err] = await flaskClient.postCreatePacenoteAudioB64(noteName, noteParams, noteText, voiceConfig)
 
   if (err) {
     console.error('error from postCreatePacenoteAudioB64', err)
@@ -242,13 +252,12 @@ async function generateAudioFile(text, voiceConfig, audioFname) {
 
   const audioContentBase64 = resp.file_content;
   const audioBuffer = Buffer.from(audioContentBase64, 'base64');
-  const noteName = resp.note_name;
   const audioLen = resp.audio_length_sec;
 
   fs.mkdirSync(path.dirname(audioFname), { recursive: true });
   try {
     fs.writeFileSync(audioFname, audioBuffer);
-    console.log(`generated audio file noteName='${noteName}' len=${audioLen}s fname=${audioFname}`)
+    logNote(noteText,`generated audio: '${noteText}' noteName='${noteName}' len=${audioLen}s`)// fname=${audioFname}`)
     return [true, audioLen]
   } catch (error) {
     console.error('error writing file:', error);
@@ -307,7 +316,7 @@ async function transcribeAudioFile(_event, cutId, selectedMission) {
 function deleteFileWithName(fname) {
   try {
     fs.unlinkSync(fname)
-    console.log(`deleted: ${fname}`);
+    console.log(`deleted file: ${fname}`);
   } catch (err) {
     console.error('error deleting file:', err);
   }
@@ -470,18 +479,13 @@ async function setUserVoices(_event, data) {
 
 async function testVoice(_event, voiceConfig, text) {
   const audioFname = beamUserDir.voiceTestAudioFname()
-  // await executeVoiceTest(text, voiceConfig, audioFname)
-  // win.webContents.send('onVoiceTestFileReady', audioFname)
 
   if (!voiceConfig) {
     return null
   }
 
-  const [ok, _audioLen] = await generateAudioFile(text, voiceConfig, audioFname)
+  const [ok, _audioLen] = await generateAudioFile('voice_test', {}, text, voiceConfig, audioFname)
   if (ok) {
-    // if (win) {
-    //   win.webContents.send('voiceTestFileReady', audioFname);
-    // }
     return audioFname
   } else {
     return null

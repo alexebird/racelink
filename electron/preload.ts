@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onNotebooksUpdated: (callback) => ipcRenderer.on('notebooksUpdated', callback),
   rmNotebooksUpdated: () => ipcRenderer.removeAllListeners('notebooksUpdated'),
   regeneratePacenote: (mission, fname) => ipcRenderer.send('regeneratePacenote', mission, fname),
+  // onPoke: (callback) => ipcRenderer.on('poke', (_event) => callback()),
+  onTick: (callback) => ipcRenderer.on('tick', (_event) => callback()),
+  rmTick: () => ipcRenderer.removeAllListeners('tick'),
 
   // recording
   openRecordingFile: () => ipcRenderer.invoke('openRecordingFile'),

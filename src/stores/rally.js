@@ -109,9 +109,10 @@ export const useRallyStore = defineStore('rally', {
       this.missionsTree = toTreeData(results)
     },
 
-    // resetRecorder() {
-    //   this.recorder.setup()
-    //   this.recordingStatus = 'not_recording'
-    // }
+    fireRecorderWatchdog() {
+      if (this.recorder) {
+        this.recorder.watchdog()
+      }
+    }
   },
 })

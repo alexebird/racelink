@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { gcMetadata } from './MetadataManager'
+import _ from 'lodash'
 
 function cleanNameForPath(aString) {
   aString = aString.replace(/[^a-zA-Z0-9]/g, '_'); // Replace everything but letters and numbers with '_'
@@ -30,6 +31,10 @@ class Pacenote {
 
   name() {
     return this.noteData.name
+  }
+
+  metadata() {
+    return this.noteData.metadata
   }
 
   voice() {
@@ -119,13 +124,6 @@ class Notebook {
     })
 
     const children = this.cachedPacenotes.map((pn) => {
-      // return {
-      //   key: pn.name(),
-      //   data: {
-      //     name: pn.name()
-      //   }
-      // }
-      //
       return {
         name: pn.name(),
         note: pn.joinedNote(),
@@ -135,16 +133,6 @@ class Notebook {
       }
     })
 
-    // return {
-    //   key: this.basename(),
-    //   data: {
-    //     updatesCount: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
-    //     pacenotesCount: this.cachedPacenotes.length,
-    //     basename: this.basename(),
-    //     name: this.content.name,
-    //   },
-    //   children: children,
-    // }
     return {
       updatesCount: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
       pacenotesCount: this.cachedPacenotes.length,
@@ -155,30 +143,98 @@ class Notebook {
     }
   }
 
-  _concatNoteData(noteData) {
-    const AUTOFILL_BLOCKER = '#';
-    const AUTOFILL_BLOCKER_INTERNAL = '<none>';
-    const EMPTY_PLACEHOLDER = '[empty]';
+  // must be the same as the method in pacenote.lua with the same name.
+  // _joinedNote2(noteData) {
+  //
+  //   const AUTOFILL_BLOCKER = '#';
+  //   const AUTODIST_INTERNAL_LEVEL1 = '<none>'
+  //   const EMPTY_PLACEHOLDER = '[empty]';
+  //
+  //   const default_punctuation_distance_call = '.'
+  //   const var_dl = '{dl}'
+  //   const var_dt = '{dt}'
+  //
+  //   let txt = '';
+  //   if (!noteData) {
+  //     return txt;
+  //   }
+  //
+  //   const useNote = (text) => text &&
+  //     text !== '' &&
+  //     text !== AUTOFILL_BLOCKER &&
+  //     text !== AUTODIST_INTERNAL_LEVEL1;
+  //
+  //   const note = noteData.note
+  //   const before = noteData.before
+  //   const after = noteData.after
+  //
+  //   if (useNote(note)) {
+  //     txt = note;
+  //   } else {
+  //     return EMPTY_PLACEHOLDER
+  //   }
+  //
+  //   if (!txt.includes(var_dl)) {
+  //     txt = var_dl + ' ' + txt;
+  //   }
+  //
+  //   txt = useNote(before) ?
+  //     txt.replace(var_dl, before) :
+  //     txt.replace(var_dl, '');
+  //
+  //   if (useNote(after)) {
+  //     if (!txt.includes(var_dt)) {
+  //       txt += ' ' + var_dt + default_punctuation_distance_call;
+  //     }
+  //     txt = txt.replace(var_dt, after);
+  //   } else {
+  //     txt = txt.replace(var_dt, '');
+  //   }
+  //
+  //   // Trim string
+  //   txt = txt.trim();
+  //
+  //   return txt;
+  // }
 
-    let before = noteData.before || '';
-    if (before === AUTOFILL_BLOCKER || before === AUTOFILL_BLOCKER_INTERNAL) {
-      before = '';
+  // _joinedNote(noteData) {
+  //   const AUTOFILL_BLOCKER = '#';
+  //   const AUTOFILL_BLOCKER_INTERNAL = '<none>';
+  //   const EMPTY_PLACEHOLDER = '[empty]';
+  //
+  //   const default_punctuation_distance_call = '.'
+  //   const var_dl = '{dl}'
+  //   const var_dt = '{dt}'
+  //
+  //   let note = noteData.note || '';
+  //   if (note === AUTOFILL_BLOCKER || note === AUTOFILL_BLOCKER_INTERNAL) {
+  //     return EMPTY_PLACEHOLDER
+  //   }
+  //
+  //   let before = noteData.before || '';
+  //   if (before === AUTOFILL_BLOCKER || before === AUTOFILL_BLOCKER_INTERNAL) {
+  //     before = '';
+  //   }
+  //
+  //   let after = noteData.after || '';
+  //   if (after === AUTOFILL_BLOCKER || after === AUTOFILL_BLOCKER_INTERNAL) {
+  //     after = '';
+  //   }
+  //
+  //   const rv = [before, note, after].join(' ').trim();
+  //   if (rv === '') {
+  //     return EMPTY_PLACEHOLDER;
+  //   }
+  //
+  //   return rv;
+  // }
+
+  finalNoteText(metadata, langData) {
+    if (langData._out) {
+      return langData._out
+    } else if (metadata && metadata.static && langData.note) {
+      return langData.note
     }
-
-    let note = noteData.note || '';
-    if (note === AUTOFILL_BLOCKER || note === AUTOFILL_BLOCKER_INTERNAL) {
-      note = '';
-    }
-
-    let after = noteData.after || '';
-    if (after === AUTOFILL_BLOCKER || after === AUTOFILL_BLOCKER_INTERNAL) {
-      after = '';
-    }
-
-    const rv = [before, note, after].join(' ').trim(); if (rv === '') { return EMPTY_PLACEHOLDER;
-    }
-
-    return rv;
   }
 
   _cachePacenotes() {
@@ -187,15 +243,22 @@ class Notebook {
     this.codrivers().forEach(codriverData => {
       // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
       this.content.pacenotes.concat(this.staticPacenotes).forEach(pacenoteData => {
-        Object.entries(pacenoteData['notes']).forEach(([lang, noteData]) => {
+        Object.entries(pacenoteData['notes']).forEach(([lang, langData]) => {
           if (codriverData['language'] === lang) {
-            let pnDataCopy = JSON.parse(JSON.stringify(pacenoteData)); // Deep copy equivalent
-            pnDataCopy['note'] = this._concatNoteData(noteData);
-            pnDataCopy['language'] = lang;
-            pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
-            let pacenote = new Pacenote(this, pnDataCopy);
-            pacenote.setFileExists()
-            this.cachedPacenotes.push(pacenote);
+            let pnDataCopy = _.cloneDeep(pacenoteData);
+            // pnDataCopy['note'] = this._joinedNote2(langData);
+            const noteText = this.finalNoteText(pacenoteData.metadata, langData)
+            if (noteText) {
+              pnDataCopy['note'] = noteText;
+              pnDataCopy['language'] = lang;
+              pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
+              pnDataCopy['metadata'] = pacenoteData.metadata || {};
+              let pacenote = new Pacenote(this, pnDataCopy);
+              pacenote.setFileExists();
+              this.cachedPacenotes.push(pacenote);
+            } else {
+              console.error(`missing notes.${lang}._out field for note ${pacenoteData.name}`);
+            }
           }
         });
       });
