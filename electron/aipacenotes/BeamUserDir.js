@@ -50,6 +50,7 @@ export default class BeamUserDir {
       `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
+      `${beamDir}/mods/unpacked/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/repo/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
     ];
   }
