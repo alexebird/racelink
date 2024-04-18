@@ -3,6 +3,8 @@ import path from 'node:path'
 import fs from 'node:fs'
 import _ from 'lodash'
 
+// import log from 'electron-log/main'
+
 function blankData() {
   return { voices: [] }
 }
@@ -11,9 +13,14 @@ export default class VoiceManager {
   constructor(flaskClient) {
     // const basePath = !app.isPackaged ? '.' : app.getPath('userData')
     // const basePath = !app.isPackaged ? '.' : 'src/assets'
-    const basePath = 'src/assets'
-    this.flaskClient = flaskClient
+    // const basePath = 'src/assets'
+    const basePath = app.isPackaged ? path.join(path.dirname(__dirname), 'dist/assets') : 'public/assets'
     this.filePath = path.join(basePath, 'voice-db.json')
+    // console.log(this.filePath)
+    // logging shows -> filePath: C:\Users\bird\AppData\Local\Programs\RaceLink\resources\app.asar\dist-electron\dist\assets\voice-db.json
+    // log.info(`filePath: ${this.filePath}`)
+
+    this.flaskClient = flaskClient
     this.data = blankData()
     this.load()
   }
