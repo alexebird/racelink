@@ -25,6 +25,6 @@ release
 *.sln
 *.sw?
 
-out
-settings.json
-voice-db.json
+/out
+/settings.json
+/voice-db.json

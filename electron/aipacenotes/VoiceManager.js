@@ -9,7 +9,9 @@ function blankData() {
 
 export default class VoiceManager {
   constructor(flaskClient) {
-    const basePath = !app.isPackaged ? '.' : app.getPath('userData')
+    // const basePath = !app.isPackaged ? '.' : app.getPath('userData')
+    // const basePath = !app.isPackaged ? '.' : 'src/assets'
+    const basePath = 'src/assets'
     this.flaskClient = flaskClient
     this.filePath = path.join(basePath, 'voice-db.json')
     this.data = blankData()
@@ -30,6 +32,7 @@ export default class VoiceManager {
         this.data = blankData()
       }
     } else {
+      console.log(`voice-db.json not found at ${this.filePath}`)
       this.data = blankData()
     }
   }
@@ -50,9 +53,16 @@ export default class VoiceManager {
   }
 
   async refreshVoices() {
-    const [resp, err] = await this.flaskClient.getVoicesList()
-    const newData = resp
-    this.update(newData)
-    return [newData, err]
+    const err = null
+    if (!app.isPackaged) {
+      console.log('updating voice db')
+      const [resp, err2] = await this.flaskClient.getVoicesList()
+      if (err2) {
+        err = err2
+      }
+      const newData = resp
+      this.update(newData)
+    }
+    return [this.data, err]
   }
 }
