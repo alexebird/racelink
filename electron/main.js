@@ -204,7 +204,7 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   inFlightMissions.add(selectedMission.mission.fname)
 
   const notebookScanner = new NotebookScanner(beamUserDir, selectedMission.mission.fname)
-  const pacenotesToUpdate = notebookScanner.getUpdatesToDo()
+  const pacenotesToUpdate = notebookScanner.getUpdatesToDo().slice(0, 4); // do N at a time
   sendIpcNotebooks(notebookScanner)
 
   const promises = pacenotesToUpdate.map((pn) => {
