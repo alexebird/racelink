@@ -12,6 +12,7 @@ releasing
 
 linux shell
 ```
+# update version in package.json - should track same minor version of the aipacenotes mod.
 git tag "$(jq -r '.version' package.json )"
 git push
 git push --tag
