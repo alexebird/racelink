@@ -879,6 +879,13 @@
       "display_name": "English (United States)",
       "language_code": "en-US",
       "type": "gcp",
+      "voice_name": "en-US-Journey-O",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United States)",
+      "language_code": "en-US",
+      "type": "gcp",
       "voice_name": "en-US-Neural2-A",
       "voice_ssml_gender": "male"
     },
@@ -2700,20 +2707,6 @@
       "language_code": "pt-BR",
       "type": "gcp",
       "voice_name": "pt-BR-Standard-C",
-      "voice_ssml_gender": "female"
-    },
-    {
-      "display_name": "Portuguese (Brazil)",
-      "language_code": "pt-BR",
-      "type": "gcp",
-      "voice_name": "pt-BR-Studio-B",
-      "voice_ssml_gender": "male"
-    },
-    {
-      "display_name": "Portuguese (Brazil)",
-      "language_code": "pt-BR",
-      "type": "gcp",
-      "voice_name": "pt-BR-Studio-C",
       "voice_ssml_gender": "female"
     },
     {

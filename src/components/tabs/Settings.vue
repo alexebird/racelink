@@ -1,5 +1,8 @@
 <script setup lang="js">
+
+import { ref, toRaw } from 'vue'
 import { useSettingsStore } from "@/stores/settings"
+
 const settingsStore = useSettingsStore()
 
 const openFilePicker = () => {
@@ -16,6 +19,10 @@ const settingChangeMinSilenceDuration = () => {
 
 const settingChangeNoiseLevel = () => {
   settingsStore.setSetting('trimSilenceNoiseLevel', settingsStore.settings.trimSilenceNoiseLevel)
+}
+
+const onApiKeyValueUpdate = (event) => {
+  settingsStore.setSetting('racerApiKey', event.target.value)
 }
 </script>
 
@@ -62,8 +69,24 @@ const settingChangeNoiseLevel = () => {
         </div>
       </div>
     </div>
+
+    <div class='p-4'>
+      <div>
+        RaceLink API Key
+        <div class='ml-4'>
+          <InputText
+            @input="onApiKeyValueUpdate"
+            v-model="settingsStore.settings.racerApiKey"
+            placeholder="Enter your API key"
+            class="wide-input" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.wide-input {
+  width: 400px;
+}
 </style>
