@@ -60,9 +60,9 @@ export default class RacerApiClient {
   }
 
   async postCreateResult(fname, resultsData) {
-    const url = this.mkurl('/v1/results')
+    const url = this.mkurl('/v1/attempt_raw_data')
     const body = {
-      result: {
+      attempt_raw_data: {
         fname: fname,
         raw: resultsData,
       }

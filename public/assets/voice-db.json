@@ -830,6 +830,20 @@
       "display_name": "English (India)",
       "language_code": "en-IN",
       "type": "gcp",
+      "voice_name": "en-IN-Standard-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
+      "voice_name": "en-IN-Standard-F",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
       "voice_name": "en-IN-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -853,6 +867,20 @@
       "type": "gcp",
       "voice_name": "en-IN-Wavenet-D",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
+      "voice_name": "en-IN-Wavenet-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
+      "voice_name": "en-IN-Wavenet-F",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "English (United States)",
@@ -1600,6 +1628,20 @@
       "display_name": "French (France)",
       "language_code": "fr-FR",
       "type": "gcp",
+      "voice_name": "fr-FR-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
       "voice_name": "fr-FR-Studio-A",
       "voice_ssml_gender": "female"
     },
@@ -1644,6 +1686,20 @@
       "type": "gcp",
       "voice_name": "fr-FR-Wavenet-E",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Wavenet-G",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "Galician (Spain)",
@@ -1824,6 +1880,20 @@
       "display_name": "Hindi (India)",
       "language_code": "hi-IN",
       "type": "gcp",
+      "voice_name": "hi-IN-Standard-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Hindi (India)",
+      "language_code": "hi-IN",
+      "type": "gcp",
+      "voice_name": "hi-IN-Standard-F",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Hindi (India)",
+      "language_code": "hi-IN",
+      "type": "gcp",
       "voice_name": "hi-IN-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -1847,6 +1917,20 @@
       "type": "gcp",
       "voice_name": "hi-IN-Wavenet-D",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Hindi (India)",
+      "language_code": "hi-IN",
+      "type": "gcp",
+      "voice_name": "hi-IN-Wavenet-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Hindi (India)",
+      "language_code": "hi-IN",
+      "type": "gcp",
+      "voice_name": "hi-IN-Wavenet-F",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "Hungarian (Hungary)",
@@ -2713,6 +2797,20 @@
       "display_name": "Portuguese (Brazil)",
       "language_code": "pt-BR",
       "type": "gcp",
+      "voice_name": "pt-BR-Standard-D",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Portuguese (Brazil)",
+      "language_code": "pt-BR",
+      "type": "gcp",
+      "voice_name": "pt-BR-Standard-E",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Portuguese (Brazil)",
+      "language_code": "pt-BR",
+      "type": "gcp",
       "voice_name": "pt-BR-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2729,6 +2827,20 @@
       "type": "gcp",
       "voice_name": "pt-BR-Wavenet-C",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Portuguese (Brazil)",
+      "language_code": "pt-BR",
+      "type": "gcp",
+      "voice_name": "pt-BR-Wavenet-D",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Portuguese (Brazil)",
+      "language_code": "pt-BR",
+      "type": "gcp",
+      "voice_name": "pt-BR-Wavenet-E",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "Portuguese (Portugal)",
