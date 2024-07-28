@@ -6,7 +6,9 @@ import PQueue from 'p-queue'
 const { v4: uuidv4 } = require('uuid')
 import { MissionScanner } from './aipacenotes/MissionScanner'
 import NotebookScanner from './aipacenotes/NotebookScanner'
+import ResultsManager from './aipacenotes/ResultsManager'
 import FlaskApiClient from './aipacenotes/FlaskApiClient'
+import RacerApiClient from './aipacenotes/RacerApiClient'
 import BeamUserDir from './aipacenotes/BeamUserDir'
 import UserVoicesFile from './aipacenotes/UserVoicesFile'
 import startServer from './server'
@@ -39,7 +41,7 @@ function defaultBeamUserDir() {
   if (process.platform === 'darwin') {
     return '/Users/bird/beamng/code/racelink/test/data'
   } else {
-    return path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.31')
+    return path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.32')
   }
 }
 
@@ -49,8 +51,9 @@ const defaultSettings = {
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
   uuid: uuidv4(),
-  versionString: pkg.version,
+  versionString: isDevelopment ? `dev` : pkg.version,
   lastSelectedMission: null,
+  racerApiKey: null,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
 }
@@ -60,9 +63,11 @@ const queue = new PQueue({concurrency: 1});
 const appSettings = new Settings('settings.json', defaultSettings)
 appSettings.save()
 const flaskClient = new FlaskApiClient(appSettings.get('uuid'))
+const racerClient = new RacerApiClient(appSettings.get('racerApiKey'), appSettings.get('uuid'))
 const voiceManager = new VoiceManager(flaskClient)
 const beamUserDir = new BeamUserDir(appSettings)
 const missionScanner = new MissionScanner()
+const resultsManager = new ResultsManager(beamUserDir, racerClient, appSettings)
 const inFlightMissions = new Set()
 let audioFileStream = null
 let audioFileFname = null
@@ -78,7 +83,9 @@ function nowTs() {
 }
 
 function createWindow() {
-  Menu.setApplicationMenu(null)
+  if (!isDevelopment) {
+    Menu.setApplicationMenu(null)
+  }
 
   // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
   //   callback({
@@ -94,7 +101,7 @@ function createWindow() {
     height: 1200,
     icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
     webPreferences: {
-      // backgroundThrottling: false,
+      backgroundThrottling: false,
       webSecurity: false,
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -121,8 +128,11 @@ function createWindow() {
     win.webContents.openDevTools();
   }
 
+  // the main process drives the polling behavior
   setInterval(() => {
     win.webContents.send('tick')
+    // console.log('tick')
+    resultsManager.onTick()
   }, 1000)
 }
 

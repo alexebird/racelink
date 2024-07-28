@@ -17,17 +17,20 @@ const expandedKeys = ref({})
 const missionsRefreshing = ref(false)
 
 const onNodeSelect = (node) => {
+  // console.debug('onNodeSelect')
   if (node.selectable) {
+    console.debug('onNodeSelect selectable')
     // toast.add({ severity: 'success', summary: 'Node Selected', detail: node.data.fname, life: 1000 });
-    // rallyStore.$patch({selectedMission: node.data})
     rallyStore.selectMission(node.data)
+    settingsStore.setLastSelectedMission(rallyStore.selectedMissionId)
   }
 }
 
 const onNodeUnselect = (node) => {
+  // console.debug('onNodeUnselect')
   if (node.selectable) {
+    console.debug('onNodeUnselect selectable')
     // toast.add({ severity: 'warn', summary: 'Node Unselected', detail: node.data.fname, life: 1000 });
-    // rallyStore.$patch({selectedMission: null})
     rallyStore.selectMission(null)
   }
 }
@@ -77,28 +80,14 @@ function selectMissionWithFullId(selectedMissionId) {
 }
 
 onMounted(() => {
+  console.debug('onMounted')
   refreshMissions(() => {
-    // console.log(toRaw(settingsStore.settings.lastSelectedMission))
-    // console.log(toRaw(settingsStore.lastSelectedMission))
+    console.log(toRaw(settingsStore.lastSelectedMission))
     selectMissionWithFullId(settingsStore.lastSelectedMission)
     scanNotebooks()
-
-    // timer = setInterval(() => {
-    //   const now = new Date();
-    //   const isoTimestamp = now.toISOString();
-    //   console.log(`setInterval ${isoTimestamp}`);
-    //   scanNotebooks()
-    // }, 1000)
   })
 
-  // window.electronAPI.onPoke(() => {
-  //   console.log("poke")
-  // })
-
   window.electronAPI.onTick(() => {
-    // const now = new Date();
-    // const isoTimestamp = now.toISOString();
-    // console.log(`tick ${isoTimestamp}`);
     scanNotebooks()
     rallyStore.fireRecorderWatchdog()
   })
@@ -107,10 +96,6 @@ onMounted(() => {
 onUnmounted(() => {
   rallyStore.recorder.teardown()
   window.electronAPI.rmTick()
-  // if (timer) {
-    // clearInterval(timer)
-    // timer = null
-  // }
 })
 
 function scanNotebooks() {

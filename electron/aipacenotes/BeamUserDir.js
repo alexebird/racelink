@@ -32,6 +32,42 @@ export default class BeamUserDir {
     return `${beamDir}/temp/aipacenotes/voice_test.ogg`
   }
 
+  resultsFiles() {
+    const beamDir = this.appSettings.get('beamUserDir')
+    const dir = `${beamDir}/settings/aipacenotes/results`
+
+    const fileList = []
+
+    if (!fs.existsSync(dir)) {
+      console.error(`file doesnt exist: ${dir}`)
+      return fileList
+    }
+
+    try {
+      const files = fs.readdirSync(dir)
+
+      files.forEach(file => {
+        if (file.endsWith('.txt')) {
+          const filePath = path.join(dir, file)
+          fileList.push(filePath)
+        }
+      });
+    } catch (err) {
+      console.error(`error scanning directory: `, err)
+    }
+
+    return fileList
+  }
+
+  racelinkDir() {
+    const beamDir = this.appSettings.get('beamUserDir')
+
+    const dir = `${beamDir}/settings/aipacenotes/racelink`
+    fs.mkdirSync(dir, {recursive: true})
+
+    return dir
+  }
+
   _voiceSearchPaths() {
     const beamDir = this.appSettings.get('beamUserDir')
     return [

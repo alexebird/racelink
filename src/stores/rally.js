@@ -76,9 +76,10 @@ export const useRallyStore = defineStore('rally', {
     progressValue: (state) => {
       let totalUpdates = state.notebooks.reduce((acc, nb) => acc + nb.updatesCount, 0)
       let totalPacenotes = state.notebooks.reduce((acc, nb) => acc + nb.pacenotesCount, 0)
-
-
       return 100 * ((totalPacenotes - totalUpdates) / totalPacenotes)
+    },
+    selectedMissionId: (state) => {
+      return state.selectedMission.fullId
     },
   },
   actions: {
@@ -97,18 +98,11 @@ export const useRallyStore = defineStore('rally', {
     selectMission(nodeData) {
       this.selectedMission = nodeData
       this.clearTranscriptionHistory()
-
-      // if (this.selectedMission) {
-      //   this.resetRecorder()
-      // } else {
-      //   this.recorder.teardown()
-      // }
+      console.debug(this.selectedMission)
     },
-
     setMissionScanResults(results) {
       this.missionsTree = toTreeData(results)
     },
-
     fireRecorderWatchdog() {
       if (this.recorder) {
         this.recorder.watchdog()

@@ -240,6 +240,11 @@ class Notebook {
   _cachePacenotes() {
     this.cachedPacenotes = []
 
+    if (!Array.isArray(this.content.pacenotes)) {
+      // If this.content.pacenotes is not an array, return early and do nothing
+      return;
+    }
+
     this.codrivers().forEach(codriverData => {
       // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
       this.content.pacenotes.concat(this.staticPacenotes).forEach(pacenoteData => {
@@ -318,18 +323,41 @@ class Notebook {
     let pacenoteDirs = new Set();
 
     // Recursive function to list all .ogg files
+    // const listOggFiles = (dir) => {
+    //   const files = fs.readdirSync(dir, { withFileTypes: true });
+    //   files.forEach(file => {
+    //     const fullPath = path.join(dir, file.name);
+    //     if (file.isDirectory()) {
+    //       listOggFiles(fullPath); // Recurse into subdirectories
+    //     } else if (path.extname(file.name) === '.ogg') {
+    //       allOggFiles.add(fullPath); // Store the full path for deletion
+    //       const dirName = path.dirname(fullPath);
+    //       pacenoteDirs.add(dirName)
+    //     }
+    //   });
+    // };
+
     const listOggFiles = (dir) => {
-      const files = fs.readdirSync(dir, { withFileTypes: true });
-      files.forEach(file => {
-        const fullPath = path.join(dir, file.name);
-        if (file.isDirectory()) {
-          listOggFiles(fullPath); // Recurse into subdirectories
-        } else if (path.extname(file.name) === '.ogg') {
-          allOggFiles.add(fullPath); // Store the full path for deletion
-          const dirName = path.dirname(fullPath);
-          pacenoteDirs.add(dirName)
-        }
-      });
+      if (!fs.existsSync(dir)) {
+        // console.error(`Directory does not exist: ${dir}`);
+        return;
+      }
+
+      try {
+        const files = fs.readdirSync(dir, { withFileTypes: true });
+        files.forEach(file => {
+          const fullPath = path.join(dir, file.name);
+          if (file.isDirectory()) {
+            listOggFiles(fullPath); // Recurse into subdirectories
+          } else if (path.extname(file.name) === '.ogg') {
+            allOggFiles.add(fullPath); // Store the full path for deletion
+            const dirName = path.dirname(fullPath);
+            pacenoteDirs.add(dirName);
+          }
+        });
+      } catch (error) {
+        console.error(`Error reading directory: ${dir}`, error);
+      }
     };
 
     // 1. List all .ogg files in the directory and subdirectories

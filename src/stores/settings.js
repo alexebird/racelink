@@ -15,6 +15,9 @@ export const useSettingsStore = defineStore('settings', {
       window.electronAPI.setSetting(key, value).then((settings) => {
         this.settings = settings
       })
-    }
+    },
+    setLastSelectedMission(missionId) {
+      this.setSetting('lastSelectedMission', missionId)
+    },
   },
 })
