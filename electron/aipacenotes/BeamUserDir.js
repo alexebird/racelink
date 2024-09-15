@@ -70,25 +70,40 @@ export default class BeamUserDir {
 
   _voiceSearchPaths() {
     const beamDir = this.appSettings.get('beamUserDir')
-    return [
+    const racelinkPath = this.appSettings.get('racelinkPath')
+
+    const paths = [
       `${beamDir}/mods/repo/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/default.voices.json`,
       `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/default.voices.json`,
-      this.userVoicesFile()
-    ];
+      this.userVoicesFile(),
+    ]
+
+    if (racelinkPath) {
+      paths.push(`${racelinkPath}/settings/aipacenotes/default.voices.json`)
+    }
+
+    return paths
   }
 
   _staticPacenotesSearchPaths() {
     const beamDir = this.appSettings.get('beamUserDir')
-    return [
-      `${beamDir}/settings/aipacenotes/static_pacenotes.json`,
+    const racelinkPath = this.appSettings.get('racelinkPath')
+
+    const paths = [
       `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/unpacked/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
       `${beamDir}/mods/repo/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
-    ];
+    ]
+
+    if (racelinkPath) {
+      paths.push(`${racelinkPath}/settings/aipacenotes/static_pacenotes.json`)
+    }
+
+    return paths
   }
 
   readFileFromZip(zipFilePath, internalPath) {

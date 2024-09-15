@@ -45,6 +45,8 @@ function defaultBeamUserDir() {
   }
 }
 
+// console.log(path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.32'))
+
 const defaultSettings = {
   beamUserDir: defaultBeamUserDir(),
   autostopThreshold: 20,
@@ -56,6 +58,12 @@ const defaultSettings = {
   racerApiKey: null,
   // windowSize: { width: 800, height: 600 },
   // notificationsEnabled: true
+}
+
+if (process.env['RACELINK_PATH'] !== undefined) {
+  // defaultSettings['devRoot'] = path.join(app.getPath('home'), 'beamng', 'game')
+  defaultSettings['racelinkPath'] = process.env['RACELINK_PATH']
+  console.log(`found RACELINK_PATH: ${defaultSettings['racelinkPath']}`)
 }
 
 const queue = new PQueue({concurrency: 1});

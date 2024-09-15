@@ -229,12 +229,27 @@ class Notebook {
   //   return rv;
   // }
 
+  ensureArray(value) {
+    return Array.isArray(value) ? value : [value];
+  }
+
   finalNoteText(metadata, langData) {
     if (langData._out) {
       return langData._out
     } else if (metadata && metadata.static && langData.note) {
       return langData.note
     }
+  }
+
+  _cachePacenote(pnDataCopy, noteText, lang, codriverData, pacenoteData) {
+    pnDataCopy['note'] = noteText;
+    pnDataCopy['language'] = lang;
+    pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
+    pnDataCopy['metadata'] = pacenoteData.metadata || {};
+    // console.log(pnDataCopy)
+    let pacenote = new Pacenote(this, pnDataCopy);
+    pacenote.setFileExists();
+    this.cachedPacenotes.push(pacenote);
   }
 
   _cachePacenotes() {
@@ -249,18 +264,29 @@ class Notebook {
       // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
       this.content.pacenotes.concat(this.staticPacenotes).forEach(pacenoteData => {
         Object.entries(pacenoteData['notes']).forEach(([lang, langData]) => {
+          // if (pacenoteData.metadata.static) return
           if (codriverData['language'] === lang) {
-            let pnDataCopy = _.cloneDeep(pacenoteData);
-            // pnDataCopy['note'] = this._joinedNote2(langData);
-            const noteText = this.finalNoteText(pacenoteData.metadata, langData)
-            if (noteText) {
-              pnDataCopy['note'] = noteText;
-              pnDataCopy['language'] = lang;
-              pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
-              pnDataCopy['metadata'] = pacenoteData.metadata || {};
-              let pacenote = new Pacenote(this, pnDataCopy);
-              pacenote.setFileExists();
-              this.cachedPacenotes.push(pacenote);
+            let outValue = this.finalNoteText(pacenoteData.metadata, langData)
+            // console.log(outValue)
+            if (outValue) {
+              if (typeof outValue === 'string') {
+                outValue = { freeform: outValue }
+              }
+
+              if ('freeform' in outValue) {
+                let pnDataCopy = _.cloneDeep(pacenoteData);
+                this._cachePacenote(pnDataCopy, outValue.freeform, lang, codriverData, pacenoteData)
+              }
+
+              if ('galactic' in outValue && Array.isArray(outValue.galactic)) {
+                outValue.galactic.forEach((noteText, i) => {
+                  let pnDataCopy = _.cloneDeep(pacenoteData);
+                  pnDataCopy.name = `${pnDataCopy.name}.g${i}`
+                  // console.log(noteText, i)
+                  this._cachePacenote(pnDataCopy, noteText, lang, codriverData, pacenoteData)
+                })
+              }
+
             } else {
               console.error(`missing notes.${lang}._out field for note ${pacenoteData.name}`);
             }
