@@ -103,6 +103,10 @@ class Pacenote {
   audioFname() {
     return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.noteBasename())
   }
+
+  needsUpdate() {
+    return !this.fileExists && this.joinedNote() !== ''
+  }
 }
 
 class Notebook {
@@ -134,7 +138,7 @@ class Notebook {
     })
 
     return {
-      updatesCount: this.cachedPacenotes.filter((pn) => !pn.fileExists).length,
+      updatesCount: this.cachedPacenotes.filter((pn) => pn.needsUpdate()).length,
       pacenotesCount: this.cachedPacenotes.length,
       basename: this.basename(),
       name: this.content.name,
@@ -278,10 +282,10 @@ class Notebook {
                 this._cachePacenote(pnDataCopy, outValue.freeform, lang, codriverData, pacenoteData)
               }
 
-              if ('galactic' in outValue && Array.isArray(outValue.galactic)) {
-                outValue.galactic.forEach((noteText, i) => {
+              if ('structured' in outValue && Array.isArray(outValue.structured)) {
+                outValue.structured.forEach((noteText, i) => {
                   let pnDataCopy = _.cloneDeep(pacenoteData);
-                  pnDataCopy.name = `${pnDataCopy.name}.g${i}`
+                  pnDataCopy.name = `${pnDataCopy.name} [${i}]`
                   // console.log(noteText, i)
                   this._cachePacenote(pnDataCopy, noteText, lang, codriverData, pacenoteData)
                 })
@@ -332,7 +336,8 @@ class Notebook {
 
     // console.log(this.pacenotesDir())
     return this.cachedPacenotes.map(pn => {
-      if (!pn.fileExists) {
+      if (pn.needsUpdate()) {
+        // console.log(`updating pacenote: ${pn.joinedNote()}`)
         return pn
       } else {
         return null

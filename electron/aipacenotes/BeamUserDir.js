@@ -39,7 +39,7 @@ export default class BeamUserDir {
     const fileList = []
 
     if (!fs.existsSync(dir)) {
-      console.error(`file doesnt exist: ${dir}`)
+      // console.error(`file doesnt exist: ${dir}`)
       return fileList
     }
 

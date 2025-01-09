@@ -41,7 +41,7 @@ function defaultBeamUserDir() {
   if (process.platform === 'darwin') {
     return '/Users/bird/beamng/code/racelink/test/data'
   } else {
-    return path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.32')
+    return path.join(app.getPath('home'), 'AppData', 'Local', 'BeamNG.drive', '0.34')
   }
 }
 
@@ -233,19 +233,23 @@ async function missionGeneratePacenotes(_event, selectedMission) {
     const noteParams = pn.metadata()
     logNote(noteText, `updating note: '${noteText}' noteName='${noteName}'`)
 
-    return generateAudioFile(noteName, noteParams, noteText, voiceConfig, audioFname).then((data) => {
-      const [ok, audioLen] = data
-      if (ok) {
-        storeMetadata(audioFname, audioLen, noteName)
-        sendIpcNotebooks(notebookScanner)
-      }
-    })
+    if (noteText === null || noteText.length === 0) {
+      return Promise.resolve("skipped")
+    } else {
+      return generateAudioFile(noteName, noteParams, noteText, voiceConfig, audioFname).then((data) => {
+        const [ok, audioLen] = data
+        if (ok) {
+          storeMetadata(audioFname, audioLen, noteName)
+          sendIpcNotebooks(notebookScanner)
+        }
+      })
+    }
   })
 
   Promise.allSettled(promises).then(results => {
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
-        // console.log(`Operation ${index + 1} succeeded.`)
+        console.log(`Operation ${index + 1} succeeded.`)
       } else {
         console.error(`pacenote update failed:`, result.reason)
       }
@@ -502,12 +506,16 @@ async function testVoice(_event, voiceConfig, text) {
     return null
   }
 
-  const [ok, _audioLen] = await generateAudioFile('voice_test', {}, text, voiceConfig, audioFname)
-  if (ok) {
-    return audioFname
-  } else {
-    return null
+  if (text !== null && text.length > 0) {
+    const [ok, _audioLen] = await generateAudioFile('voice_test', {}, text, voiceConfig, audioFname)
+    if (ok) {
+      return audioFname
+    } else {
+      return null
+    }
   }
+
+  return null
 }
 
 function setupExpressServer() {

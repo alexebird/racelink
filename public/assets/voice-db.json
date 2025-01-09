@@ -99,6 +99,20 @@
       "voice_ssml_gender": "female"
     },
     {
+      "display_name": "Bulgarian (Bulgaria)",
+      "language_code": "bg-BG",
+      "type": "gcp",
+      "voice_name": "bg-BG-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Bulgarian (Bulgaria)",
+      "language_code": "bg-BG",
+      "type": "gcp",
+      "voice_name": "bg-BG-Wavenet-B",
+      "voice_ssml_gender": "female"
+    },
+    {
       "display_name": "Bangla (India)",
       "language_code": "bn-IN",
       "type": "gcp",
@@ -159,6 +173,20 @@
       "language_code": "ca-ES",
       "type": "gcp",
       "voice_name": "ca-ES-Standard-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Catalan (Spain)",
+      "language_code": "ca-ES",
+      "type": "gcp",
+      "voice_name": "ca-ES-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Catalan (Spain)",
+      "language_code": "ca-ES",
+      "type": "gcp",
+      "voice_name": "ca-ES-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -270,7 +298,21 @@
       "display_name": "Czech (Czechia)",
       "language_code": "cs-CZ",
       "type": "gcp",
+      "voice_name": "cs-CZ-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Czech (Czechia)",
+      "language_code": "cs-CZ",
+      "type": "gcp",
       "voice_name": "cs-CZ-Wavenet-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Czech (Czechia)",
+      "language_code": "cs-CZ",
+      "type": "gcp",
+      "voice_name": "cs-CZ-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -278,6 +320,13 @@
       "language_code": "da-DK",
       "type": "gcp",
       "voice_name": "da-DK-Neural2-D",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Danish (Denmark)",
+      "language_code": "da-DK",
+      "type": "gcp",
+      "voice_name": "da-DK-Neural2-F",
       "voice_ssml_gender": "female"
     },
     {
@@ -312,6 +361,20 @@
       "display_name": "Danish (Denmark)",
       "language_code": "da-DK",
       "type": "gcp",
+      "voice_name": "da-DK-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Danish (Denmark)",
+      "language_code": "da-DK",
+      "type": "gcp",
+      "voice_name": "da-DK-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Danish (Denmark)",
+      "language_code": "da-DK",
+      "type": "gcp",
       "voice_name": "da-DK-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -334,6 +397,41 @@
       "language_code": "da-DK",
       "type": "gcp",
       "voice_name": "da-DK-Wavenet-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Danish (Denmark)",
+      "language_code": "da-DK",
+      "type": "gcp",
+      "voice_name": "da-DK-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Danish (Denmark)",
+      "language_code": "da-DK",
+      "type": "gcp",
+      "voice_name": "da-DK-Wavenet-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Journey-O",
       "voice_ssml_gender": "female"
     },
     {
@@ -370,6 +468,20 @@
       "type": "gcp",
       "voice_name": "de-DE-Neural2-F",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Neural2-G",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Neural2-H",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "German (Germany)",
@@ -419,6 +531,20 @@
       "type": "gcp",
       "voice_name": "de-DE-Standard-F",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Standard-G",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Standard-H",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "German (Germany)",
@@ -477,6 +603,20 @@
       "voice_ssml_gender": "female"
     },
     {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Wavenet-G",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "German (Germany)",
+      "language_code": "de-DE",
+      "type": "gcp",
+      "voice_name": "de-DE-Wavenet-H",
+      "voice_ssml_gender": "male"
+    },
+    {
       "display_name": "Greek (Greece)",
       "language_code": "el-GR",
       "type": "gcp",
@@ -487,7 +627,42 @@
       "display_name": "Greek (Greece)",
       "language_code": "el-GR",
       "type": "gcp",
+      "voice_name": "el-GR-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Greek (Greece)",
+      "language_code": "el-GR",
+      "type": "gcp",
       "voice_name": "el-GR-Wavenet-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Greek (Greece)",
+      "language_code": "el-GR",
+      "type": "gcp",
+      "voice_name": "el-GR-Wavenet-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (Australia)",
+      "language_code": "en-AU",
+      "type": "gcp",
+      "voice_name": "en-AU-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "English (Australia)",
+      "language_code": "en-AU",
+      "type": "gcp",
+      "voice_name": "en-AU-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (Australia)",
+      "language_code": "en-AU",
+      "type": "gcp",
+      "voice_name": "en-AU-Journey-O",
       "voice_ssml_gender": "female"
     },
     {
@@ -606,6 +781,27 @@
       "display_name": "English (United Kingdom)",
       "language_code": "en-GB",
       "type": "gcp",
+      "voice_name": "en-GB-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Journey-O",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
       "voice_name": "en-GB-Neural2-A",
       "voice_ssml_gender": "female"
     },
@@ -636,6 +832,20 @@
       "type": "gcp",
       "voice_name": "en-GB-Neural2-F",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Neural2-N",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Neural2-O",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "English (United Kingdom)",
@@ -725,6 +935,20 @@
       "display_name": "English (United Kingdom)",
       "language_code": "en-GB",
       "type": "gcp",
+      "voice_name": "en-GB-Standard-N",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Standard-O",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
       "voice_name": "en-GB-Studio-B",
       "voice_ssml_gender": "male"
     },
@@ -768,6 +992,41 @@
       "language_code": "en-GB",
       "type": "gcp",
       "voice_name": "en-GB-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Wavenet-N",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (United Kingdom)",
+      "language_code": "en-GB",
+      "type": "gcp",
+      "voice_name": "en-GB-Wavenet-O",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
+      "voice_name": "en-IN-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
+      "voice_name": "en-IN-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "English (India)",
+      "language_code": "en-IN",
+      "type": "gcp",
+      "voice_name": "en-IN-Journey-O",
       "voice_ssml_gender": "female"
     },
     {
@@ -1159,6 +1418,27 @@
       "display_name": "Spanish (Spain)",
       "language_code": "es-ES",
       "type": "gcp",
+      "voice_name": "es-ES-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Journey-O",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
       "voice_name": "es-ES-Neural2-A",
       "voice_ssml_gender": "female"
     },
@@ -1201,6 +1481,20 @@
       "display_name": "Spanish (Spain)",
       "language_code": "es-ES",
       "type": "gcp",
+      "voice_name": "es-ES-Neural2-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Neural2-H",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
       "voice_name": "es-ES-Polyglot-1",
       "voice_ssml_gender": "male"
     },
@@ -1236,6 +1530,34 @@
       "display_name": "Spanish (Spain)",
       "language_code": "es-ES",
       "type": "gcp",
+      "voice_name": "es-ES-Standard-E",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Standard-H",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
       "voice_name": "es-ES-Studio-C",
       "voice_ssml_gender": "female"
     },
@@ -1265,6 +1587,55 @@
       "language_code": "es-ES",
       "type": "gcp",
       "voice_name": "es-ES-Wavenet-D",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Wavenet-E",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Wavenet-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (Spain)",
+      "language_code": "es-ES",
+      "type": "gcp",
+      "voice_name": "es-ES-Wavenet-H",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (United States)",
+      "language_code": "es-US",
+      "type": "gcp",
+      "voice_name": "es-US-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Spanish (United States)",
+      "language_code": "es-US",
+      "type": "gcp",
+      "voice_name": "es-US-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Spanish (United States)",
+      "language_code": "es-US",
+      "type": "gcp",
+      "voice_name": "es-US-Journey-O",
       "voice_ssml_gender": "female"
     },
     {
@@ -1373,10 +1744,31 @@
       "voice_ssml_gender": "male"
     },
     {
+      "display_name": "Estonian (Estonia)",
+      "language_code": "et-EE",
+      "type": "gcp",
+      "voice_name": "et-EE-Standard-A",
+      "voice_ssml_gender": "male"
+    },
+    {
       "display_name": "Basque (Spain)",
       "language_code": "eu-ES",
       "type": "gcp",
       "voice_name": "eu-ES-Standard-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Basque (Spain)",
+      "language_code": "eu-ES",
+      "type": "gcp",
+      "voice_name": "eu-ES-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Basque (Spain)",
+      "language_code": "eu-ES",
+      "type": "gcp",
+      "voice_name": "eu-ES-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -1390,7 +1782,21 @@
       "display_name": "Finnish (Finland)",
       "language_code": "fi-FI",
       "type": "gcp",
+      "voice_name": "fi-FI-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Finnish (Finland)",
+      "language_code": "fi-FI",
+      "type": "gcp",
       "voice_name": "fi-FI-Wavenet-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Finnish (Finland)",
+      "language_code": "fi-FI",
+      "type": "gcp",
+      "voice_name": "fi-FI-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -1462,6 +1868,27 @@
       "type": "gcp",
       "voice_name": "fil-ph-Neural2-D",
       "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "French (Canada)",
+      "language_code": "fr-CA",
+      "type": "gcp",
+      "voice_name": "fr-CA-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "French (Canada)",
+      "language_code": "fr-CA",
+      "type": "gcp",
+      "voice_name": "fr-CA-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (Canada)",
+      "language_code": "fr-CA",
+      "type": "gcp",
+      "voice_name": "fr-CA-Journey-O",
+      "voice_ssml_gender": "female"
     },
     {
       "display_name": "French (Canada)",
@@ -1551,6 +1978,27 @@
       "display_name": "French (France)",
       "language_code": "fr-FR",
       "type": "gcp",
+      "voice_name": "fr-FR-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Journey-O",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
       "voice_name": "fr-FR-Neural2-A",
       "voice_ssml_gender": "female"
     },
@@ -1581,6 +2029,20 @@
       "type": "gcp",
       "voice_name": "fr-FR-Neural2-E",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Neural2-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "French (France)",
+      "language_code": "fr-FR",
+      "type": "gcp",
+      "voice_name": "fr-FR-Neural2-G",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "French (France)",
@@ -1706,6 +2168,20 @@
       "language_code": "gl-ES",
       "type": "gcp",
       "voice_name": "gl-ES-Standard-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Galician (Spain)",
+      "language_code": "gl-ES",
+      "type": "gcp",
+      "voice_name": "gl-ES-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Galician (Spain)",
+      "language_code": "gl-ES",
+      "type": "gcp",
+      "voice_name": "gl-ES-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -1943,7 +2419,21 @@
       "display_name": "Hungarian (Hungary)",
       "language_code": "hu-HU",
       "type": "gcp",
+      "voice_name": "hu-HU-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Hungarian (Hungary)",
+      "language_code": "hu-HU",
+      "type": "gcp",
       "voice_name": "hu-HU-Wavenet-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Hungarian (Hungary)",
+      "language_code": "hu-HU",
+      "type": "gcp",
+      "voice_name": "hu-HU-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -2010,6 +2500,41 @@
       "voice_ssml_gender": "female"
     },
     {
+      "display_name": "Icelandic (Iceland)",
+      "language_code": "is-IS",
+      "type": "gcp",
+      "voice_name": "is-IS-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Icelandic (Iceland)",
+      "language_code": "is-IS",
+      "type": "gcp",
+      "voice_name": "is-IS-Wavenet-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Journey-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Journey-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Journey-O",
+      "voice_ssml_gender": "female"
+    },
+    {
       "display_name": "Italian (Italy)",
       "language_code": "it-IT",
       "type": "gcp",
@@ -2021,6 +2546,13 @@
       "language_code": "it-IT",
       "type": "gcp",
       "voice_name": "it-IT-Neural2-C",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Neural2-F",
       "voice_ssml_gender": "male"
     },
     {
@@ -2055,6 +2587,20 @@
       "display_name": "Italian (Italy)",
       "language_code": "it-IT",
       "type": "gcp",
+      "voice_name": "it-IT-Standard-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Standard-F",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
       "voice_name": "it-IT-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2077,6 +2623,20 @@
       "language_code": "it-IT",
       "type": "gcp",
       "voice_name": "it-IT-Wavenet-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Wavenet-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Italian (Italy)",
+      "language_code": "it-IT",
+      "type": "gcp",
+      "voice_name": "it-IT-Wavenet-F",
       "voice_ssml_gender": "male"
     },
     {
@@ -2297,10 +2857,38 @@
       "voice_ssml_gender": "male"
     },
     {
+      "display_name": "Lithuanian (Lithuania)",
+      "language_code": "lt-LT",
+      "type": "gcp",
+      "voice_name": "lt-LT-Standard-B",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Lithuanian (Lithuania)",
+      "language_code": "lt-LT",
+      "type": "gcp",
+      "voice_name": "lt-LT-Wavenet-B",
+      "voice_ssml_gender": "male"
+    },
+    {
       "display_name": "Latvian (Latvia)",
       "language_code": "lv-LV",
       "type": "gcp",
       "voice_name": "lv-LV-Standard-A",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Latvian (Latvia)",
+      "language_code": "lv-LV",
+      "type": "gcp",
+      "voice_name": "lv-LV-Standard-B",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Lithuanian (Lithuania)",
+      "language_code": "lt-LT",
+      "type": "gcp",
+      "voice_name": "lv-LV-Wavenet-B",
       "voice_ssml_gender": "male"
     },
     {
@@ -2496,6 +3084,20 @@
       "display_name": "Norwegian Bokmål (Norway)",
       "language_code": "nb-NO",
       "type": "gcp",
+      "voice_name": "nb-NO-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Norwegian Bokmål (Norway)",
+      "language_code": "nb-NO",
+      "type": "gcp",
+      "voice_name": "nb-NO-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Norwegian Bokmål (Norway)",
+      "language_code": "nb-NO",
+      "type": "gcp",
       "voice_name": "nb-NO-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2528,6 +3130,20 @@
       "voice_ssml_gender": "female"
     },
     {
+      "display_name": "Norwegian Bokmål (Norway)",
+      "language_code": "nb-NO",
+      "type": "gcp",
+      "voice_name": "nb-NO-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Norwegian Bokmål (Norway)",
+      "language_code": "nb-NO",
+      "type": "gcp",
+      "voice_name": "nb-NO-Wavenet-G",
+      "voice_ssml_gender": "male"
+    },
+    {
       "display_name": "Dutch (Belgium)",
       "language_code": "nl-BE",
       "type": "gcp",
@@ -2545,6 +3161,20 @@
       "display_name": "Dutch (Belgium)",
       "language_code": "nl-BE",
       "type": "gcp",
+      "voice_name": "nl-BE-Standard-C",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Dutch (Belgium)",
+      "language_code": "nl-BE",
+      "type": "gcp",
+      "voice_name": "nl-BE-Standard-D",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Dutch (Belgium)",
+      "language_code": "nl-BE",
+      "type": "gcp",
       "voice_name": "nl-BE-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2553,6 +3183,20 @@
       "language_code": "nl-BE",
       "type": "gcp",
       "voice_name": "nl-BE-Wavenet-B",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Dutch (Belgium)",
+      "language_code": "nl-BE",
+      "type": "gcp",
+      "voice_name": "nl-BE-Wavenet-C",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Dutch (Belgium)",
+      "language_code": "nl-BE",
+      "type": "gcp",
+      "voice_name": "nl-BE-Wavenet-D",
       "voice_ssml_gender": "male"
     },
     {
@@ -2594,6 +3238,20 @@
       "display_name": "Dutch (Netherlands)",
       "language_code": "nl-NL",
       "type": "gcp",
+      "voice_name": "nl-NL-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Dutch (Netherlands)",
+      "language_code": "nl-NL",
+      "type": "gcp",
+      "voice_name": "nl-NL-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Dutch (Netherlands)",
+      "language_code": "nl-NL",
+      "type": "gcp",
       "voice_name": "nl-NL-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2624,6 +3282,20 @@
       "type": "gcp",
       "voice_name": "nl-NL-Wavenet-E",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Dutch (Netherlands)",
+      "language_code": "nl-NL",
+      "type": "gcp",
+      "voice_name": "nl-NL-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Dutch (Netherlands)",
+      "language_code": "nl-NL",
+      "type": "gcp",
+      "voice_name": "nl-NL-Wavenet-G",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "Punjabi (India)",
@@ -2720,6 +3392,20 @@
       "display_name": "Polish (Poland)",
       "language_code": "pl-PL",
       "type": "gcp",
+      "voice_name": "pl-PL-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Polish (Poland)",
+      "language_code": "pl-PL",
+      "type": "gcp",
+      "voice_name": "pl-PL-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Polish (Poland)",
+      "language_code": "pl-PL",
+      "type": "gcp",
       "voice_name": "pl-PL-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2750,6 +3436,20 @@
       "type": "gcp",
       "voice_name": "pl-PL-Wavenet-E",
       "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Polish (Poland)",
+      "language_code": "pl-PL",
+      "type": "gcp",
+      "voice_name": "pl-PL-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Polish (Poland)",
+      "language_code": "pl-PL",
+      "type": "gcp",
+      "voice_name": "pl-PL-Wavenet-G",
+      "voice_ssml_gender": "male"
     },
     {
       "display_name": "Portuguese (Brazil)",
@@ -2874,6 +3574,20 @@
       "display_name": "Portuguese (Portugal)",
       "language_code": "pt-PT",
       "type": "gcp",
+      "voice_name": "pt-PT-Standard-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Portuguese (Portugal)",
+      "language_code": "pt-PT",
+      "type": "gcp",
+      "voice_name": "pt-PT-Standard-F",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Portuguese (Portugal)",
+      "language_code": "pt-PT",
+      "type": "gcp",
       "voice_name": "pt-PT-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -2899,6 +3613,20 @@
       "voice_ssml_gender": "female"
     },
     {
+      "display_name": "Portuguese (Portugal)",
+      "language_code": "pt-PT",
+      "type": "gcp",
+      "voice_name": "pt-PT-Wavenet-E",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Portuguese (Portugal)",
+      "language_code": "pt-PT",
+      "type": "gcp",
+      "voice_name": "pt-PT-Wavenet-F",
+      "voice_ssml_gender": "male"
+    },
+    {
       "display_name": "Romanian (Romania)",
       "language_code": "ro-RO",
       "type": "gcp",
@@ -2909,7 +3637,21 @@
       "display_name": "Romanian (Romania)",
       "language_code": "ro-RO",
       "type": "gcp",
+      "voice_name": "ro-RO-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Romanian (Romania)",
+      "language_code": "ro-RO",
+      "type": "gcp",
       "voice_name": "ro-RO-Wavenet-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Romanian (Romania)",
+      "language_code": "ro-RO",
+      "type": "gcp",
+      "voice_name": "ro-RO-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -2993,7 +3735,21 @@
       "display_name": "Slovak (Slovakia)",
       "language_code": "sk-SK",
       "type": "gcp",
+      "voice_name": "sk-SK-Standard-B",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Slovak (Slovakia)",
+      "language_code": "sk-SK",
+      "type": "gcp",
       "voice_name": "sk-SK-Wavenet-A",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Slovak (Slovakia)",
+      "language_code": "sk-SK",
+      "type": "gcp",
+      "voice_name": "sk-SK-Wavenet-B",
       "voice_ssml_gender": "female"
     },
     {
@@ -3042,6 +3798,20 @@
       "display_name": "Swedish (Sweden)",
       "language_code": "sv-SE",
       "type": "gcp",
+      "voice_name": "sv-SE-Standard-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Swedish (Sweden)",
+      "language_code": "sv-SE",
+      "type": "gcp",
+      "voice_name": "sv-SE-Standard-G",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Swedish (Sweden)",
+      "language_code": "sv-SE",
+      "type": "gcp",
       "voice_name": "sv-SE-Wavenet-A",
       "voice_ssml_gender": "female"
     },
@@ -3071,6 +3841,20 @@
       "language_code": "sv-SE",
       "type": "gcp",
       "voice_name": "sv-SE-Wavenet-E",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Swedish (Sweden)",
+      "language_code": "sv-SE",
+      "type": "gcp",
+      "voice_name": "sv-SE-Wavenet-F",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Swedish (Sweden)",
+      "language_code": "sv-SE",
+      "type": "gcp",
+      "voice_name": "sv-SE-Wavenet-G",
       "voice_ssml_gender": "male"
     },
     {
@@ -3141,6 +3925,20 @@
       "language_code": "te-IN",
       "type": "gcp",
       "voice_name": "te-IN-Standard-B",
+      "voice_ssml_gender": "male"
+    },
+    {
+      "display_name": "Telugu (India)",
+      "language_code": "te-IN",
+      "type": "gcp",
+      "voice_name": "te-IN-Standard-C",
+      "voice_ssml_gender": "female"
+    },
+    {
+      "display_name": "Telugu (India)",
+      "language_code": "te-IN",
+      "type": "gcp",
+      "voice_name": "te-IN-Standard-D",
       "voice_ssml_gender": "male"
     },
     {
