@@ -2,6 +2,8 @@ const AdmZip = require('adm-zip');
 const fs = require('fs');
 const path = require('path');
 
+const SETTINGS_PATH = 'settings/rally'
+
 export default class BeamUserDir {
   constructor(appSettings) {
     this.appSettings = appSettings
@@ -24,7 +26,7 @@ export default class BeamUserDir {
 
   userVoicesFile() {
     const beamDir = this.appSettings.get('beamUserDir')
-    return `${beamDir}/settings/aipacenotes/user.voices.json`
+    return `${beamDir}/${SETTINGS_PATH}/user.voices.json`
   }
 
   voiceTestAudioFname() {
@@ -34,7 +36,7 @@ export default class BeamUserDir {
 
   resultsFiles() {
     const beamDir = this.appSettings.get('beamUserDir')
-    const dir = `${beamDir}/settings/aipacenotes/results`
+    const dir = `${beamDir}/${SETTINGS_PATH}/results`
 
     const fileList = []
 
@@ -62,7 +64,7 @@ export default class BeamUserDir {
   racelinkDir() {
     const beamDir = this.appSettings.get('beamUserDir')
 
-    const dir = `${beamDir}/settings/aipacenotes/racelink`
+    const dir = `${beamDir}/${SETTINGS_PATH}/racelink`
     fs.mkdirSync(dir, {recursive: true})
 
     return dir
@@ -73,15 +75,15 @@ export default class BeamUserDir {
     const racelinkPath = this.appSettings.get('racelinkPath')
 
     const paths = [
-      `${beamDir}/mods/repo/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
-      `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/default.voices.json`,
-      `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/default.voices.json`,
-      `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/default.voices.json`,
+      `${beamDir}/mods/repo/aipacenotes.zip/${SETTINGS_PATH}/default.voices.json`,
+      `${beamDir}/mods/aipacenotes.zip/${SETTINGS_PATH}/default.voices.json`,
+      `${beamDir}/mods/unpacked/aipacenotes/${SETTINGS_PATH}/default.voices.json`,
+      `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/${SETTINGS_PATH}/default.voices.json`,
       this.userVoicesFile(),
     ]
 
     if (racelinkPath) {
-      paths.push(`${racelinkPath}/settings/aipacenotes/default.voices.json`)
+      paths.push(`${racelinkPath}/${SETTINGS_PATH}/default.voices.json`)
     }
 
     return paths
@@ -92,15 +94,15 @@ export default class BeamUserDir {
     const racelinkPath = this.appSettings.get('racelinkPath')
 
     const paths = [
-      `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/settings/aipacenotes/static_pacenotes.json`,
-      `${beamDir}/mods/unpacked/aipacenotes/settings/aipacenotes/static_pacenotes.json`,
-      `${beamDir}/mods/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
-      `${beamDir}/mods/unpacked/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
-      `${beamDir}/mods/repo/aipacenotes.zip/settings/aipacenotes/static_pacenotes.json`,
+      `${beamDir}/mods/unpacked/beamng-aipacenotes-mod/${SETTINGS_PATH}/static_pacenotes.json`,
+      `${beamDir}/mods/unpacked/aipacenotes/${SETTINGS_PATH}/static_pacenotes.json`,
+      `${beamDir}/mods/aipacenotes.zip/${SETTINGS_PATH}/static_pacenotes.json`,
+      `${beamDir}/mods/unpacked/aipacenotes.zip/${SETTINGS_PATH}/static_pacenotes.json`,
+      `${beamDir}/mods/repo/aipacenotes.zip/${SETTINGS_PATH}/static_pacenotes.json`,
     ]
 
     if (racelinkPath) {
-      paths.push(`${racelinkPath}/settings/aipacenotes/static_pacenotes.json`)
+      paths.push(`${racelinkPath}/${SETTINGS_PATH}/static_pacenotes.json`)
     }
 
     return paths
