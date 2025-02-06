@@ -5,10 +5,18 @@ import { useSettingsStore } from "@/stores/settings"
 
 const settingsStore = useSettingsStore()
 
-const openFilePicker = () => {
+const openFilePickerBeamUserDir = () => {
   window.electronAPI.selectDirectory().then((selectedPath) => {
     if (selectedPath) {
       settingsStore.setSetting('beamUserDir', selectedPath)
+    }
+  })
+}
+
+const openFilePickerRacelinkPath = () => {
+  window.electronAPI.selectDirectory().then((selectedPath) => {
+    if (selectedPath) {
+      settingsStore.setSetting('racelinkPath', selectedPath)
     }
   })
 }
@@ -37,9 +45,21 @@ const onApiKeyValueUpdate = (event) => {
       </div>
       <div class='ml-4'>
         <span class="font-mono">{{settingsStore.settings.beamUserDir}}</span>
-        <Button class='!block w-28 mt-2' @click="openFilePicker">Change</Button>
+        <Button class='!block w-28 mt-2' @click="openFilePickerBeamUserDir">Change</Button>
       </div>
     </div>
+
+
+    <div class='p-4'>
+      <div>
+        Game Search Path
+      </div>
+      <div class='ml-4'>
+        <span class="font-mono">{{settingsStore.settings.racelinkPath}}</span>
+        <Button class='!block w-28 mt-2' @click="openFilePickerRacelinkPath">Change</Button>
+      </div>
+    </div>
+
 
     <div class='p-4'>
       <div>

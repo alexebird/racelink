@@ -49,6 +49,7 @@ function defaultBeamUserDir() {
 
 const defaultSettings = {
   beamUserDir: defaultBeamUserDir(),
+  racelinkPath: null,
   autostopThreshold: 20,
   trimSilenceNoiseLevel: -40.0,
   trimSilenceMinSilenceDuration: 0.5,
@@ -60,11 +61,11 @@ const defaultSettings = {
   // notificationsEnabled: true
 }
 
-if (process.env['RACELINK_PATH'] !== undefined) {
+// if (process.env['RACELINK_PATH'] !== undefined) {
   // defaultSettings['devRoot'] = path.join(app.getPath('home'), 'beamng', 'game')
-  defaultSettings['racelinkPath'] = process.env['RACELINK_PATH']
-  console.log(`found RACELINK_PATH: ${defaultSettings['racelinkPath']}`)
-}
+  // defaultSettings['racelinkPath'] = process.env['RACELINK_PATH']
+  // console.log(`found RACELINK_PATH: ${defaultSettings['racelinkPath']}`)
+// }
 
 const queue = new PQueue({concurrency: 1});
 
@@ -316,7 +317,7 @@ async function transcribeAudioFile(_event, cutId, selectedMission) {
     resp.text = UNKNOWN_PLACEHOLDER
   }
 
-  const filePath = path.join(selectedMission.mission.fname, 'aipacenotes', 'recce', 'primary', 'transcripts.json');
+  const filePath = path.join(selectedMission.mission.fname, 'rally', 'recce', 'primary', 'transcripts.json');
 
   const last = tscHist.pop()
   tscHist.push(resp)

@@ -64,7 +64,7 @@ export default class NotebookScanner {
   }
 
   findNotebookFiles() {
-    const notebookPath = path.join(this.missionDir, 'aipacenotes', 'notebooks')
+    const notebookPath = path.join(this.missionDir, 'rally', 'notebooks')
     // console.log(notebookPath)
     return this._listFiles(notebookPath)
   }
