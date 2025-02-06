@@ -3,7 +3,7 @@
   "description": "Racing software for BeamNG.drive",
   "author": "birdman",
   "private": true,
-  "version": "v0.6.0-alpha",
+  "version": "v0.6.1-alpha",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",
