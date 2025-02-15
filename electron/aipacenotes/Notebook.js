@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { gcMetadata } from './MetadataManager'
 import _ from 'lodash'
+import crypto from 'node:crypto'
 
 function cleanNameForPath(aString) {
   aString = aString.replace(/[^a-zA-Z0-9]/g, '_'); // Replace everything but letters and numbers with '_'
@@ -46,18 +47,9 @@ class Pacenote {
   }
 
   noteHash() {
-    const note = this.noteData.note
-    // Assuming note is already a string; if not, you might need to encode it from UTF-16 to UTF-8.
-    let hexString = ''
-    for (let i = 0; i < note.length; i++) {
-      hexString += note.charCodeAt(i).toString(16).padStart(2, '0')
-    }
-
-    let hashValue = 0
-    for (let i = 0; i < hexString.length; i++) {
-      hashValue = (hashValue * 33 + hexString.charCodeAt(i)) % 2147483647
-    }
-    return hashValue
+    const hash = crypto.createHash('sha1')
+    hash.update(this.noteData.note)
+    return hash.digest('hex').substring(0, 16)
   }
 
  // noteData: {

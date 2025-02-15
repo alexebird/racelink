@@ -16,7 +16,11 @@ linux shell
 git tag "$(jq -r '.version' package.json )"
 git push
 git push --tag
-(in powershell) npm run build
+
+(in powershell)
+npm run build
+
+export BIRD="/c/Users/Alex Bird/beamng/"
 VER="$(jq -r '.version[1:] ' package.json)" ; cp -v "release/${VER}/RaceLink-${VER}-Setup.exe" "${BIRD}/build/" ; ls -ltrh "${BIRD}/build/"
 explorer.exe $(wslpath -w "${BIRD}/build/")
 ```
