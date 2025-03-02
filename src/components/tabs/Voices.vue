@@ -43,18 +43,6 @@ function hideSpinner() {
   spinnerClass.value = 'hidden'
 }
 
-// const saveVoice = () => {
-//   const formVoice = voicesStore.formVoice
-//   if (formVoice) {
-//     const [name, voiceData] = formVoice
-//     voicesStore.updateUserVoices(name, voiceData)
-//   }
-// }
-
-// const newVoice = () => {
-//   voicesStore.newVoice()
-// }
-
 const refreshVoices = () => {
   showSpinner()
   voicesStore.refreshVoices().then(([voiceData, err]) => {
@@ -93,26 +81,15 @@ const testSpecificVoice = (voiceId, voiceData) => {
     })
 }
 
-// const onListSelectionChange = () => {
-//   voicesStore.setFormToSelectedVoice()
-// }
-
-// const confirmDelete = (event) => {
-//   confirm.require({
-//     target: event.currentTarget,
-//     message: 'Do you want to delete this voice?',
-//     icon: 'pi pi-info-circle',
-//     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
-//     acceptClass: 'p-button-danger p-button-sm',
-//     rejectLabel: 'Cancel',
-//     acceptLabel: 'Delete',
-//     accept: () => {
-//       voicesStore.deleteSelectedUserVoice()
-//     },
-//     reject: () => {
-//     }
-//   })
-// }
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      console.log(`Voice ID '${text}' copied to clipboard`);
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+}
 </script>
 
 <template>
@@ -178,10 +155,16 @@ const testSpecificVoice = (voiceId, voiceData) => {
           </Column>
           <Column header="Actions">
             <template #body="slotProps">
-              <Button icon="pi pi-play" 
-                      class="p-button-sm p-button-rounded" 
-                      @click="testSpecificVoice(slotProps.data.id, slotProps.data.data)"
-                      title="Test Voice"/>
+              <div class="flex gap-2">
+                <Button icon="pi pi-play" 
+                        class="p-button-sm p-button-rounded" 
+                        @click="testSpecificVoice(slotProps.data.id, slotProps.data.data)"
+                        title="Test Voice"/>
+                <Button icon="pi pi-copy" 
+                        class="p-button-sm p-button-rounded p-button-secondary" 
+                        @click="copyToClipboard(slotProps.data.id)"
+                        v-tooltip.top="'Copy Voice ID to clipboard'"/>
+              </div>
             </template>
           </Column>
         </DataTable>

@@ -21,6 +21,15 @@ export default class VoiceManager {
     return this.data
   }
 
+  getVoiceConfig(voiceId) {
+    const voice = this.data.voices[voiceId]
+    if (!voice) {
+      console.error(`Voice not found: ${voiceId}`)
+      return null
+    }
+    return voice
+  }
+
   load() {
     if (fs.existsSync(this.filePath)) {
       try {

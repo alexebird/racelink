@@ -230,7 +230,8 @@ async function missionGeneratePacenotes(_event, selectedMission) {
     const audioFname = pn.audioFname()
     const noteName = pn.name()
     const noteText = pn.joinedNote()
-    const voiceConfig = beamUserDir.voices()[pn.voice()]
+    // const voiceConfig = beamUserDir.voices()[pn.voice()]
+    const voiceConfig = voiceManager.getVoiceConfig(pn.voice())
     const noteParams = pn.metadata()
     logNote(noteText, `updating note: '${noteText}' noteName='${noteName}'`)
 
