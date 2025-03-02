@@ -9,14 +9,26 @@ const voicesStore = useVoicesStore()
 import { useAudioPlayerStore } from "@/stores/audioPlayer"
 const audioPlayerStore = useAudioPlayerStore()
 
-import { useConfirm } from "primevue/useconfirm";
-const confirm = useConfirm();
+// import { useConfirm } from "primevue/useconfirm";
+// const confirm = useConfirm();
+
+// Add these imports for the DataTable component
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import InputText from 'primevue/inputtext';
+import { FilterMatchMode } from 'primevue/api';
 
 const spinnerClass = ref('hidden')
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  type: { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+});
 
 onMounted(() => {
-  voicesStore.refreshVoices()
-  voicesStore.getUserVoices()
+  refreshVoices()
+  // voicesStore.getUserVoices()
 })
 
 onUnmounted(() => {
@@ -31,143 +43,168 @@ function hideSpinner() {
   spinnerClass.value = 'hidden'
 }
 
-const saveVoice = () => {
-  const formVoice = voicesStore.formVoice
-  if (formVoice) {
-    const [name, voiceData] = formVoice
-    voicesStore.updateUserVoices(name, voiceData)
-  }
-}
+// const saveVoice = () => {
+//   const formVoice = voicesStore.formVoice
+//   if (formVoice) {
+//     const [name, voiceData] = formVoice
+//     voicesStore.updateUserVoices(name, voiceData)
+//   }
+// }
 
-const newVoice = () => {
-  voicesStore.newVoice()
-}
+// const newVoice = () => {
+//   voicesStore.newVoice()
+// }
 
-const testVoice = () => {
+const refreshVoices = () => {
   showSpinner()
-  voicesStore.testVoice().then((audioFname) => {
+  voicesStore.refreshVoices().then(([voiceData, err]) => {
     hideSpinner()
-    if (audioFname) {
-      audioPlayerStore.play(audioFname)
+    if (err) {
+      console.error(err)
     }
   })
 }
 
-const onListSelectionChange = () => {
-  voicesStore.setFormToSelectedVoice()
+const testSpecificVoice = (voiceId, voiceData) => {
+  showSpinner()
+  
+  // Create a plain serializable object by removing any proxy/reactive wrappers
+  const voiceConfig = {
+    text_to_speech: JSON.parse(JSON.stringify(voiceData.text_to_speech))
+  }
+  
+  console.log("Testing voice with config:", voiceConfig);
+  console.log("Test text:", voicesStore.testText);
+  
+  voicesStore.testVoice(voiceConfig)
+    .then((audioFname) => {
+      console.log("Received audio filename:", audioFname);
+      hideSpinner()
+      if (audioFname) {
+        console.log("Attempting to play:", audioFname);
+        audioPlayerStore.play(audioFname)
+      } else {
+        console.warn("No audio filename returned from voice test");
+      }
+    })
+    .catch((error) => {
+      hideSpinner()
+      console.error("Error testing voice:", error)
+    })
 }
 
-const confirmDelete = (event) => {
-  confirm.require({
-    target: event.currentTarget,
-    message: 'Do you want to delete this voice?',
-    icon: 'pi pi-info-circle',
-    rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
-    acceptClass: 'p-button-danger p-button-sm',
-    rejectLabel: 'Cancel',
-    acceptLabel: 'Delete',
-    accept: () => {
-      voicesStore.deleteSelectedUserVoice()
-    },
-    reject: () => {
-    }
-  })
-}
+// const onListSelectionChange = () => {
+//   voicesStore.setFormToSelectedVoice()
+// }
+
+// const confirmDelete = (event) => {
+//   confirm.require({
+//     target: event.currentTarget,
+//     message: 'Do you want to delete this voice?',
+//     icon: 'pi pi-info-circle',
+//     rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+//     acceptClass: 'p-button-danger p-button-sm',
+//     rejectLabel: 'Cancel',
+//     acceptLabel: 'Delete',
+//     accept: () => {
+//       voicesStore.deleteSelectedUserVoice()
+//     },
+//     reject: () => {
+//     }
+//   })
+// }
 </script>
 
 <template>
   <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
+
     <div class="text-lg m-2">
       Voices
     </div>
-        <!-- <div> -->
-        <!--   <Button @click="refreshVoices"> -->
-        <!--     Refresh Voices -->
-        <!--   </Button> -->
-        <!-- </div> -->
 
-    <div class="flex">
-      <div class="flex flex-col gap-2">
-        <Button @click="newVoice" class="w-24 ml-2">New Voice</Button>
-        <Listbox
-          @change="onListSelectionChange"
-          v-model="voicesStore.selectedUserVoice"
-          :options="voicesStore.listboxUserVoices"
-          optionLabel="name"
-          class="min-h-96 ml-2"
-        ></Listbox>
+    <div class="flex ml-2">
+      <div class="flex flex-row items-center gap-2">
+        <Button @click="refreshVoices">
+          Refresh Voices
+        </Button>
+        <ProgressSpinner :class='spinnerClass' style="width: 30px; height: 30px" strokeWidth="4" animationDuration=".5s" />
+      </div>
+    </div>
+
+    <div class="m-2">
+      <!-- Debug section -->
+      <div v-if="voicesStore.voiceData" class="mb-4 p-2">
+        <div>Voice count: {{ voicesStore.voiceData.voices ? Object.keys(voicesStore.voiceData.voices).length : 0 }}</div>
       </div>
 
-      <div class="ml-4">
-        <div class="flex flex-col gap-2">
-          <div class="flex flex-col gap-2 w-64 ">
-            <label for="user_voice_name">Name</label>
-            <!-- <InputText type="text" v-model="value" /> -->
-            <InputText id="user_voice_name" v-model="voicesStore.form.user_voice_name" aria-describedby="user_voice_name-help" />
-            <small id="user_voice_name-help">Your own name for this voice.</small>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label for="tts_language_code">Voice</label>
-            <!-- <InputText type="text" v-model="value" /> -->
-            <!-- <InputText id="tts_language_code" v-model="voicesStore.form.text_to_speech.language_code" aria-describedby="tts_language_code-help" /> -->
-            <!-- <small id="tts_language_code-help">Give a name for this voice.</small> -->
-
-            <Dropdown v-model="voicesStore.form.dropdownVoice" :options="voicesStore.dropdownVoices" filter optionLabel="dropdown_display_name" placeholder="Select a Voice" class="min-w-96 w-[32rem]">
-              <template #value="slotProps">
-                <div v-if="slotProps.value" class="flex align-items-center">
-                  <img :alt="slotProps.value.dropdown_display_name" src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png" :class="`mr-2 flag flag-${slotProps.value.country_code.toLowerCase()}`" />
-                  <div>{{ slotProps.value.dropdown_display_name }}</div>
-                </div>
-                <span v-else>
-                  {{ slotProps.placeholder }}
-                </span>
-              </template>
-              <template #option="slotProps">
-                <div class="flex align-items-center">
-                  <img :alt="slotProps.option.dropdown_display_name" src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png" :class="`mr-2 flag flag-${slotProps.option.country_code.toLowerCase()}`"  />
-                  <div>{{ slotProps.option.dropdown_display_name }}</div>
-                </div>
-              </template>
-            </Dropdown>
-            <small v-if="voicesStore.voiceDataFetchError" class="text-red-400">
-              {{voicesStore.voiceDataFetchError}}
-            </small>
-            <small>
-              <div class="font-bold">Recommended voice type is Neural2, then Wavenet, then Standard.</div>
-              Voice types:
-              <ul class="ml-8 list-disc">
-                <!-- <li>Journey - latest tech</li> -->
-                <!-- <li>Casual - casual speech patterns</li> -->
-                <li>Neural2 - best general purpose, supports most languages</li>
-                <!-- <li>News - sounds like the news</li> -->
-                <!-- <li>Studio - sounds like an audiobook</li> -->
-                <li>Wavenet - general purpose, older tech than Neural2</li>
-                <!-- <li>Polyglot - can speak multiple languages</li> -->
-                <li>Standard - general purpose, older tech than Wavenet</li>
-              </ul>
-            </small>
-          </div>
-
-          <div class="flex gap-2">
-            <Button @click="saveVoice" class="w-16" label="Save"></Button>
-            <ConfirmPopup></ConfirmPopup>
-            <Button @click="confirmDelete($event)" class="w-16" label="Delete" severity="danger"></Button>
-          </div>
-
-          <div class="flex flex-col gap-2">
-            <label for="test_voice">Test</label>
-            <InputText id="test_voice" type="text" v-model="voicesStore.testText" />
-            <div class="flex w-32">
-              <Button @click="testVoice" class="w-16" label="Test" severity="secondary"></Button>
-              <ProgressSpinner :class='spinnerClass' style="width: 30px; height: 30px" strokeWidth="4" animationDuration=".5s" />
+      <div class="overflow-auto" style="max-height: calc(100vh - 200px);">
+        <DataTable v-if="voicesStore.voiceData && voicesStore.voiceData.voices" 
+                  :value="Object.entries(voicesStore.voiceData.voices).map(([key, value]) => ({
+                    id: key,
+                    data: value,
+                    json: JSON.stringify(value, null, 2),
+                    type: value.text_to_speech?.type || 'unknown',
+                    name: value.text_to_speech?.info?.name || key
+                  }))" 
+                  stripedRows 
+                  paginator 
+                  :rows="10"
+                  :rowsPerPageOptions="[5, 10, 25, 50]"
+                  tableStyle="min-width: 50rem"
+                  :globalFilterFields="['id', 'name', 'type', 'json']"
+                  :filters="filters"
+                  filterDisplay="menu">
+          <template #header>
+            <div class="flex justify-between">
+              <span class="p-input-icon-left">
+                <i class="pi pi-search mr-2" />
+                <InputText v-model="filters.global.value" placeholder="Search..." />
+              </span>
             </div>
-          </div>
+          </template>
+          <Column field="id" header="BeamNG Voice ID" sortable filter filterPlaceholder="Search by ID"></Column>
+          <Column field="name" header="Name" sortable filter filterPlaceholder="Search by name"></Column>
+          <Column field="type" header="Provider" sortable filter filterPlaceholder="Search by type"></Column>
+          <Column header="Details">
+            <template #body="slotProps">
+              <Button icon="pi pi-info-circle" 
+                      class="p-button-sm p-button-rounded p-button-text" 
+                      v-tooltip.top="{ 
+                        value: `<pre>${slotProps.data.json}</pre>`, 
+                        escape: false,
+                        class: 'monospace-tooltip' 
+                      }"/>
+            </template>
+          </Column>
+          <Column header="Actions">
+            <template #body="slotProps">
+              <Button icon="pi pi-play" 
+                      class="p-button-sm p-button-rounded" 
+                      @click="testSpecificVoice(slotProps.data.id, slotProps.data.data)"
+                      title="Test Voice"/>
+            </template>
+          </Column>
+        </DataTable>
+        <div v-else-if="voicesStore.voiceDataError" class="text-red-500 p-3">
+          Error loading voices: {{ voicesStore.voiceDataError }}
+        </div>
+        <div v-else class="p-3">
+          No voice data available. Click "Refresh Voices" to load voices.
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
-<style scoped>
+<style>
+/* More specific selector for tooltip styling */
+.monospace-tooltip {
+  font-family: monospace !important;
+  max-width: 600px !important;
+  font-size: 12px !important;
+  overflow: auto !important;
+  max-height: 400px !important;
+  text-align: left !important;
+}
 </style>

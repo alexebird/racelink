@@ -10,16 +10,8 @@ function blankData() {
 }
 
 export default class VoiceManager {
-  constructor(flaskClient) {
-    // const basePath = !app.isPackaged ? '.' : app.getPath('userData')
-    // const basePath = !app.isPackaged ? '.' : 'src/assets'
-    // const basePath = 'src/assets'
-    const basePath = app.isPackaged ? path.join(path.dirname(__dirname), 'dist/assets') : 'public/assets'
-    this.filePath = path.join(basePath, 'voice-db.json')
-    // console.log(this.filePath)
-    // logging shows -> filePath: C:\Users\bird\AppData\Local\Programs\RaceLink\resources\app.asar\dist-electron\dist\assets\voice-db.json
-    // log.info(`filePath: ${this.filePath}`)
-
+  constructor(flaskClient, beamUserDir) {
+    this.filePath = beamUserDir.voicesFile()
     this.flaskClient = flaskClient
     this.data = blankData()
     this.load()
@@ -62,7 +54,7 @@ export default class VoiceManager {
   async refreshVoices() {
     let err = null
     if (!app.isPackaged) {
-      console.log('updating voice db')
+      console.log('updating voices.json')
       const [resp, err2] = await this.flaskClient.getVoicesList()
       if (err2) {
         err = err2

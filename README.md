@@ -1,6 +1,13 @@
 RACELINK
 ===
 
+dev env vars
+```
+# cant use string 'localhost' on windows for some reason.
+export VOCALIZER_URL='http://127.0.0.1:8647'
+export RACER_URL='http://127.0.0.1:3000/api'
+```
+
 dev setup
 ```
 cd .\Desktop\beam-bird\gh_repos\racelink\

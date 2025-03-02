@@ -4,17 +4,20 @@ import fs from 'node:fs'
 
 // const settings = require('./aipacenotes/settings'); // Adjust the import path as necessary
 
-const timeoutMs = 1000;
+const timeoutVoicesListMs = 20 * 1000;
 const timeoutTranscribeMs = 20 * 1000
 const timeoutGenerateMs = 20 * 1000
 
+const VOCALIZER_URL = process.env.VOCALIZER_URL || "https://aipacenotes.alxb.us/f"
+
 export default class FlaskApiClient {
-  constructor(uuid) {
-    this.baseURL = "https://aipacenotes.alxb.us/f"
-    // this.baseURL = "http://127.0.0.1:8080" // cant be localhost
+  constructor(apiKey, uuid) {
+    this.baseURL = VOCALIZER_URL
     console.log(`vocalizer url: ${this.baseURL}`)
-    this.headerUUID = 'X-Aip-Client-UUID'
+    this.headerUUID = 'X-Client-UUID'
     this.userUUID = uuid
+    this.headerApiKey = 'Authorization'
+    this.apiKey = apiKey
   }
 
   mkurl(suffix) {
@@ -86,10 +89,12 @@ export default class FlaskApiClient {
       note_params: noteParams || {},
       note_text: noteText,
       voice_config: voiceConfig,
+      ffmpeg_mode: 'plain',
     }
     const headers = {
       "Content-Type": "application/json",
       [this.headerUUID]: this.userUUID,
+      [this.headerApiKey]: `Bearer ${this.apiKey}`,
     }
 
     const config = {
@@ -113,6 +118,7 @@ export default class FlaskApiClient {
     formData.append('audio', fs.createReadStream(fname));
     const headers = {
       [this.headerUUID]: this.userUUID,
+      [this.headerApiKey]: `Bearer ${this.apiKey}`,
       ...formData.getHeaders(), // This line is necessary for setting multipart/form-data headers
     };
 
@@ -139,6 +145,7 @@ export default class FlaskApiClient {
     const headers = {
       "Content-Type": "application/json",
       [this.headerUUID]: this.userUUID,
+      [this.headerApiKey]: `Bearer ${this.apiKey}`,
     }
 
     const config = {
@@ -158,12 +165,13 @@ export default class FlaskApiClient {
     const url = this.mkurl('/voices/list')
     const headers = {
       [this.headerUUID]: this.userUUID,
+      [this.headerApiKey]: `Bearer ${this.apiKey}`,
     }
 
     const config = {
       headers,
-      timeout: timeoutMs,
-      signal: AbortSignal.timeout(timeoutMs),
+      timeout: timeoutVoicesListMs,
+      signal: AbortSignal.timeout(timeoutVoicesListMs),
     }
 
     try {
@@ -171,7 +179,10 @@ export default class FlaskApiClient {
       return [response.data, null]
     } catch (error) {
       console.error('error getting voices')
-      return [null, this.parseAxiosError(error)]
+      console.error(error)
+      const errMsg = this.parseAxiosError(error)
+      console.error(errMsg)
+      return [null, errMsg]
     }
   }
 }

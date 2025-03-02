@@ -2,104 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { gcMetadata } from './MetadataManager'
 import _ from 'lodash'
-import crypto from 'node:crypto'
-
-function cleanNameForPath(aString) {
-  aString = aString.replace(/[^a-zA-Z0-9]/g, '_'); // Replace everything but letters and numbers with '_'
-  aString = aString.replace(/_+/g, '_');           // Replace multiple consecutive '_' with a single '_'
-  return aString;
-}
-
-function normalizePath(inPath) {
-  // return path.normalize(inPath).replace(/\\/g, "/");
-  return inPath
-}
-
-class Pacenote {
-  constructor(notebook, noteData) {
-    this.notebook = notebook
-    this.noteData = noteData
-    this.fileExists = false
-  }
-
-  setFileExists() {
-    this.fileExists = fs.existsSync(this.audioFname())
-  }
-
-  joinedNote() {
-    return this.noteData.note
-  }
-
-  name() {
-    return this.noteData.name
-  }
-
-  metadata() {
-    return this.noteData.metadata
-  }
-
-  voice() {
-    return this.noteData.codriver.voice
-  }
-
-  language() {
-    return this.noteData.language
-  }
-
-  noteHash() {
-    const hash = crypto.createHash('sha1')
-    hash.update(this.noteData.note)
-    return hash.digest('hex').substring(0, 16)
-  }
-
- // noteData: {
- //    metadata: {},
- //    name: 'Pacenote 5',
- //    notes: {
- //      english: [Object],
- //      french: [Object],
- //      german: [Object],
- //      russian: [Object],
- //      spanish: [Object]
- //    },
- //    oldId: 30,
- //    pacenoteWaypoints: [
- //      [Object], [Object],
- //      [Object], [Object],
- //      [Object], [Object],
- //      [Object], [Object]
- //    ],
- //    note: 'fotobar ?',
- //    language: 'french',
- //    codriver: {
- //      language: 'french',
- //      name: 'Cosette',
- //      oldId: 13,
- //      voice: 'french_female'
- //    }
- //  }
-  cleanCodriverName() {
-    return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.language}_${this.noteData.codriver.voice}`)
-
-    // return normalizePath(path.join(this.dirname(), 'generated_pacenotes', cleanNameForPath(this.basenameNoExt())))
-
-    // return aipacenotes.clean_name_for_path(
-    //   self.codriver_name() + '_'+self.language() + '_' + self.voice()
-    // )
-  }
-
-  noteBasename() {
-    return `pacenote_${this.noteHash()}.ogg`
-  }
-
-  audioFname() {
-    return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.noteBasename())
-  }
-
-  needsUpdate() {
-    return !this.fileExists && this.joinedNote() !== ''
-  }
-}
+import { Pacenote, cleanNameForPath } from './Pacenote'
 
 class Notebook {
   constructor(notebookPath, voices, staticPacenotes) {
@@ -138,92 +41,6 @@ class Notebook {
       pacenotesDir: this.pacenotesDir(),
     }
   }
-
-  // must be the same as the method in pacenote.lua with the same name.
-  // _joinedNote2(noteData) {
-  //
-  //   const AUTOFILL_BLOCKER = '#';
-  //   const AUTODIST_INTERNAL_LEVEL1 = '<none>'
-  //   const EMPTY_PLACEHOLDER = '[empty]';
-  //
-  //   const default_punctuation_distance_call = '.'
-  //   const var_dl = '{dl}'
-  //   const var_dt = '{dt}'
-  //
-  //   let txt = '';
-  //   if (!noteData) {
-  //     return txt;
-  //   }
-  //
-  //   const useNote = (text) => text &&
-  //     text !== '' &&
-  //     text !== AUTOFILL_BLOCKER &&
-  //     text !== AUTODIST_INTERNAL_LEVEL1;
-  //
-  //   const note = noteData.note
-  //   const before = noteData.before
-  //   const after = noteData.after
-  //
-  //   if (useNote(note)) {
-  //     txt = note;
-  //   } else {
-  //     return EMPTY_PLACEHOLDER
-  //   }
-  //
-  //   if (!txt.includes(var_dl)) {
-  //     txt = var_dl + ' ' + txt;
-  //   }
-  //
-  //   txt = useNote(before) ?
-  //     txt.replace(var_dl, before) :
-  //     txt.replace(var_dl, '');
-  //
-  //   if (useNote(after)) {
-  //     if (!txt.includes(var_dt)) {
-  //       txt += ' ' + var_dt + default_punctuation_distance_call;
-  //     }
-  //     txt = txt.replace(var_dt, after);
-  //   } else {
-  //     txt = txt.replace(var_dt, '');
-  //   }
-  //
-  //   // Trim string
-  //   txt = txt.trim();
-  //
-  //   return txt;
-  // }
-
-  // _joinedNote(noteData) {
-  //   const AUTOFILL_BLOCKER = '#';
-  //   const AUTOFILL_BLOCKER_INTERNAL = '<none>';
-  //   const EMPTY_PLACEHOLDER = '[empty]';
-  //
-  //   const default_punctuation_distance_call = '.'
-  //   const var_dl = '{dl}'
-  //   const var_dt = '{dt}'
-  //
-  //   let note = noteData.note || '';
-  //   if (note === AUTOFILL_BLOCKER || note === AUTOFILL_BLOCKER_INTERNAL) {
-  //     return EMPTY_PLACEHOLDER
-  //   }
-  //
-  //   let before = noteData.before || '';
-  //   if (before === AUTOFILL_BLOCKER || before === AUTOFILL_BLOCKER_INTERNAL) {
-  //     before = '';
-  //   }
-  //
-  //   let after = noteData.after || '';
-  //   if (after === AUTOFILL_BLOCKER || after === AUTOFILL_BLOCKER_INTERNAL) {
-  //     after = '';
-  //   }
-  //
-  //   const rv = [before, note, after].join(' ').trim();
-  //   if (rv === '') {
-  //     return EMPTY_PLACEHOLDER;
-  //   }
-  //
-  //   return rv;
-  // }
 
   ensureArray(value) {
     return Array.isArray(value) ? value : [value];
@@ -320,7 +137,7 @@ class Notebook {
   }
 
   pacenotesDir() {
-    return normalizePath(path.join(this.dirname(), 'generated_pacenotes', cleanNameForPath(this.basenameNoExt())))
+    return path.join(this.dirname(), 'generated_pacenotes', cleanNameForPath(this.basenameNoExt()))
   }
 
   updatePacenotes() {
@@ -344,21 +161,6 @@ class Notebook {
     let allOggFiles = new Set();
     let pacenoteFiles = new Set();
     let pacenoteDirs = new Set();
-
-    // Recursive function to list all .ogg files
-    // const listOggFiles = (dir) => {
-    //   const files = fs.readdirSync(dir, { withFileTypes: true });
-    //   files.forEach(file => {
-    //     const fullPath = path.join(dir, file.name);
-    //     if (file.isDirectory()) {
-    //       listOggFiles(fullPath); // Recurse into subdirectories
-    //     } else if (path.extname(file.name) === '.ogg') {
-    //       allOggFiles.add(fullPath); // Store the full path for deletion
-    //       const dirName = path.dirname(fullPath);
-    //       pacenoteDirs.add(dirName)
-    //     }
-    //   });
-    // };
 
     const listOggFiles = (dir) => {
       if (!fs.existsSync(dir)) {
@@ -407,7 +209,6 @@ class Notebook {
     pacenoteDirs.forEach(pd => {
       gcMetadata(pd)
     });
-
   }
 }
 

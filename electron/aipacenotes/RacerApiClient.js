@@ -6,13 +6,14 @@ const timeoutMs = 1000;
 const timeoutTranscribeMs = 20 * 1000
 const timeoutGenerateMs = 20 * 1000
 
+const RACER_URL = process.env.RACER_URL || "https://aipacenotes.alxb.us/api"
+
 export default class RacerApiClient {
   constructor(apiKey, uuid) {
-    // this.baseURL = "https://aipacenotes.alxb.us/api"
-    this.baseURL = "http://127.0.0.1:3000/api" // cant be localhost
+    this.baseURL = RACER_URL
     console.log(`racer url: ${this.baseURL}`)
-    this.headerUUID = 'X-Aip-Client-UUID'
-    this.headerApiKey = 'X-Api-Key'
+    this.headerUUID = 'X-Client-UUID'
+    this.headerApiKey = 'Authorization'
     this.userUUID = uuid
     this.apiKey = apiKey
   }
@@ -46,7 +47,7 @@ export default class RacerApiClient {
   async getHealthcheck() {
     const url = this.mkurl('/healthcheck')
     const headers = {
-      [this.headerApiKey]: this.apiKey,
+      [this.headerApiKey]: `Bearer ${this.apiKey}`,
       [this.headerUUID]: this.userUUID,
     }
 
@@ -70,7 +71,7 @@ export default class RacerApiClient {
     const headers = {
       "Content-Type": "application/json",
       [this.headerUUID]: this.userUUID,
-      [this.headerApiKey]: this.apiKey,
+      [this.headerApiKey]: `Bearer ${this.apiKey}`,
     }
 
     const config = {

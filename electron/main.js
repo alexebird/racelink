@@ -71,10 +71,10 @@ const queue = new PQueue({concurrency: 1});
 
 const appSettings = new Settings('settings.json', defaultSettings)
 appSettings.save()
-const flaskClient = new FlaskApiClient(appSettings.get('uuid'))
+const flaskClient = new FlaskApiClient(appSettings.get('racerApiKey'), appSettings.get('uuid'))
 const racerClient = new RacerApiClient(appSettings.get('racerApiKey'), appSettings.get('uuid'))
-const voiceManager = new VoiceManager(flaskClient)
 const beamUserDir = new BeamUserDir(appSettings)
+const voiceManager = new VoiceManager(flaskClient, beamUserDir)
 const missionScanner = new MissionScanner()
 const resultsManager = new ResultsManager(beamUserDir, racerClient, appSettings)
 const inFlightMissions = new Set()

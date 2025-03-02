@@ -94,11 +94,13 @@ const onApiKeyValueUpdate = (event) => {
       <div>
         RaceLink API Key
         <div class='ml-4'>
-          <InputText
+          <Password
             @input="onApiKeyValueUpdate"
             v-model="settingsStore.settings.racerApiKey"
             placeholder="Enter your API key"
-            class="wide-input" />
+            :feedback="false"
+            :inputStyle="{ width: '400px' }" 
+            />
         </div>
       </div>
     </div>
@@ -106,7 +108,4 @@ const onApiKeyValueUpdate = (event) => {
 </template>
 
 <style scoped>
-.wide-input {
-  width: 400px;
-}
 </style>

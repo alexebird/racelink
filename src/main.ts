@@ -51,6 +51,9 @@ app.component('ConfirmPopup', ConfirmPopup)
 import InputText from 'primevue/inputtext'
 app.component('InputText', InputText)
 
+import Password from 'primevue/password'
+app.component('Password', Password)
+
 import Dropdown from 'primevue/dropdown'
 app.component('Dropdown', Dropdown)
 

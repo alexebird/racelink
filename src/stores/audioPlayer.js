@@ -22,7 +22,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', {
         console.log('audio file ready', url)
 
         this.audioElement.src = url
-        this.audioElement.volume = 0.3
+        // this.audioElement.volume = 0.3
         this.audioElement.play()
           .catch(error => console.error("Error playing audio:", error))
       } else {

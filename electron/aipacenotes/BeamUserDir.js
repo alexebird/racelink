@@ -11,6 +11,11 @@ export default class BeamUserDir {
     this.cachedStaticPacenotes = null
   }
 
+  voicesFile() {
+    const beamDir = this.appSettings.get('beamUserDir')
+    return `${beamDir}/${SETTINGS_PATH}/voices.json`
+  }
+
   voices() {
     return this.cachedVoices
   }
