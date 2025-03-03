@@ -8,7 +8,7 @@ const timeoutVoicesListMs = 20 * 1000;
 const timeoutTranscribeMs = 20 * 1000
 const timeoutGenerateMs = 20 * 1000
 
-const VOCALIZER_URL = process.env.VOCALIZER_URL || "https://aipacenotes.alxb.us/f"
+const VOCALIZER_URL = process.env.VOCALIZER_URL || "https://racel.ink/api2"
 
 export default class FlaskApiClient {
   constructor(apiKey, uuid) {

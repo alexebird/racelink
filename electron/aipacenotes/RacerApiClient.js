@@ -6,7 +6,7 @@ const timeoutMs = 1000;
 const timeoutTranscribeMs = 20 * 1000
 const timeoutGenerateMs = 20 * 1000
 
-const RACER_URL = process.env.RACER_URL || "https://aipacenotes.alxb.us/api"
+const RACER_URL = process.env.RACER_URL || "https://racel.ink/api"
 
 export default class RacerApiClient {
   constructor(apiKey, uuid) {
