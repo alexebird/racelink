@@ -83,7 +83,7 @@ export default class FlaskApiClient {
   // }
 
   async postCreatePacenoteAudioB64(noteName, noteParams, noteText, voiceConfig) {
-    console.log(JSON.stringify(voiceConfig, null, 2))
+    // console.log(JSON.stringify(voiceConfig, null, 2))
     const url = this.mkurl('/pacenotes/audio/createB64')
     const data = {
       note_name: noteName,

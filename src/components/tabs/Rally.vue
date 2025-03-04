@@ -23,6 +23,7 @@ const onNodeSelect = (node) => {
     // toast.add({ severity: 'success', summary: 'Node Selected', detail: node.data.fname, life: 1000 });
     rallyStore.selectMission(node.data)
     settingsStore.setLastSelectedMission(rallyStore.selectedMissionId)
+    scanNotebooks()
   }
 }
 

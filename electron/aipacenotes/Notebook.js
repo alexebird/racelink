@@ -3,13 +3,16 @@ import path from 'node:path'
 import { gcMetadata } from './MetadataManager'
 import _ from 'lodash'
 import { Pacenote, cleanNameForPath } from './Pacenote'
+import crypto from 'crypto'
 
 class Notebook {
-  constructor(notebookPath, voices, staticPacenotes) {
+  constructor(notebookPath, voices) {
     this.voices = voices
-    this.staticPacenotes = staticPacenotes.static_pacenotes
     this.notebookPath = notebookPath
     this.content = this._readNotebookFile()
+    // console.log(JSON.stringify(this.content, null, 2))
+    this.staticPacenotes = this.content.staticPacenotes
+    this.fileHash = null
     this._cachePacenotes()
   }
 
@@ -39,6 +42,7 @@ class Notebook {
       name: this.content.name,
       pacenotes: children,
       pacenotesDir: this.pacenotesDir(),
+      fileHash: this.fileHash,
     }
   }
 
@@ -76,6 +80,10 @@ class Notebook {
     this.codrivers().forEach(codriverData => {
       // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
       this.content.pacenotes.concat(this.staticPacenotes).forEach(pacenoteData => {
+        if (!pacenoteData) {
+          console.error(`missing pacenoteData for pacenote ${pacenoteData}`)
+          return
+        }
         Object.entries(pacenoteData['notes']).forEach(([lang, langData]) => {
           // if (pacenoteData.metadata.static) return
           if (codriverData['language'] === lang) {
@@ -112,9 +120,11 @@ class Notebook {
   _readNotebookFile() {
     try {
       const data = fs.readFileSync(this.notebookPath, 'utf8')
+      this.fileHash = crypto.createHash('sha1').update(data).digest('hex');
       return JSON.parse(data)
     } catch (err) {
       console.error('Error reading notebook file:', err)
+      this.fileHash = null;
       return null
     }
   }

@@ -86,6 +86,8 @@ const UNKNOWN_PLACEHOLDER = '[unknown]';
 // let lastAudioPlayerPausedState = true
 let lastNetworkError = null
 const networkErrorDebounceSec = 5
+let cachedFileHashes = null
+let lastMissionId = null
 
 function nowTs() {
   return Date.now()/1000
@@ -196,14 +198,42 @@ function recordingFname() {
   return outputFile
 }
 
+function setsEqual(setA, setB) {
+  if (setA.size !== setB.size) return false;
+  for (const item of setA) {
+    if (!setB.has(item)) return false;
+  }
+  return true;
+}
+
 function sendIpcNotebooks(notebookScanner) {
   if (win) {
-    win.webContents.send('notebooksUpdated', notebookScanner.getNotebooksAsIpcData());
+    const notebooks = notebookScanner.getNotebooksAsIpcData()
+
+    // Collect all notebook file hashes into a set
+    const fileHashes = new Set();
+    if (notebooks) {
+      notebooks.forEach(notebook => {
+        if (notebook.fileHash) {
+          fileHashes.add(notebook.fileHash);
+        }
+      });
+    }
+    
+    // Only send if the set of hashes is different from the cached one
+    if (!cachedFileHashes || !setsEqual(fileHashes, cachedFileHashes)) {
+      cachedFileHashes = new Set(fileHashes);
+      win.webContents.send('notebooksUpdated', notebooks);
+    }
   }
 }
 
 async function missionGeneratePacenotes(_event, selectedMission) {
   if (selectedMission) {
+    if (selectedMission.mission.fullId !== lastMissionId) {
+      lastMissionId = selectedMission.mission.fullId
+      cachedFileHashes = null
+    }
     appSettings.set('lastSelectedMission', selectedMission.mission.fullId)
   } else {
     appSettings.set('lastSelectedMission', null)

@@ -59,7 +59,7 @@ export default class NotebookScanner {
 
     // read all notebook files
     this.notebooks = files.map((file) => {
-      return new Notebook(file, this.beamUserDir.voices(), this.beamUserDir.staticPacenotes())
+      return new Notebook(file, this.beamUserDir.voices())
     })
   }
 

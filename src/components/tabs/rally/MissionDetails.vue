@@ -18,8 +18,7 @@ onMounted(() => {
   rallyStore.resetRecording()
 
   window.electronAPI.onNotebooksUpdated((event, notebooks) => {
-    // console.log('onNotebooksUpdated', notebooks)
-    rallyStore.$patch({ notebooks: notebooks })
+    rallyStore.$patch({ notebooks: notebooks });
   })
 
   // window.electronAPI.onTranscribeDone((resp) => {
@@ -101,7 +100,8 @@ const getLanguageOptions = (pacenotes) => {
 const getTypeOptions = () => {
   return [
     { name: 'Freeform', value: 'freeform' },
-    { name: 'Structured', value: 'structured' }
+    { name: 'Structured', value: 'structured' },
+    { name: 'System', value: 'system' }
   ]
 }
 
@@ -141,7 +141,15 @@ const processPacenotes = (pacenotes) => {
     const processedNote = { ...note }
     
     // Add a type field based on the name pattern
-    processedNote.type = note.name && note.name.match(/\[\d+\]/) ? 'structured' : 'freeform'
+    if (!note.name) {
+      processedNote.type = 'freeform'
+    } else if (!note.name.startsWith('Pacenote ')) {
+      processedNote.type = 'system'
+    } else if (note.name.match(/\[\d+\]/)) {
+      processedNote.type = 'structured'
+    } else {
+      processedNote.type = 'freeform'
+    }
     
     return processedNote
   })
@@ -245,20 +253,27 @@ const filterPacenotes = (pacenotes) => {
                   
                   <DataTable
                     :value="filterPacenotes(slotProps.data.pacenotes)"
-                    scrollable scrollHeight="600px"
-                    paginator :rows="8"
+                    scrollable 
+                    scrollHeight="600px"
+                    :paginator="false"
                     rowHover
                     :rowClass="(data) => getRowClass(data)"
+                    class="pacenotes-table"
                   >
-                    <Column field="name" header="Name" style="width: 7rem"></Column>
-                    <Column header="">
+                    <Column field="name" header="Name" style="width: 120px" class="fixed-width-column"></Column>
+                    <Column header="" style="width: 80px" class="fixed-width-column">
                       <template #body="slotProps">
                         <div class="flex">
-                          <Button @click="() => onPlayClick(slotProps.data.audioFname)">
-                            <span class="pi pi-play"></span>
+                          <Button @click="() => onPlayClick(slotProps.data.audioFname)"
+                            class="p-button-sm p-button-icon-only mini-button">
+                            <span class="pi pi-play text-xs"></span>
                           </Button>
-                          <Button class="ml-2" @click="() => onRegenOneClick(slotProps.data.audioFname)">
-                            <span class="pi pi-refresh"></span>
+                          <Button class="ml-1 p-button-sm p-button-icon-only mini-button" @click="() => onRegenOneClick(slotProps.data.audioFname)">
+                            <span class="pi pi-refresh text-xs"></span>
+                          </Button>
+                          <Button class="ml-1 p-button-sm p-button-icon-only mini-button" 
+                            v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type + ' | Language: ' + slotProps.data.language">
+                            <span class="pi pi-info-circle text-xs"></span>
                           </Button>
                         </div>
                       </template>
@@ -270,9 +285,36 @@ const filterPacenotes = (pacenotes) => {
                         </span>
                       </template>
                     </Column>
-                    <Column field="language" header="Language"></Column>
-                    <Column field="voice" header="Voice"></Column>
-                    <Column field="type" header="Type"></Column>
+                    <!-- <Column field="language" header="Language"></Column> -->
+                    
+                    <!-- Add a row template to apply the tooltip to the entire row -->
+                    <template #row="slotProps">
+                      <tr v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type" 
+                          :class="getRowClass(slotProps.data)">
+                        <td style="width: 120px" class="fixed-width-column">{{ slotProps.data.name }}</td>
+                        <td style="width: 80px" class="fixed-width-column">
+                          <div class="flex">
+                            <Button @click="() => onPlayClick(slotProps.data.audioFname)"
+                              class="p-button-sm p-button-icon-only mini-button">
+                              <span class="pi pi-play text-xs"></span>
+                            </Button>
+                            <Button class="ml-1 p-button-sm p-button-icon-only mini-button" @click="() => onRegenOneClick(slotProps.data.audioFname)">
+                              <span class="pi pi-refresh text-xs"></span>
+                            </Button>
+                            <Button class="ml-1 p-button-sm p-button-icon-only mini-button" 
+                              v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type + ' | Language: ' + slotProps.data.language">
+                              <span class="pi pi-info-circle text-xs"></span>
+                            </Button>
+                          </div>
+                        </td>
+                        <td>
+                          <span class="font-mono">
+                            {{ slotProps.data.note}}
+                          </span>
+                        </td>
+                        <td>{{ slotProps.data.language }}</td>
+                      </tr>
+                    </template>
                   </DataTable>
                 </div>
               </template>
@@ -323,5 +365,34 @@ const filterPacenotes = (pacenotes) => {
 
 :deep(.odd-pacenote-group) {
   background-color: transparent;
+}
+
+/* Custom mini button styling */
+:deep(.mini-button) {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  padding: 0 !important;
+}
+
+:deep(.mini-button .p-button-icon) {
+  font-size: 0.75rem;
+}
+
+/* Fixed width column styling */
+:deep(.fixed-width-column) {
+  max-width: none !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Scrollable table styling */
+:deep(.pacenotes-table) {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+:deep(.pacenotes-table .p-datatable-wrapper) {
+  max-height: 70vh;
 }
 </style>

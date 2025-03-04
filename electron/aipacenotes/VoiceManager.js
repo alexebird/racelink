@@ -62,15 +62,15 @@ export default class VoiceManager {
 
   async refreshVoices() {
     let err = null
-    if (!app.isPackaged) {
-      console.log('updating voices.json')
-      const [resp, err2] = await this.flaskClient.getVoicesList()
-      if (err2) {
-        err = err2
-      }
-      const newData = resp
-      this.update(newData)
+    // if (!app.isPackaged) {
+    // }
+    console.log('updating voices.json')
+    const [resp, err2] = await this.flaskClient.getVoicesList()
+    if (err2) {
+      err = err2
     }
+    const newData = resp
+    this.update(newData)
     return [this.data, err]
   }
 }

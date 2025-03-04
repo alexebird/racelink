@@ -8,7 +8,7 @@ export default class BeamUserDir {
   constructor(appSettings) {
     this.appSettings = appSettings
     this.cachedVoices = null
-    this.cachedStaticPacenotes = null
+    // this.cachedStaticPacenotes = null
   }
 
   voicesFile() {
@@ -20,13 +20,13 @@ export default class BeamUserDir {
     return this.cachedVoices
   }
 
-  staticPacenotes() {
-    return this.cachedStaticPacenotes
-  }
+  // staticPacenotes() {
+  //   return this.cachedStaticPacenotes
+  // }
 
   load() {
     this.cachedVoices = this.loadAndMergeVoices()
-    this.cachedStaticPacenotes = this.loadStaticPacenotes()
+    // this.cachedStaticPacenotes = this.loadStaticPacenotes()
   }
 
   userVoicesFile() {
@@ -175,26 +175,26 @@ export default class BeamUserDir {
     return mergedJson;
   }
 
-  loadStaticPacenotes() {
-    for (const path of this._staticPacenotesSearchPaths()) {
-      try {
-        let content;
-        if (path.includes('.zip/')) {
-          const [zipPath, internalPath] = path.split('.zip/').map((part, index) => index === 0 ? `${part}.zip` : part);
-          content = this.readFileFromZip(zipPath, internalPath);
-        } else {
-          content = this.readFileNormally(path);
-        }
-        if (content) {
-          const json = JSON.parse(content);
-          return json; // Return the content of the first file found
-        }
-      } catch (error) {
-        // If there's an error (file not found or read error), continue to the next path
-        console.error(`Error reading file at ${path}:`, error);
-      }
-    }
-    // If no files are found or all attempts to read files fail, optionally return null or throw an error
-    return null;
-  }
+  // loadStaticPacenotes() {
+  //   for (const path of this._staticPacenotesSearchPaths()) {
+  //     try {
+  //       let content;
+  //       if (path.includes('.zip/')) {
+  //         const [zipPath, internalPath] = path.split('.zip/').map((part, index) => index === 0 ? `${part}.zip` : part);
+  //         content = this.readFileFromZip(zipPath, internalPath);
+  //       } else {
+  //         content = this.readFileNormally(path);
+  //       }
+  //       if (content) {
+  //         const json = JSON.parse(content);
+  //         return json; // Return the content of the first file found
+  //       }
+  //     } catch (error) {
+  //       // If there's an error (file not found or read error), continue to the next path
+  //       console.error(`Error reading file at ${path}:`, error);
+  //     }
+  //   }
+  //   // If no files are found or all attempts to read files fail, optionally return null or throw an error
+  //   return null;
+  // }
 }
