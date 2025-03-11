@@ -6,6 +6,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSettings: () => ipcRenderer.invoke('settingsGetAll'),
   setSetting: (key, value) => ipcRenderer.invoke('settingsSet', key, value),
 
+  // toast
+  onToast: (callback) => ipcRenderer.on('toastNotice', (_event, toast) => callback(toast)),
+
   // file explorer stuff
   openFileExplorer: (dirname) => ipcRenderer.send('openFileExplorer', dirname),
   openExternal: (url) => ipcRenderer.send('openExternal', url),

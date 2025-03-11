@@ -90,7 +90,8 @@ export default class FlaskApiClient {
       note_params: noteParams || {},
       note_text: noteText,
       voice_config: voiceConfig,
-      ffmpeg_mode: 'plain',
+      effects_mode: 'lufs',
+      // effects_mode: 'plain',
     }
     const headers = {
       "Content-Type": "application/json",
@@ -109,6 +110,7 @@ export default class FlaskApiClient {
       return [response.data, null]
     } catch (error) {
       console.error('error creating pacenote audio');
+      console.error(error.response.data)
       return [null, this.parseAxiosError(error)];
     }
   }

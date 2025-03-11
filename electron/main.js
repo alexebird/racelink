@@ -211,21 +211,27 @@ function sendIpcNotebooks(notebookScanner) {
     const notebooks = notebookScanner.getNotebooksAsIpcData()
 
     // Collect all notebook file hashes into a set
-    const fileHashes = new Set();
-    if (notebooks) {
-      notebooks.forEach(notebook => {
-        if (notebook.fileHash) {
-          fileHashes.add(notebook.fileHash);
-        }
-      });
-    }
+    // const fileHashes = new Set();
+    // if (notebooks) {
+    //   notebooks.forEach(notebook => {
+    //     if (notebook.fileHash) {
+    //       fileHashes.add(notebook.fileHash);
+    //     }
+    //   });
+    // }
     
     // Only send if the set of hashes is different from the cached one
-    if (!cachedFileHashes || !setsEqual(fileHashes, cachedFileHashes)) {
-      cachedFileHashes = new Set(fileHashes);
+    // if (!cachedFileHashes || !setsEqual(fileHashes, cachedFileHashes)) {
+      // cachedFileHashes = new Set(fileHashes);
       win.webContents.send('notebooksUpdated', notebooks);
-    }
+    // }
   }
+}
+
+function sendToastNotice(severity, summary, detail) {
+  const life = 1000
+  const notice = {severity, summary, detail, life}  
+  win.webContents.send('toastNotice', notice);
 }
 
 async function missionGeneratePacenotes(_event, selectedMission) {
@@ -253,7 +259,7 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   inFlightMissions.add(selectedMission.mission.fname)
 
   const notebookScanner = new NotebookScanner(beamUserDir, selectedMission.mission.fname)
-  const pacenotesToUpdate = notebookScanner.getUpdatesToDo().slice(0, 4); // do N at a time
+  const pacenotesToUpdate = notebookScanner.getUpdatesToDo().slice(0, 1); // do N at a time
   sendIpcNotebooks(notebookScanner)
 
   const promises = pacenotesToUpdate.map((pn) => {
@@ -262,6 +268,12 @@ async function missionGeneratePacenotes(_event, selectedMission) {
     const noteText = pn.joinedNote()
     // const voiceConfig = beamUserDir.voices()[pn.voice()]
     const voiceConfig = voiceManager.getVoiceConfig(pn.voice())
+
+    if (!voiceConfig) {
+      sendToastNotice("error", "Voice Not Found", `Voice '${pn.voice()}' not found. Make sure you can find it in the Voices tab.`)
+      return Promise.resolve("skipped")
+    }
+
     const noteParams = pn.metadata()
     logNote(noteText, `updating note: '${noteText}' noteName='${noteName}'`)
 

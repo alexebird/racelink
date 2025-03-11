@@ -13,12 +13,25 @@ const expandedRows = ref({})
 const currentIndex = ref(-1);
 const selectedLanguage = ref(null)
 const selectedType = ref(null)
+const paginationState = ref({}) // Track pagination state for each notebook
 
 onMounted(() => {
   rallyStore.resetRecording()
 
   window.electronAPI.onNotebooksUpdated((event, notebooks) => {
-    rallyStore.$patch({ notebooks: notebooks });
+    // Preserve pagination state when notebooks are updated
+    const updatedNotebooks = notebooks.map(notebook => {
+      // Initialize pagination state for this notebook if it doesn't exist
+      if (!paginationState.value[notebook.basename]) {
+        paginationState.value[notebook.basename] = { 
+          page: 0,
+          rows: 10
+        }
+      }
+      return notebook
+    })
+    
+    rallyStore.$patch({ notebooks: updatedNotebooks });
   })
 
   // window.electronAPI.onTranscribeDone((resp) => {
@@ -173,6 +186,19 @@ const filterPacenotes = (pacenotes) => {
     return languageMatch && typeMatch
   })
 }
+
+// Method to handle pagination state changes
+const onPageChange = (event, notebookId) => {
+  if (!paginationState.value[notebookId]) {
+    paginationState.value[notebookId] = {}
+  }
+  
+  // Update pagination state with new values
+  paginationState.value[notebookId] = {
+    page: event.page,
+    rows: event.rows
+  }
+}
 </script>
 
 <template>
@@ -219,6 +245,7 @@ const filterPacenotes = (pacenotes) => {
                 </template>
               </Column>
               <Column field="name" header="Name"></Column>
+              <Column field="updatedAgo" header="Last Saved"></Column>
               <Column header="" style="width: 3rem">
                 <template #body="slotProps">
                   <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)"
@@ -253,12 +280,14 @@ const filterPacenotes = (pacenotes) => {
                   
                   <DataTable
                     :value="filterPacenotes(slotProps.data.pacenotes)"
-                    scrollable 
-                    scrollHeight="600px"
-                    :paginator="false"
+                    :paginator="true"
+                    :rows="paginationState[slotProps.data.basename]?.rows || 10"
+                    :rowsPerPageOptions="[5, 10, 20, 50]"
                     rowHover
                     :rowClass="(data) => getRowClass(data)"
                     class="pacenotes-table"
+                    :first="paginationState[slotProps.data.basename]?.page * (paginationState[slotProps.data.basename]?.rows || 10)"
+                    @page="onPageChange($event, slotProps.data.basename)"
                   >
                     <Column field="name" header="Name" style="width: 120px" class="fixed-width-column"></Column>
                     <Column header="" style="width: 80px" class="fixed-width-column">
@@ -388,11 +417,10 @@ const filterPacenotes = (pacenotes) => {
 
 /* Scrollable table styling */
 :deep(.pacenotes-table) {
-  max-height: 70vh;
-  overflow-y: auto;
+  /* No special styling needed for paginated table */
 }
 
 :deep(.pacenotes-table .p-datatable-wrapper) {
-  max-height: 70vh;
+  /* No special styling needed for paginated table */
 }
 </style>

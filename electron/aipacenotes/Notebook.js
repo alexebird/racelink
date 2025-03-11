@@ -11,7 +11,7 @@ class Notebook {
     this.notebookPath = notebookPath
     this.content = this._readNotebookFile()
     // console.log(JSON.stringify(this.content, null, 2))
-    this.staticPacenotes = this.content.staticPacenotes
+    this.systemPacenotes = this.content.systemPacenotes
     this.fileHash = null
     this._cachePacenotes()
   }
@@ -35,6 +35,27 @@ class Notebook {
       }
     })
 
+    // Convert updated_at timestamp to a human-readable "ago" string
+    let updatedAgo = '';
+    if (this.content.updated_at) {
+      const now = Math.floor(Date.now() / 1000);
+      const diff = now - this.content.updated_at;
+      
+      if (diff < 60) {
+        updatedAgo = `${diff} seconds ago`;
+      } else if (diff < 3600) {
+        updatedAgo = `${Math.floor(diff / 60)} minutes ago`;
+      } else if (diff < 86400) {
+        updatedAgo = `${Math.floor(diff / 3600)} hours ago`;
+      } else if (diff < 604800) {
+        updatedAgo = `${Math.floor(diff / 86400)} days ago`;
+      } else {
+        updatedAgo = `${Math.floor(diff / 604800)} weeks ago`;
+      }
+    } else {
+      updatedAgo = 'unknown';
+    }
+
     return {
       updatesCount: this.cachedPacenotes.filter((pn) => pn.needsUpdate()).length,
       pacenotesCount: this.cachedPacenotes.length,
@@ -43,6 +64,7 @@ class Notebook {
       pacenotes: children,
       pacenotesDir: this.pacenotesDir(),
       fileHash: this.fileHash,
+      updatedAgo: updatedAgo,
     }
   }
 
@@ -79,7 +101,7 @@ class Notebook {
 
     this.codrivers().forEach(codriverData => {
       // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
-      this.content.pacenotes.concat(this.staticPacenotes).forEach(pacenoteData => {
+      this.content.pacenotes.concat(this.systemPacenotes).forEach(pacenoteData => {
         if (!pacenoteData) {
           console.error(`missing pacenoteData for pacenote ${pacenoteData}`)
           return
