@@ -40,6 +40,10 @@ export class Pacenote {
     return this.noteData.language
   }
 
+  audioMode() {
+    return this.noteData.audioMode
+  }
+
   noteHash() {
     const hash = crypto.createHash('sha1')
     hash.update(this.noteData.note)
@@ -73,7 +77,8 @@ export class Pacenote {
  //    }
  //  }
   cleanCodriverName() {
-    return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.language}_${this.noteData.codriver.voice}`)
+    // return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.language}_${this.noteData.codriver.voice}`)
+    return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.codriver.pk}`)
   }
 
   noteBasename() {
@@ -81,7 +86,7 @@ export class Pacenote {
   }
 
   audioFname() {
-    return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.noteBasename())
+    return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.audioMode(), this.noteBasename())
   }
 
   needsUpdate() {

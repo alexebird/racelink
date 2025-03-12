@@ -80,11 +80,12 @@ class Notebook {
     }
   }
 
-  _cachePacenote(pnDataCopy, noteText, lang, codriverData, pacenoteData) {
+  _cachePacenote(pnDataCopy, audioMode, noteText, lang, codriverData, pacenoteData) {
     pnDataCopy['note'] = noteText;
     pnDataCopy['language'] = lang;
     pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
     pnDataCopy['metadata'] = pacenoteData.metadata || {};
+    pnDataCopy['audioMode'] = audioMode;
     // console.log(pnDataCopy)
     let pacenote = new Pacenote(this, pnDataCopy);
     pacenote.setFileExists();
@@ -118,7 +119,7 @@ class Notebook {
 
               if ('freeform' in outValue) {
                 let pnDataCopy = _.cloneDeep(pacenoteData);
-                this._cachePacenote(pnDataCopy, outValue.freeform, lang, codriverData, pacenoteData)
+                this._cachePacenote(pnDataCopy, 'freeform', outValue.freeform, lang, codriverData, pacenoteData)
               }
 
               if ('structured' in outValue && Array.isArray(outValue.structured)) {
@@ -126,7 +127,7 @@ class Notebook {
                   let pnDataCopy = _.cloneDeep(pacenoteData);
                   pnDataCopy.name = `${pnDataCopy.name} [${i}]`
                   // console.log(noteText, i)
-                  this._cachePacenote(pnDataCopy, noteText, lang, codriverData, pacenoteData)
+                  this._cachePacenote(pnDataCopy, 'structured', noteText, lang, codriverData, pacenoteData)
                 })
               }
 
@@ -169,7 +170,7 @@ class Notebook {
   }
 
   pacenotesDir() {
-    return path.join(this.dirname(), 'generated_pacenotes', cleanNameForPath(this.basenameNoExt()))
+    return path.join(this.dirname(), 'gen', cleanNameForPath(this.basenameNoExt()))
   }
 
   updatePacenotes() {
