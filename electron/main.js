@@ -16,6 +16,9 @@ import Settings from './Settings'
 import VoiceManager from './aipacenotes/VoiceManager'
 import { storeMetadata } from './aipacenotes/MetadataManager'
 
+console.log('Electron version:', process.versions.electron);
+console.log('Node version:', process.versions.node);
+
 
 // The built directory structure
 //
@@ -99,25 +102,27 @@ function createWindow() {
     Menu.setApplicationMenu(null)
   }
 
-  // session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-  //   callback({
-  //     responseHeaders: {
-  //       ...details.responseHeaders,
-  //       'Content-Security-Policy': ['default-src \'none\'']
-  //     }
-  //   })
-  // })
-
   win = new BrowserWindow({
     width: 1800,
     height: 1200,
     icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
     webPreferences: {
       backgroundThrottling: false,
-      webSecurity: false,
+      // webSecurity: false,
+      webSecurity: true,
       preload: path.join(__dirname, 'preload.js'),
     },
   })
+
+  // Set CSP via headers (more secure than meta tags)
+  win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': ["default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; media-src 'self' http://127.0.0.1:27872"]
+      }
+    });
+  });
 
   beamUserDir.load()
   setupIPC()

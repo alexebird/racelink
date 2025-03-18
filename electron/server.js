@@ -2,6 +2,8 @@ const express = require('express')
 const app = express();
 const HOST = '127.0.0.1';
 const PORT = 27872;
+const path = require('path');
+const fs = require('fs');
 
 const callbacks = {
   onRecordingCut: () => {},
@@ -32,6 +34,34 @@ app.get('/transcripts/:count', (req, resp) => {
       transcripts: transcripts,
     });
   })
+});
+
+// Add a new endpoint to serve audio files
+app.get('/audio/:filename', (req, res) => {
+  const filename = req.params.filename;
+  // We use a query parameter to get the full path (encoded)
+  const fullPath = decodeURIComponent(req.query.path || '');
+  
+  if (!fullPath) {
+    return res.status(400).send('Missing path parameter');
+  }
+  
+  // Security check to prevent directory traversal
+  if (fullPath.includes('..')) {
+    return res.status(403).send('Invalid path');
+  }
+  
+  try {
+    if (fs.existsSync(fullPath)) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      fs.createReadStream(fullPath).pipe(res);
+    } else {
+      res.status(404).send('File not found');
+    }
+  } catch (error) {
+    console.error('Error serving audio file:', error);
+    res.status(500).send('Server error');
+  }
 });
 
 function startServer(cbs) {

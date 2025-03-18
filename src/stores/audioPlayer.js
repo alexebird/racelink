@@ -2,10 +2,13 @@ import { toRaw } from 'vue'
 import { defineStore } from 'pinia'
 import _ from 'lodash'
 
-function fileProtoAudioFname(audioFname) {
-  const url = new URL(`file://${audioFname}`)
-  url.searchParams.set('t', Date.now());
-  return url.href
+function serverAudioUrl(audioFname) {
+  // Encode the full path to use as a query parameter
+  const encodedPath = encodeURIComponent(audioFname);
+  // Extract just the filename for the route parameter
+  const filename = audioFname.split(/[/\\]/).pop();
+  // Create URL with cache-busting timestamp
+  return `http://127.0.0.1:27872/audio/${filename}?path=${encodedPath}&t=${Date.now()}`;
 }
 
 export const useAudioPlayerStore = defineStore('audioPlayer', {
@@ -18,7 +21,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', {
     },
     play(audioFname) {
       if (this.audioElement) {
-        const url = fileProtoAudioFname(audioFname)
+        const url = serverAudioUrl(audioFname)
         console.log('audio file ready', url)
 
         this.audioElement.src = url
