@@ -2,7 +2,6 @@ import { app, Menu, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
 import crypto from 'node:crypto'
-import PQueue from 'p-queue'
 const { v4: uuidv4 } = require('uuid')
 import { MissionScanner } from './aipacenotes/MissionScanner'
 import NotebookScanner from './aipacenotes/NotebookScanner'
@@ -69,8 +68,6 @@ const defaultSettings = {
   // defaultSettings['racelinkPath'] = process.env['RACELINK_PATH']
   // console.log(`found RACELINK_PATH: ${defaultSettings['racelinkPath']}`)
 // }
-
-const queue = new PQueue({concurrency: 1});
 
 const appSettings = new Settings('settings.json', defaultSettings)
 appSettings.save()
