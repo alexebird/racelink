@@ -14,7 +14,7 @@ export const useVoicesStore = defineStore('voices', {
     refreshVoices() {
       return window.electronAPI.refreshVoices().then((data) => {
         const [voiceData, err] = data
-        console.log(voiceData)
+        // console.log(voiceData)
         this.setVoicesData(voiceData, err)
         return data
       })

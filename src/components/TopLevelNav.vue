@@ -39,8 +39,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col h-screen">
-    <TabMenu :model="items"
+  <div class="grid grid-cols-1 grid-rows-[1fr_1.5em] h-screen w-full">
+    <!-- <Tabs :model="items"
       :activeIndex="activeIndex"
       :ptOptions="{ mergeProps: true }"
       pt:root:class="h-full !bg-stone-800 min-w-28 max-w-28"
@@ -55,20 +55,60 @@ onMounted(() => {
           </a>
         </router-link>
       </template>
-    </TabMenu>
-    <div class="version-info font-mono text-sm text-stone-400 text-center">
+    </Tabs> -->
+    <Tabs value="0" class="h-full w-full">
+      <TabList>
+        <Tab value="0">
+          <span class="pi pi-car" />
+          <span>Rally</span>
+        </Tab>
+        <Tab value="1">
+          <span class="pi pi-comment" />
+          <span>Voices</span>
+        </Tab>
+        <Tab value="2">
+          <span class="pi pi-sliders-h" />
+          <span>Settings</span>
+        </Tab>
+        <Tab value="3">
+          <span class="pi pi-question-circle" />
+          <span>Help</span>
+        </Tab>
+      </TabList>
+      <TabPanels class="h-full">
+        <TabPanel value="0" class="h-full">
+          <Rally />
+        </TabPanel>
+        <TabPanel value="1" class="h-full">
+          <Voices />
+        </TabPanel>
+        <TabPanel value="2" class="h-full">
+          <Settings />
+        </TabPanel>
+        <TabPanel value="3" class="h-full">
+          <Help />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+
+    <div class="font-mono text-sm pl-2 pr-2 align-middle">
       {{settingsStore.settings.versionString}}
     </div>
+
   </div>
 </template>
 
 <style scoped>
-[data-pc-section="menuitem"][data-p-disabled="false"][data-p-highlight="true"] [data-pc-section="action"] {
+/* [data-pc-section="menuitem"][data-p-disabled="false"][data-p-highlight="true"] [data-pc-section="action"] {
   background-color: theme(colors.stone.700);
   color: rgb(var(--surface-0));
 }
 
 [data-pc-section="action"]:hover, .version-info {
   background-color: theme(colors.stone.800);
+} */
+
+.pi + span {
+  @apply ml-2;
 }
 </style>

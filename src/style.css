@@ -1,10 +1,62 @@
-@import 'primeicons/primeicons.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* :root {
+  --body-bg: var(--p-surface-50);
+  --body-text-color: var(--p-surface-900);
+  --card-border: 1px solid var(--border-color);
+  --card-bg: var(--p-surface-0);
+  --border-color: var(--p-surface-200);
+  --text-color: var(--p-surface-700);
+  --overlay-background: #ffffff;
+}
+
+:root[class='p-dark'] {
+  --body-bg: var(--p-surface-950);
+  --body-text-color: var(--p-surface-50);
+  --card-border: 1px solid transparent;
+  --card-bg: var(--p-surface-900);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-color: var(--p-surface-0);
+  --overlay-background: var(--p-surface-900);
+}
+
+html {
+  font-size: 14px;
+}
+
+body {
+  margin: 0px;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--body-bg);
+  font-weight: normal;
+  color: var(--body-text-color);
+  padding: 1rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+} */
+
+
+
+/* @import 'primeicons/primeicons.css'; */
+
+/* @import "tailwindcss"; */
+/* @import "tailwindcss-primeui"; */
+
+/* @tailwind base; */
+/* @tailwind components; */
+/* @tailwind utilities; */
+
+/* :root {
     --primary-50: 236 253 245;
     --primary-100: 209 250 229;
     --primary-200: 167 243 208;
@@ -28,29 +80,29 @@
     --surface-800: 30 41 59;
     --surface-900: 15 23 42;
     --surface-950: 3 6 23;
-}
+} */
 
-/* :root { */
-/*   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; */
-/*   line-height: 1.5; */
-/*   font-weight: 400; */
-/**/
-/*   color-scheme: light dark; */
-/*   color: rgba(255, 255, 255, 0.87); */
-/*   background-color: #242424; */
-/**/
-/*   font-synthesis: none; */
-/*   text-rendering: optimizeLegibility; */
-/*   -webkit-font-smoothing: antialiased; */
-/*   -moz-osx-font-smoothing: grayscale; */
-/*   -webkit-text-size-adjust: 100%; */
-/* } */
+/* :root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
 
-/* body { */
-/* background-color: pink; */
-/* margin: 0; */
-/* display: flex; */
-/* place-items: center; */
-/* min-width: 320px; */
-/* min-height: 100vh; */
-/* } */
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+} */
+
+/* body {
+  background-color: pink;
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+} */

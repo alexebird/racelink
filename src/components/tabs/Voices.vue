@@ -16,7 +16,7 @@ const audioPlayerStore = useAudioPlayerStore()
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
-import { FilterMatchMode } from 'primevue/api';
+import { FilterMatchMode } from '@primevue/core/api';
 
 const spinnerClass = ref('hidden')
 const filters = ref({
@@ -28,7 +28,6 @@ const filters = ref({
 
 onMounted(() => {
   refreshVoices()
-  // voicesStore.getUserVoices()
 })
 
 onUnmounted(() => {
@@ -40,7 +39,7 @@ function showSpinner() {
 }
 
 function hideSpinner() {
-  spinnerClass.value = 'hidden'
+  spinnerClass.value = '!invisible'
 }
 
 const refreshVoices = () => {
@@ -93,18 +92,11 @@ function copyToClipboard(text) {
 </script>
 
 <template>
-  <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
-
-    <div class="text-lg m-2">
-      Voices
-    </div>
-
+  <div class='flex flex-col w-full h-full'>
     <div class="flex ml-2">
       <div class="flex flex-row items-center gap-2">
-        <Button @click="refreshVoices">
-          Refresh Voices
-        </Button>
-        <ProgressSpinner :class='spinnerClass' style="width: 30px; height: 30px" strokeWidth="4" animationDuration=".5s" />
+        <Button @click="refreshVoices" label="refresh voices" class="!pt-px !pb-px !pl-2 !pr-2" icon="pi pi-refresh" size="small" />
+        <ProgressSpinner :class="spinnerClass" style="width: 30px; height: 30px" strokeWidth="4" animationDuration=".5s" />
       </div>
     </div>
 
@@ -126,7 +118,6 @@ function copyToClipboard(text) {
                   stripedRows 
                   paginator 
                   :rows="10"
-                  :rowsPerPageOptions="[5, 10, 25, 50]"
                   tableStyle="min-width: 50rem"
                   :globalFilterFields="['id', 'name', 'type', 'json']"
                   :filters="filters"

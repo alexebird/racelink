@@ -35,10 +35,7 @@ const onApiKeyValueUpdate = (event) => {
 </script>
 
 <template>
-  <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
-    <div class="text-lg m-2">
-      Settings
-    </div>
+  <div class='flex flex-col w-full h-full'>
     <div class='p-4'>
       <div>
         Beam User Dir

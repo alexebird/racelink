@@ -7,10 +7,8 @@ const openHelp = () => {
 </script>
 
 <template>
-  <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'>
-    <div class="text-lg m-2">
-      Help
-    </div>
+  <!-- <div class='flex flex-col w-full h-screen text-surface-0 bg-surface-800'> -->
+  <div class='flex flex-col w-full'>
     <div class='p-4'>
       Help is available: <span @click="openHelp" class="text-primary-400 cursor-pointer underline">{{ helpUrl }}</span>
     </div>

@@ -202,21 +202,17 @@ const onPageChange = (event, notebookId) => {
 </script>
 
 <template>
-  <div class='flex flex-col w-full h-screen overflow-hidden text-surface-0 bg-surface-800'>
+  <div class='flex flex-col w-full h-full overflow-hidden'>
     <div v-if="rallyStore.selectedMission">
       <div class="text-xl m-2">
-        {{rallyStore.selectedMission.missionId}}
+        {{rallyStore.selectedMission.levelId}} / {{rallyStore.selectedMission.missionId}}
       </div>
       <div class="text-md m-2">
         <ul>
-          <li>
-            level: {{rallyStore.selectedMission.levelId}}
-          </li>
           <li class="mt-2">
-            <Button class="mr-4" @click="openFileExplorer"
-              icon="pi pi-folder-open" label="Open Mission"
-              v-tooltip="'Open an Explorer window for this mission'"
-            ></Button>
+            <Button class="mr-4 !pt-px !pb-px !pl-2 !pr-2" @click="openFileExplorer"
+              icon="pi pi-folder-open" label="Open Mission" size="small"
+              v-tooltip="'Open an Explorer window for this mission'" />
             <span class="font-mono text-xs">
               {{rallyStore.selectedMission.fname}}
             </span>
@@ -224,104 +220,79 @@ const onPageChange = (event, notebookId) => {
         </ul>
       </div>
 
-      <TabView v-model:activeIndex="activeTab"
-        class="w-full"
-        pt:navcontainer:class="ml-1"
-        pt:content:class="!rounded-none"
-      >
-        <TabPanel header="Notebooks">
-          <div class="flex flex-col">
-            <ProgressBar :value="rallyStore.progressValue" :showValue="false"></ProgressBar>
-            <DataTable
-              :value="rallyStore.notebooks"
-              dataKey="basename"
-              tableStyle="min-width: 10rem"
-              v-model:expandedRows="expandedRows"
-            >
-              <Column expander style="width: 3rem" />
-              <Column header="Notes" style="width: 6rem" >
-                <template #body="slotProps">
-                  <Badge :value="progressBadgeStr(slotProps)" :severity="slotProps.data.updatesCount === 0 ? 'success' : 'danger'"></Badge>
-                </template>
-              </Column>
-              <Column field="name" header="Name"></Column>
-              <Column field="updatedAgo" header="Last Saved"></Column>
-              <Column header="" style="width: 3rem">
-                <template #body="slotProps">
-                  <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)"
-                    v-tooltip.top="'Open an Explorer window for this notebook'"
-                    icon="pi pi-folder-open"></Button>
-                </template>
-              </Column>
-              <Column field="basename" header="ID"></Column>
-              <template #expansion="slotProps">
-                <div class="p-3">
-                  <h5 class="text-xl">Pacenotes</h5>
-                  
-                  <div class="mb-3 flex flex-wrap items-center gap-4">
-                    <div class="flex items-center">
-                      <label class="mr-2">Filter by language:</label>
-                      <SelectButton v-model="selectedLanguage" 
-                        :options="getLanguageOptions(slotProps.data.pacenotes)" 
-                        optionLabel="name" 
-                        optionValue="value"
-                        :allowEmpty="true" />
+      <Tabs value="0">
+        <TabList>
+          <Tab value="0">
+            <span>Notebooks</span>
+          </Tab>
+          <Tab value="1">
+            <span>Voice Recording</span>
+          </Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel value="0">
+
+            <div class="flex flex-col">
+              <ProgressBar :value="rallyStore.progressValue" :showValue="false"></ProgressBar>
+              <DataTable
+                :value="rallyStore.notebooks"
+                dataKey="basename"
+                tableStyle="min-width: 10rem"
+                v-model:expandedRows="expandedRows"
+              >
+                <Column expander style="width: 3rem" />
+                <Column header="Notes" style="width: 6rem" >
+                  <template #body="slotProps">
+                    <Badge :value="progressBadgeStr(slotProps)" :severity="slotProps.data.updatesCount === 0 ? 'success' : 'danger'"></Badge>
+                  </template>
+                </Column>
+                <Column field="name" header="Name"></Column>
+                <Column field="updatedAgo" header="Last Saved"></Column>
+                <Column header="" style="width: 3rem">
+                  <template #body="slotProps">
+                    <Button @click="() => onOpenNotebookClick(slotProps.data.pacenotesDir)"
+                      v-tooltip.top="'Open an Explorer window for this notebook'"
+                      icon="pi pi-folder-open"></Button>
+                  </template>
+                </Column>
+                <Column field="basename" header="ID"></Column>
+                <template #expansion="slotProps">
+                  <div class="p-3">
+                    <h5 class="text-xl">Pacenotes</h5>
+                    
+                    <div class="mb-3 flex flex-wrap items-center gap-4">
+                      <div class="flex items-center">
+                        <label class="mr-2">Filter by language:</label>
+                        <SelectButton v-model="selectedLanguage" 
+                          :options="getLanguageOptions(slotProps.data.pacenotes)" 
+                          optionLabel="name" 
+                          optionValue="value"
+                          :allowEmpty="true" />
+                      </div>
+                      
+                      <div class="flex items-center">
+                        <label class="mr-2">Filter by type:</label>
+                        <SelectButton v-model="selectedType" 
+                          :options="getTypeOptions()" 
+                          optionLabel="name" 
+                          optionValue="value"
+                          :allowEmpty="true" />
+                      </div>
                     </div>
                     
-                    <div class="flex items-center">
-                      <label class="mr-2">Filter by type:</label>
-                      <SelectButton v-model="selectedType" 
-                        :options="getTypeOptions()" 
-                        optionLabel="name" 
-                        optionValue="value"
-                        :allowEmpty="true" />
-                    </div>
-                  </div>
-                  
-                  <DataTable
-                    :value="filterPacenotes(slotProps.data.pacenotes)"
-                    :paginator="true"
-                    :rows="paginationState[slotProps.data.basename]?.rows || 10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]"
-                    rowHover
-                    :rowClass="(data) => getRowClass(data)"
-                    class="pacenotes-table"
-                    :first="paginationState[slotProps.data.basename]?.page * (paginationState[slotProps.data.basename]?.rows || 10)"
-                    @page="onPageChange($event, slotProps.data.basename)"
-                  >
-                    <Column field="name" header="Name" style="width: 120px" class="fixed-width-column"></Column>
-                    <Column header="" style="width: 80px" class="fixed-width-column">
-                      <template #body="slotProps">
-                        <div class="flex">
-                          <Button @click="() => onPlayClick(slotProps.data.audioFname)"
-                            class="p-button-sm p-button-icon-only mini-button">
-                            <span class="pi pi-play text-xs"></span>
-                          </Button>
-                          <Button class="ml-1 p-button-sm p-button-icon-only mini-button" @click="() => onRegenOneClick(slotProps.data.audioFname)">
-                            <span class="pi pi-refresh text-xs"></span>
-                          </Button>
-                          <Button class="ml-1 p-button-sm p-button-icon-only mini-button" 
-                            v-tooltip.top="'Voice: ' + slotProps.data.voice + '\nType: ' + slotProps.data.type + '\nLanguage: ' + slotProps.data.language + '\nFile: ' + slotProps.data.audioFname">
-                            <span class="pi pi-info-circle text-xs"></span>
-                          </Button>
-                        </div>
-                      </template>
-                    </Column>
-                    <Column field="note" header="Note">
-                      <template #body="slotProps">
-                        <span class="font-mono">
-                          {{ slotProps.data.note}}
-                        </span>
-                      </template>
-                    </Column>
-                    <!-- <Column field="language" header="Language"></Column> -->
-                    
-                    <!-- Add a row template to apply the tooltip to the entire row -->
-                    <template #row="slotProps">
-                      <tr v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type" 
-                          :class="getRowClass(slotProps.data)">
-                        <td style="width: 120px" class="fixed-width-column">{{ slotProps.data.name }}</td>
-                        <td style="width: 80px" class="fixed-width-column">
+                    <DataTable
+                      :value="filterPacenotes(slotProps.data.pacenotes)"
+                      :paginator="true"
+                      :rows="paginationState[slotProps.data.basename]?.rows || 10"
+                      :rowClass="(data) => getRowClass(data)"
+                      class="pacenotes-table"
+                      :first="paginationState[slotProps.data.basename]?.page * (paginationState[slotProps.data.basename]?.rows || 10)"
+                      @page="onPageChange($event, slotProps.data.basename)"
+                    >
+                      <Column field="name" header="Name" style="width: 120px" class="fixed-width-column"></Column>
+                      <Column header="" style="width: 80px" class="fixed-width-column">
+                        <template #body="slotProps">
                           <div class="flex">
                             <Button @click="() => onPlayClick(slotProps.data.audioFname)"
                               class="p-button-sm p-button-icon-only mini-button">
@@ -331,55 +302,85 @@ const onPageChange = (event, notebookId) => {
                               <span class="pi pi-refresh text-xs"></span>
                             </Button>
                             <Button class="ml-1 p-button-sm p-button-icon-only mini-button" 
-                              v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type + ' | Language: ' + slotProps.data.language">
+                              v-tooltip.top="'Voice: ' + slotProps.data.voice + '\nType: ' + slotProps.data.type + '\nLanguage: ' + slotProps.data.language + '\nFile: ' + slotProps.data.audioFname">
                               <span class="pi pi-info-circle text-xs"></span>
                             </Button>
                           </div>
-                        </td>
-                        <td>
+                        </template>
+                      </Column>
+                      <Column field="note" header="Note">
+                        <template #body="slotProps">
                           <span class="font-mono">
                             {{ slotProps.data.note}}
                           </span>
-                        </td>
-                        <td>{{ slotProps.data.language }}</td>
-                      </tr>
-                    </template>
-                  </DataTable>
-                </div>
-              </template>
-            </DataTable>
-          </div>
-        </TabPanel>
-
-        <TabPanel header="Voice Recording">
-          <div class='flex pb-2'>
-            <Button :disabled="!rallyStore.recorder" @click="onRecordingCut">Cut</Button>
-            <div class='ml-5'>
-              <span v-if="rallyStore.recordingStatus === 'recording'" class="pi pi-circle-fill text-red-600 align-middle"></span>
-              <span v-else="rallyStore.recordingStatus !== 'recording'" class="pi pi-circle-fill align-middle"></span>
-              <span class="m-1 align-baseline">
-                recording
-                <span v-if="rallyStore.recordingStatus === 'recording' && rallyStore.recordingAutostop >= 0"> ({{ rallyStore.recordingAutostop }}s)</span>
-                <span class="text-red-600" v-if="rallyStore.recordingError">{{rallyStore.recordingError}}</span>
-              </span>
+                        </template>
+                      </Column>
+                      
+                      <!-- Add a row template to apply the tooltip to the entire row -->
+                      <template #row="slotProps">
+                        <tr v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type" 
+                            :class="getRowClass(slotProps.data)">
+                          <td style="width: 120px" class="fixed-width-column">{{ slotProps.data.name }}</td>
+                          <td style="width: 80px" class="fixed-width-column">
+                            <div class="flex">
+                              <Button @click="() => onPlayClick(slotProps.data.audioFname)"
+                                class="p-button-sm p-button-icon-only mini-button">
+                                <span class="pi pi-play text-xs"></span>
+                              </Button>
+                              <Button class="ml-1 p-button-sm p-button-icon-only mini-button" @click="() => onRegenOneClick(slotProps.data.audioFname)">
+                                <span class="pi pi-refresh text-xs"></span>
+                              </Button>
+                              <Button class="ml-1 p-button-sm p-button-icon-only mini-button" 
+                                v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type + ' | Language: ' + slotProps.data.language">
+                                <span class="pi pi-info-circle text-xs"></span>
+                              </Button>
+                            </div>
+                          </td>
+                          <td>
+                            <span class="font-mono">
+                              {{ slotProps.data.note}}
+                            </span>
+                          </td>
+                          <td>{{ slotProps.data.language }}</td>
+                        </tr>
+                      </template>
+                    </DataTable>
+                  </div>
+                </template>
+              </DataTable>
             </div>
-          </div>
+          </TabPanel>
 
-          <DataTable :value="rallyStore.transcriptionHistory" tableStyle="min-width: 10rem">
-            <Column field="error" header="Status">
-              <template #body="slotProps">
-                <InlineMessage v-if="!slotProps.data.error" severity="success">ok</InlineMessage>
-                <InlineMessage v-else severity="error">fail</InlineMessage>
-              </template>
-            </Column>
-            <Column field="text" header="Text"></Column>
-          </DataTable>
-        </TabPanel>
+          <TabPanel value="1">
+            <div class='flex pb-2'>
+              <Button :disabled="!rallyStore.recorder" @click="onRecordingCut">Cut</Button>
+              <div class='ml-5'>
+                <span v-if="rallyStore.recordingStatus === 'recording'" class="pi pi-circle-fill text-red-600 align-middle"></span>
+                <span v-else="rallyStore.recordingStatus !== 'recording'" class="pi pi-circle-fill align-middle"></span>
+                <span class="m-1 align-baseline">
+                  recording
+                  <span v-if="rallyStore.recordingStatus === 'recording' && rallyStore.recordingAutostop >= 0"> ({{ rallyStore.recordingAutostop }}s)</span>
+                  <span class="text-red-600" v-if="rallyStore.recordingError">{{rallyStore.recordingError}}</span>
+                </span>
+              </div>
+            </div>
 
-      </TabView>
+            <DataTable :value="rallyStore.transcriptionHistory" tableStyle="min-width: 10rem">
+              <Column field="error" header="Status">
+                <template #body="slotProps">
+                  <InlineMessage v-if="!slotProps.data.error" severity="success">ok</InlineMessage>
+                  <InlineMessage v-else severity="error">fail</InlineMessage>
+                </template>
+              </Column>
+              <Column field="text" header="Text"></Column>
+            </DataTable>
+
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </div>
 
-    <div v-else>
+    <div v-else class="text-xl italic">
       Select a mission.
     </div>
 

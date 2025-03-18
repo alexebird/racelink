@@ -1,37 +1,23 @@
-import { createApp } from 'vue'
-import './style.css'
-import './flags.css'
-import App from './App.vue'
-import router from './router'
+import "primeicons/primeicons.css";
+import "./style.css";
+import "./flags.css";
 
-import { createPinia } from 'pinia'
-
-// import 'primevue/resources/themes/aura-light-green/theme.css'
-import PrimeVue from 'primevue/config'
-import { usePassThrough } from 'primevue/passthrough'
-// import Lara from '@/presets/lara';
-import Wind from '@/presets/wind';
+import { createApp } from 'vue';
+import App from './App.vue';
+import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
+import Aura from '@primeuix/themes/aura';
 
 const pinia = createPinia()
-
 const app = createApp(App)
 
 app.use(pinia)
-app.use(router)
-
-const CustomPreset = usePassThrough(
-  Wind,
-  {},
-  {
-    mergeSections: true,
-    mergeProps: true
-  }
-);
 
 app.use(PrimeVue, {
-  unstyled: true,
-  pt: CustomPreset,
-})
+    theme: {
+        preset: Aura
+    }
+});
 
 import Tooltip from 'primevue/tooltip'
 app.directive('tooltip', Tooltip)
@@ -57,11 +43,14 @@ app.component('Password', Password)
 import Dropdown from 'primevue/dropdown'
 app.component('Dropdown', Dropdown)
 
-import TabMenu from 'primevue/tabmenu'
-app.component('TabMenu', TabMenu)
+import Tabs from 'primevue/tabs'
+app.component('Tabs', Tabs)
 
-import TabView from 'primevue/tabview'
-app.component('TabView', TabView)
+import Tab from 'primevue/tab'
+app.component('Tab', Tab)
+
+import TabList from 'primevue/tablist'
+app.component('TabList', TabList)
 
 import TabPanel from 'primevue/tabpanel'
 app.component('TabPanel', TabPanel)
@@ -69,36 +58,38 @@ app.component('TabPanel', TabPanel)
 import Listbox from 'primevue/listbox';
 app.component('Listbox', Listbox)
 
-// import Menu from 'primevue/menu'
-// app.component('Menu', Menu)
-
 import Tree from 'primevue/tree'
 app.component('Tree', Tree)
 
 import DataTable from 'primevue/datatable';
 app.component('DataTable', DataTable);
+
 import TreeTable from 'primevue/treetable';
 app.component('TreeTable', TreeTable);
+
 import Column from 'primevue/column';
 app.component('Column', Column);
-import ColumnGroup from 'primevue/columngroup';   // optional
+
+import ColumnGroup from 'primevue/columngroup';
 app.component('ColumnGroup', ColumnGroup);
-import Row from 'primevue/row';                   // optional
+
+import Row from 'primevue/row';
 app.component('Row', Row);
+
 import InlineMessage from 'primevue/inlinemessage'
 app.component('InlineMessage', InlineMessage)
+
 import Badge from 'primevue/badge'
 app.component('Badge', Badge)
+
 import Slider from 'primevue/slider';
 app.component('Slider', Slider);
+
 import ScrollPanel from 'primevue/scrollpanel'
 app.component('ScrollPanel', ScrollPanel);
 
 import Card from 'primevue/card'
 app.component('Card', Card)
-
-// import { useToast } from 'primevue/useToast'
-// app.component('useToast', useToast)
 
 import ToastService from 'primevue/toastservice';
 app.use(ToastService);

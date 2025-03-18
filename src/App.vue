@@ -15,7 +15,6 @@ window.electronAPI.onToast((data) => {
 
 <template>
   <Toast />
-  <TopLevelNav />
-  <router-view />
   <AudioPlayer />
+  <TopLevelNav />
 </template>

@@ -4,22 +4,17 @@ import { useRallyStore } from "@/stores/rally"
 import { useSettingsStore } from "@/stores/settings"
 import MissionDetails from "@/components/tabs/rally/MissionDetails.vue";
 
-// import { useToast } from "primevue/usetoast"
-// import Toast from 'primevue/toast'
-// const toast = useToast();
-
 const settingsStore = useSettingsStore()
 const rallyStore = useRallyStore()
 const selectedKey = ref({})
 const expandedKeys = ref({})
-// let timer = null
 
 const missionsRefreshing = ref(false)
 
 const onNodeSelect = (node) => {
   // console.debug('onNodeSelect')
   if (node.selectable) {
-    console.debug('onNodeSelect selectable')
+    // console.debug('onNodeSelect selectable')
     // toast.add({ severity: 'success', summary: 'Node Selected', detail: node.data.fname, life: 1000 });
     rallyStore.selectMission(node.data)
     settingsStore.setLastSelectedMission(rallyStore.selectedMissionId)
@@ -30,7 +25,7 @@ const onNodeSelect = (node) => {
 const onNodeUnselect = (node) => {
   // console.debug('onNodeUnselect')
   if (node.selectable) {
-    console.debug('onNodeUnselect selectable')
+    // console.debug('onNodeUnselect selectable')
     // toast.add({ severity: 'warn', summary: 'Node Unselected', detail: node.data.fname, life: 1000 });
     rallyStore.selectMission(null)
   }
@@ -63,7 +58,7 @@ function selectMissionWithFullId(selectedMissionId) {
   // const selectedMissionId = "utah/rallyStage/aip-echo-canyon"
   // const selectedMissionId = "lvl/rallyStage/aip-test"
 
-  console.log(`setting selected mission to ${selectedMissionId}`)
+  // console.log(`setting selected mission to ${selectedMissionId}`)
 
   if (!selectedMissionId) {
     return
@@ -81,9 +76,9 @@ function selectMissionWithFullId(selectedMissionId) {
 }
 
 onMounted(() => {
-  console.debug('onMounted')
+  // console.debug('onMounted')
   refreshMissions(() => {
-    console.log(toRaw(settingsStore.lastSelectedMission))
+    // console.log(toRaw(settingsStore.lastSelectedMission))
     selectMissionWithFullId(settingsStore.lastSelectedMission)
     scanNotebooks()
   })
@@ -120,26 +115,25 @@ const btnRefreshMissions = () => {
 </script>
 
 <template>
-  <!-- <Toast /> -->
-  <div class="flex flex-col h-screen text-surface-0 bg-surface-700">
-    <div class="flex align-left p-2 text-xl">
-      <span>
-        Missions
-      </span>
-      <Button @click="btnRefreshMissions" class="ml-2" icon="pi pi-refresh" :loading="missionsRefreshing"></Button>
+  <div class="flex flex-row">
+    <div class="flex flex-col h-full border-r-2 mr-2">
+      <div class="flex align-left">
+        <span class="text-xl mr-2">Missions</span>
+        <Button @click="btnRefreshMissions" label="refresh" class="!pt-px !pb-px !pl-2 !pr-2" icon="pi pi-refresh" size="small" :loading="missionsRefreshing" />
+      </div>
+      <Tree class="min-w-72 max-w-72 rounded-none overflow-auto"
+        :value="rallyStore.missionsTree"
+        v-model:selectionKeys="selectedKey"
+        v-model:expandedKeys="expandedKeys"
+        selectionMode="single"
+        @nodeSelect="onNodeSelect"
+        @nodeUnselect="onNodeUnselect"
+        pt:root:class="!_bg-surface-700"
+      >
+      </Tree>
     </div>
-    <Tree class="min-w-72 max-w-72 rounded-none overflow-auto"
-      :value="rallyStore.missionsTree"
-      v-model:selectionKeys="selectedKey"
-      v-model:expandedKeys="expandedKeys"
-      selectionMode="single"
-      @nodeSelect="onNodeSelect"
-      @nodeUnselect="onNodeUnselect"
-      pt:root:class="!bg-surface-700"
-    >
-    </Tree>
+    <MissionDetails />
   </div>
-  <MissionDetails />
 </template>
 
 <style scoped>
