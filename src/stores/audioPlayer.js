@@ -22,7 +22,7 @@ export const useAudioPlayerStore = defineStore('audioPlayer', {
     play(audioFname) {
       if (this.audioElement) {
         const url = serverAudioUrl(audioFname)
-        console.log('audio file ready', url)
+        // console.log('audio file ready', url)
 
         this.audioElement.src = url
         // this.audioElement.volume = 0.3
