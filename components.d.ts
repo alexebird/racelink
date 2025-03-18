@@ -15,7 +15,6 @@ declare module 'vue' {
     DataTable: typeof import('primevue/datatable')['default']
     Help: typeof import('./src/components/tabs/Help.vue')['default']
     InlineMessage: typeof import('primevue/inlinemessage')['default']
-    InputText: typeof import('primevue/inputtext')['default']
     MissionDetails: typeof import('./src/components/tabs/rally/MissionDetails.vue')['default']
     Password: typeof import('primevue/password')['default']
     ProgressBar: typeof import('primevue/progressbar')['default']
