@@ -28,33 +28,62 @@ export default class NotebookScanner {
   }
 
   cleanup() {
-    if (!this.notebooks) {
+    if (!this.notebooks || !this.notebooks.length) {
       return
     }
 
-    this.notebooks.forEach(notebook => {
-      notebook.cleanUpAudioFiles()
-    })
+    try {
+      this.notebooks.forEach(notebook => {
+        if (!notebook) return;
+        
+        try {
+          notebook.cleanUpAudioFiles()
+        } catch (err) {
+          console.error('Error cleaning up audio files:', err)
+        }
+      })
+    } catch (err) {
+      console.error('Error in cleanup:', err)
+    }
   }
 
   getUpdatesToDo() {
     this.readNotebooks()
+    
+    // Make sure notebooks exists before trying to map over it
+    if (!this.notebooks || !this.notebooks.length) {
+      return []
+    }
 
-    const pacenotesToUpdate = this.notebooks.map(notebook => {
-      return notebook.updatePacenotes()
-    }).flat()
+    try {
+      const pacenotesToUpdate = this.notebooks.map(notebook => {
+        if (!notebook) return []
+        // Ensure updatePacenotes returns an array, even if there's an error
+        try {
+          const updates = notebook.updatePacenotes()
+          return updates || []
+        } catch (err) {
+          console.error('Error updating pacenotes:', err)
+          return []
+        }
+      }).flat()
 
-    return pacenotesToUpdate
+      return pacenotesToUpdate
+    } catch (err) {
+      console.error('Error in getUpdatesToDo:', err)
+      return []
+    }
   }
 
   readNotebooks() {
     const files = this.findNotebookFiles()
     // console.log(files)
 
-    if (!files) {
+    if (!files || !files.length) {
       // no notebooks found
-      console.log(`no notebook files found for ${selectedMission.mission.fullId}`)
-      return []
+      console.log(`no notebook files found for ${this.missionDir}`)
+      this.notebooks = []
+      return
     }
 
     // read all notebook files

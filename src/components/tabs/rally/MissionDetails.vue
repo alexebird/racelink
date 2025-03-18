@@ -301,7 +301,7 @@ const onPageChange = (event, notebookId) => {
                             <span class="pi pi-refresh text-xs"></span>
                           </Button>
                           <Button class="ml-1 p-button-sm p-button-icon-only mini-button" 
-                            v-tooltip.top="'Voice: ' + slotProps.data.voice + ' | Type: ' + slotProps.data.type + ' | Language: ' + slotProps.data.language">
+                            v-tooltip.top="'Voice: ' + slotProps.data.voice + '\nType: ' + slotProps.data.type + '\nLanguage: ' + slotProps.data.language + '\nFile: ' + slotProps.data.audioFname">
                             <span class="pi pi-info-circle text-xs"></span>
                           </Button>
                         </div>

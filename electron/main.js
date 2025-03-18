@@ -88,6 +88,7 @@ let lastNetworkError = null
 const networkErrorDebounceSec = 5
 let cachedFileHashes = null
 let lastMissionId = null
+const errorDebounceState = {}
 
 function nowTs() {
   return Date.now()/1000
@@ -229,7 +230,7 @@ function sendIpcNotebooks(notebookScanner) {
 }
 
 function sendToastNotice(severity, summary, detail) {
-  const life = 1000
+  const life = 10000
   const notice = {severity, summary, detail, life}  
   win.webContents.send('toastNotice', notice);
 }
@@ -247,7 +248,7 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   }
 
   if (inFlightMissions.has(selectedMission.mission.fname)) {
-    console.log(`mission already being updated: ${selectedMission.mission.fullId}`)
+    // console.log(`mission already being updated: ${selectedMission.mission.fullId}`)
     return
   }
 
@@ -260,6 +261,7 @@ async function missionGeneratePacenotes(_event, selectedMission) {
 
   const notebookScanner = new NotebookScanner(beamUserDir, selectedMission.mission.fname)
   const pacenotesToUpdate = notebookScanner.getUpdatesToDo().slice(0, 1); // do N at a time
+
   sendIpcNotebooks(notebookScanner)
 
   const promises = pacenotesToUpdate.map((pn) => {
@@ -270,17 +272,21 @@ async function missionGeneratePacenotes(_event, selectedMission) {
     const voiceConfig = voiceManager.getVoiceConfig(pn.voice())
 
     if (!voiceConfig) {
-      sendToastNotice("error", "Voice Not Found", `Voice '${pn.voice()}' not found. Make sure you can find it in the Voices tab.`)
+      const errorKey = `voice_not_found_${pn.voice()}`
+      if (!errorDebounceState[errorKey] || nowTs() - errorDebounceState[errorKey] > 300) {
+        errorDebounceState[errorKey] = nowTs()
+        sendToastNotice("error", "Voice Not Found", `Voice '${pn.voice()}' not found. Make sure you can find it in the Voices tab.`)
+      }
       return Promise.resolve("skipped")
     }
 
-    const noteParams = pn.metadata()
+    const noteMetadata = pn.metadata()
     logNote(noteText, `updating note: '${noteText}' noteName='${noteName}'`)
 
     if (noteText === null || noteText.length === 0) {
       return Promise.resolve("skipped")
     } else {
-      return generateAudioFile(noteName, noteParams, noteText, voiceConfig, audioFname).then((data) => {
+      return generateAudioFile(noteName, noteMetadata, noteText, voiceConfig, audioFname).then((data) => {
         const [ok, audioLen] = data
         if (ok) {
           storeMetadata(audioFname, audioLen, noteName)
@@ -305,8 +311,8 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   })
 }
 
-async function generateAudioFile(noteName, noteParams, noteText, voiceConfig, audioFname) {
-  const [resp, err] = await flaskClient.postCreatePacenoteAudioB64(noteName, noteParams, noteText, voiceConfig)
+async function generateAudioFile(noteName, noteMetadata, noteText, voiceConfig, audioFname) {
+  const [resp, err] = await flaskClient.postCreatePacenoteAudioB64(noteName, noteMetadata, noteText, voiceConfig)
 
   if (err) {
     console.error('error from postCreatePacenoteAudioB64', err)
@@ -360,7 +366,13 @@ async function transcribeAudioFile(_event, cutId, selectedMission) {
     resp.text = UNKNOWN_PLACEHOLDER
   }
 
-  const filePath = path.join(selectedMission.mission.fname, 'rally', 'recce', 'primary', 'transcripts.json');
+
+  const fileDir = path.join(selectedMission.mission.fname, 'rally', 'recce', 'primary');
+  if (!fs.existsSync(fileDir)) {
+    fs.mkdirSync(fileDir, { recursive: true });
+  }
+
+  const filePath = path.join(fileDir, 'transcripts.json');
 
   const last = tscHist.pop()
   tscHist.push(resp)

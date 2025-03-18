@@ -52,7 +52,7 @@ const onApiKeyValueUpdate = (event) => {
 
     <div class='p-4'>
       <div>
-        Game Search Path
+        Beam Game Path
       </div>
       <div class='ml-4'>
         <span class="font-mono">{{settingsStore.settings.racelinkPath}}</span>
@@ -61,7 +61,7 @@ const onApiKeyValueUpdate = (event) => {
     </div>
 
 
-    <div class='p-4'>
+    <!-- <div class='p-4'>
       <div>
         Voice Recording
         <div class='ml-4'>
@@ -88,7 +88,7 @@ const onApiKeyValueUpdate = (event) => {
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class='p-4'>
       <div>

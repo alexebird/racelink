@@ -10,8 +10,9 @@ export function cleanNameForPath(aString) {
 }
 
 export class Pacenote {
-  constructor(notebook, noteData) {
+  constructor(notebook, outputDir, noteData) {
     this.notebook = notebook
+    this.outputDir = outputDir
     this.noteData = noteData
     this.fileExists = false
   }
@@ -40,44 +41,13 @@ export class Pacenote {
     return this.noteData.language
   }
 
-  audioMode() {
-    return this.noteData.audioMode
-  }
-
   noteHash() {
     const hash = crypto.createHash('sha1')
     hash.update(this.noteData.note)
     return hash.digest('hex').substring(0, 16)
   }
 
- // noteData: {
- //    metadata: {},
- //    name: 'Pacenote 5',
- //    notes: {
- //      english: [Object],
- //      french: [Object],
- //      german: [Object],
- //      russian: [Object],
- //      spanish: [Object]
- //    },
- //    oldId: 30,
- //    pacenoteWaypoints: [
- //      [Object], [Object],
- //      [Object], [Object],
- //      [Object], [Object],
- //      [Object], [Object]
- //    ],
- //    note: 'fotobar ?',
- //    language: 'french',
- //    codriver: {
- //      language: 'french',
- //      name: 'Cosette',
- //      oldId: 13,
- //      voice: 'french_female'
- //    }
- //  }
   cleanCodriverName() {
-    // return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.language}_${this.noteData.codriver.voice}`)
     return cleanNameForPath(`${this.noteData.codriver.name}_${this.noteData.codriver.pk}`)
   }
 
@@ -86,7 +56,7 @@ export class Pacenote {
   }
 
   audioFname() {
-    return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.audioMode(), this.noteBasename())
+    return path.join(this.notebook.pacenotesDir(), this.cleanCodriverName(), this.outputDir, this.noteBasename())
   }
 
   needsUpdate() {

@@ -13,7 +13,11 @@ class Notebook {
     // console.log(JSON.stringify(this.content, null, 2))
     this.systemPacenotes = this.content.systemPacenotes
     this.fileHash = null
-    this._cachePacenotes()
+    try {
+      this._cachePacenotes()
+    } catch (err) {
+      console.error('Error caching pacenotes:')
+    }
   }
 
   codrivers() {
@@ -80,14 +84,12 @@ class Notebook {
     }
   }
 
-  _cachePacenote(pnDataCopy, audioMode, noteText, lang, codriverData, pacenoteData) {
+  _cachePacenote(pnDataCopy, outputDir, noteText, lang, codriverData, pacenoteData) {
     pnDataCopy['note'] = noteText;
     pnDataCopy['language'] = lang;
     pnDataCopy['codriver'] = codriverData; // Assuming deep copy is not necessary or codriverData is simple enough
     pnDataCopy['metadata'] = pacenoteData.metadata || {};
-    pnDataCopy['audioMode'] = audioMode;
-    // console.log(pnDataCopy)
-    let pacenote = new Pacenote(this, pnDataCopy);
+    let pacenote = new Pacenote(this, outputDir, pnDataCopy);
     pacenote.setFileExists();
     this.cachedPacenotes.push(pacenote);
   }
@@ -101,17 +103,23 @@ class Notebook {
     }
 
     this.codrivers().forEach(codriverData => {
-      // Assuming `data['pacenotes']` and `notebookFile.staticPacenotes` are available in the context
-      this.content.pacenotes.concat(this.systemPacenotes).forEach(pacenoteData => {
+      // Make sure to handle the case where this.systemPacenotes is null or undefined
+      const pacenotes = this.content.pacenotes.concat(this.systemPacenotes || []);
+      pacenotes.forEach(pacenoteData => {
         if (!pacenoteData) {
           console.error(`missing pacenoteData for pacenote ${pacenoteData}`)
           return
         }
-        Object.entries(pacenoteData['notes']).forEach(([lang, langData]) => {
-          // if (pacenoteData.metadata.static) return
+
+        const notes = pacenoteData['notes']
+        if (!notes) {
+          console.error(`missing notes for pacenote ${pacenoteData.name}`)
+          return
+        }
+
+        Object.entries(notes).forEach(([lang, langData]) => {
           if (codriverData['language'] === lang) {
             let outValue = this.finalNoteText(pacenoteData.metadata, langData)
-            // console.log(outValue)
             if (outValue) {
               if (typeof outValue === 'string') {
                 outValue = { freeform: outValue }
@@ -119,14 +127,14 @@ class Notebook {
 
               if ('freeform' in outValue) {
                 let pnDataCopy = _.cloneDeep(pacenoteData);
-                this._cachePacenote(pnDataCopy, 'freeform', outValue.freeform, lang, codriverData, pacenoteData)
+                const outputDir = pacenoteData.metadata.system ? 'system' : 'freeform'
+                this._cachePacenote(pnDataCopy, outputDir, outValue.freeform, lang, codriverData, pacenoteData)
               }
 
               if ('structured' in outValue && Array.isArray(outValue.structured)) {
                 outValue.structured.forEach((noteText, i) => {
                   let pnDataCopy = _.cloneDeep(pacenoteData);
                   pnDataCopy.name = `${pnDataCopy.name} [${i}]`
-                  // console.log(noteText, i)
                   this._cachePacenote(pnDataCopy, 'structured', noteText, lang, codriverData, pacenoteData)
                 })
               }
