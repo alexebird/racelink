@@ -1,5 +1,5 @@
 <script setup lang="js">
-import { ref, inject, onMounted, onUnmounted } from "vue"
+import { ref, inject, onMounted, onUnmounted, computed } from "vue"
 // import { useSettingsStore } from "@/stores/settings"
 // const settingsStore = useSettingsStore()
 // import { useRallyStore } from "@/stores/rally"
@@ -16,15 +16,48 @@ const audioPlayerStore = useAudioPlayerStore()
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputText from 'primevue/inputtext';
-import { FilterMatchMode } from '@primevue/core/api';
 
 const spinnerClass = ref('hidden')
-const filters = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  id: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  type: { value: null, matchMode: FilterMatchMode.STARTS_WITH }
-});
+const searchQuery = ref('')
+
+// Custom search function that ANDs search components together
+const filteredVoices = computed(() => {
+  if (!voicesStore.voiceData || !voicesStore.voiceData.voices) {
+    return []
+  }
+
+  const voices = Object.entries(voicesStore.voiceData.voices).map(([key, value]) => ({
+    id: key,
+    data: value,
+    json: JSON.stringify(value, null, 2),
+    type: value.text_to_speech?.type || 'unknown',
+    name: value.text_to_speech?.info?.name || key
+  }))
+
+  if (!searchQuery.value || searchQuery.value.trim() === '') {
+    return voices
+  }
+
+  // Split search query by spaces and filter out empty strings
+  const searchTerms = searchQuery.value.trim().toLowerCase().split(/\s+/).filter(term => term.length > 0)
+  
+  if (searchTerms.length === 0) {
+    return voices
+  }
+
+  return voices.filter(voice => {
+    // Create a combined search string from all searchable fields
+    const searchableText = [
+      voice.id,
+      voice.name,
+      voice.type,
+      voice.json
+    ].join(' ').toLowerCase()
+
+    // Check if ALL search terms are present (AND logic)
+    return searchTerms.every(term => searchableText.includes(term))
+  })
+})
 
 onMounted(() => {
   refreshVoices()
@@ -108,31 +141,25 @@ function copyToClipboard(text) {
 
       <div class="overflow-auto" style="max-height: calc(100vh - 200px);">
         <DataTable v-if="voicesStore.voiceData && voicesStore.voiceData.voices" 
-                  :value="Object.entries(voicesStore.voiceData.voices).map(([key, value]) => ({
-                    id: key,
-                    data: value,
-                    json: JSON.stringify(value, null, 2),
-                    type: value.text_to_speech?.type || 'unknown',
-                    name: value.text_to_speech?.info?.name || key
-                  }))" 
+                  :value="filteredVoices" 
                   stripedRows 
                   paginator 
                   :rows="10"
-                  tableStyle="min-width: 50rem"
-                  :globalFilterFields="['id', 'name', 'type', 'json']"
-                  :filters="filters"
-                  filterDisplay="menu">
+                  tableStyle="min-width: 50rem">
           <template #header>
             <div class="flex justify-between">
               <span class="p-input-icon-left">
                 <i class="pi pi-search mr-2" />
-                <InputText v-model="filters.global.value" placeholder="Search..." />
+                <InputText v-model="searchQuery" placeholder="Search voices (space-separated terms, all must match)..." />
               </span>
+              <div class="text-sm text-gray-600 self-center">
+                Showing {{ filteredVoices.length }} of {{ Object.keys(voicesStore.voiceData.voices).length }} voices
+              </div>
             </div>
           </template>
-          <Column field="id" header="BeamNG Voice ID" sortable filter filterPlaceholder="Search by ID"></Column>
-          <Column field="name" header="Name" sortable filter filterPlaceholder="Search by name"></Column>
-          <Column field="type" header="Provider" sortable filter filterPlaceholder="Search by type"></Column>
+          <Column field="id" header="BeamNG Voice ID" sortable></Column>
+          <Column field="name" header="Name" sortable></Column>
+          <Column field="type" header="Provider" sortable></Column>
           <Column header="Details">
             <template #body="slotProps">
               <Button icon="pi pi-info-circle" 

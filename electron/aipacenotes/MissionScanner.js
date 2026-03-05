@@ -61,7 +61,7 @@ class MissionScanner {
         } else {
           // console.log(filePath)
           let mission = new Mission(filePath)
-          if (mission.missionType === 'rallyStage') {
+          if (mission.missionType === 'rallyStage' || mission.missionType === 'rallyRoadSection') {
             fileList.push(mission)
           }
         }

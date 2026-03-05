@@ -6,7 +6,7 @@ export const useVoicesStore = defineStore('voices', {
   state: () => ({
     voiceData: null,
     voiceDataError: null,
-    testText: "into three right opens over crest? fifty.",
+    testText: "into caution, three right opens over crest, fifty.",
   }),
   getters: {
   },

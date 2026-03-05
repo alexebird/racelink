@@ -82,6 +82,7 @@ let audioFileStream = null
 let audioFileFname = null
 const tscHist = []
 const UNKNOWN_PLACEHOLDER = '[unknown]';
+const pacenoteGenConcurrency = 2
 // let lastQueueSize = 0
 // let lastAudioPlayerPausedState = true
 let lastNetworkError = null
@@ -262,7 +263,7 @@ async function missionGeneratePacenotes(_event, selectedMission) {
   inFlightMissions.add(selectedMission.mission.fname)
 
   const notebookScanner = new NotebookScanner(beamUserDir, selectedMission.mission.fname)
-  const pacenotesToUpdate = notebookScanner.getUpdatesToDo().slice(0, 1); // do N at a time
+  const pacenotesToUpdate = notebookScanner.getUpdatesToDo().slice(0, pacenoteGenConcurrency); // do N at a time
 
   sendIpcNotebooks(notebookScanner)
 
